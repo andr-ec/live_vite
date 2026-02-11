@@ -360,7 +360,7 @@ export function useLiveForm<T extends object>(
         } else {
           return {
             ...baseProps,
-            value: field.value,
+            value: field.value ?? "",
             onChange: (event: any) => {
               const target = event.target as HTMLInputElement
               field.setValue(target.value as any)
@@ -470,8 +470,7 @@ export function useLiveForm<T extends object>(
         store.live!.pushEvent(store.submitEvent, { [store.formName]: data }, (result: any) => {
           if (result && result.reset) {
             setTimeout(() => {
-              Object.assign(store.initialValues, deepClone(store.currentValues))
-              Object.assign(store.currentValues, deepClone(store.initialValues))
+              store.currentValues = deepClone(store.initialValues)
               store.touchedFields.clear()
               store.submitCount = 0
               rerender()
@@ -487,7 +486,7 @@ export function useLiveForm<T extends object>(
   }
 
   function reset(): void {
-    Object.assign(store.currentValues, deepClone(store.initialValues))
+    store.currentValues = deepClone(store.initialValues)
     store.touchedFields.clear()
     store.submitCount = 0
     rerender()

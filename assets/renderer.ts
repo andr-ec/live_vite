@@ -41,6 +41,8 @@ export interface SSRContext {
   props: Record<string, any>
   /** Slot name -> HTML string mapping */
   slots: Record<string, string>
+  /** The component name (for manifest lookups). Set by getRendererRender/getMultiRendererRender. */
+  name?: string
 }
 
 /**

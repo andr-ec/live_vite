@@ -33,7 +33,17 @@ export { createVueRenderer } from "./renderers/vue.js"
 export { createReactRenderer } from "./renderers/react.js"
 
 // React hooks
-export { useLive, useLiveEvent as useLiveEventReact, useLiveNavigation as useLiveNavigationReact, LiveContext } from "./useReact.js"
+export {
+  useLive,
+  useLiveEvent as useLiveEventReact,
+  useLiveNavigation as useLiveNavigationReact,
+  useEventReply as useEventReplyReact,
+  useLiveConnection as useLiveConnectionReact,
+  LiveContext,
+  type UseEventReplyOptions as UseEventReplyReactOptions,
+  type UseEventReplyReturn as UseEventReplyReactReturn,
+  type UseLiveConnectionReturn as UseLiveConnectionReactReturn,
+} from "./useReact.js"
 export {
   useLiveForm as useLiveFormReact,
   useField as useFieldReact,

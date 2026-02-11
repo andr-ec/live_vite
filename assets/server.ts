@@ -29,7 +29,7 @@ export const getRendererRender = (
 
   return async (name: string, props: Record<string, any>, slots: Record<string, string>) => {
     const component = await resolve(name)
-    return renderer.renderToString!({ component, props, slots })
+    return renderer.renderToString!({ component, props, slots, name })
   }
 }
 
@@ -74,7 +74,7 @@ export const getMultiRendererRender = (
     }
 
     const component = await entry.resolve(name)
-    return entry.renderer.renderToString!({ component, props, slots })
+    return entry.renderer.renderToString!({ component, props, slots, name })
   }
 }
 

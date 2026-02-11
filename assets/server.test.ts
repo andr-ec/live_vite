@@ -30,6 +30,7 @@ describe("getRendererRender", () => {
       component,
       props: { count: 1 },
       slots: {},
+      name: "MyComponent",
     })
     expect(html).toBe("<!-- preload --><div>hello</div>")
   })
@@ -62,6 +63,7 @@ describe("getMultiRendererRender", () => {
       component: "ReactComponent",
       props: { count: 1 },
       slots: {},
+      name: "Counter",
     })
     expect(html).toBe("<div>react</div>")
     expect(vueRenderer.renderToString).not.toHaveBeenCalled()

@@ -57,6 +57,64 @@ export interface ReactRendererOptions {
  *
  * Slots are passed as React elements via `dangerouslySetInnerHTML`.
  */
+type SSRManifest = Record<string, string[]>
+
+function renderPreloadLinks(modules: string[], manifest: SSRManifest) {
+  let links = ""
+  const seen = new Set()
+  modules.forEach((id: string) => {
+    const files = manifest[id]
+    if (files) {
+      files.forEach(file => {
+        if (!seen.has(file)) {
+          seen.add(file)
+          const filename = file.split("/").pop() ?? file
+          if (manifest[filename]) {
+            for (const depFile of manifest[filename]) {
+              links += renderPreloadLink(depFile)
+              seen.add(depFile)
+            }
+          }
+          links += renderPreloadLink(file)
+        }
+      })
+    }
+  })
+  return links
+}
+
+function renderPreloadLink(file: string) {
+  if (file.endsWith(".js")) {
+    return `<link rel="modulepreload" crossorigin href="${file}">`
+  } else if (file.endsWith(".css")) {
+    return `<link rel="stylesheet" href="${file}">`
+  } else if (file.endsWith(".woff")) {
+    return ` <link rel="preload" href="${file}" as="font" type="font/woff" crossorigin>`
+  } else if (file.endsWith(".woff2")) {
+    return ` <link rel="preload" href="${file}" as="font" type="font/woff2" crossorigin>`
+  } else if (file.endsWith(".gif")) {
+    return ` <link rel="preload" href="${file}" as="image" type="image/gif">`
+  } else if (file.endsWith(".jpg") || file.endsWith(".jpeg")) {
+    return ` <link rel="preload" href="${file}" as="image" type="image/jpeg">`
+  } else if (file.endsWith(".png")) {
+    return ` <link rel="preload" href="${file}" as="image" type="image/png">`
+  } else {
+    return ""
+  }
+}
+
+/**
+ * Find manifest entries matching the component name.
+ * Searches manifest keys for paths containing the component name with
+ * React-typical extensions (.tsx, .jsx, .ts, .js).
+ */
+function findManifestModules(name: string, manifest: SSRManifest): string[] {
+  const extensions = [".tsx", ".jsx", ".ts", ".js"]
+  return Object.keys(manifest).filter(key =>
+    extensions.some(ext => key.endsWith(`/${name}${ext}`) || key.endsWith(`/${name}/index${ext}`) || key === `${name}${ext}`)
+  )
+}
+
 export function createReactRenderer(options: ReactRendererOptions = {}): FrameworkRenderer<ReactRendererState> {
   return {
     name: "react",
@@ -116,6 +174,7 @@ export function createReactRenderer(options: ReactRendererOptions = {}): Framewo
 
     async renderToString(ctx): Promise<string> {
       const { renderToString: reactRenderToString } = await import("react-dom/server")
+      const manifest = options.manifest ?? {}
 
       const slotElements = mapValues(htmlSlotsToReact(ctx.slots), slotFn => slotFn())
       const element = createElement(ctx.component as any, {
@@ -124,7 +183,11 @@ export function createReactRenderer(options: ReactRendererOptions = {}): Framewo
       })
 
       const html = reactRenderToString(element)
-      return "<!-- preload -->" + html
+
+      // Generate preload links from manifest if component name is available
+      const modules = ctx.name ? findManifestModules(ctx.name, manifest) : []
+      const preloadLinks = renderPreloadLinks(modules, manifest)
+      return preloadLinks + "<!-- preload -->" + html
     },
   }
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createElement, act, useState } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { LiveContext, useLive, useLiveEvent, useLiveNavigation } from "./useReact"
+import { LiveContext, useLive, useLiveEvent, useLiveNavigation, useEventReply, useLiveConnection } from "./useReact"
 
 // Enable React act() environment for jsdom
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
@@ -444,5 +444,321 @@ describe("useLiveNavigation", () => {
 
     expect(errors.length).toBe(1)
     expect(errors[0].message).toContain("LiveSocket not initialized")
+  })
+})
+
+describe("useEventReply", () => {
+  let container: HTMLDivElement
+  let root: Root
+
+  beforeEach(() => {
+    container = document.createElement("div")
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    act(() => {
+      root?.unmount()
+    })
+    document.body.removeChild(container)
+  })
+
+  it("returns initial state with null data and not loading", () => {
+    const mockHook = createMockHook()
+    let result: any
+
+    function TestComponent() {
+      result = useEventReply("fetch-data")
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(result.data).toBeNull()
+    expect(result.isLoading).toBe(false)
+    expect(typeof result.execute).toBe("function")
+    expect(typeof result.cancel).toBe("function")
+  })
+
+  it("uses defaultValue when provided", () => {
+    const mockHook = createMockHook()
+    let result: any
+
+    function TestComponent() {
+      result = useEventReply("fetch-data", { defaultValue: "initial" })
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(result.data).toBe("initial")
+  })
+
+  it("sets loading state and resolves with reply data", async () => {
+    let pushEventCallback: any
+    const mockHook = createMockHook({
+      pushEvent: vi.fn((_event: string, _params: any, cb: any) => {
+        pushEventCallback = cb
+      }),
+    })
+    let result: any
+
+    function TestComponent() {
+      result = useEventReply("fetch-data")
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    let promise: Promise<any>
+    act(() => {
+      promise = result.execute({ id: 1 })
+    })
+
+    expect(mockHook.pushEvent).toHaveBeenCalledWith("fetch-data", { id: 1 }, expect.any(Function))
+
+    // Simulate server reply
+    await act(async () => {
+      pushEventCallback({ name: "test" })
+    })
+
+    const reply = await promise!
+    expect(reply).toEqual({ name: "test" })
+    expect(result.data).toEqual({ name: "test" })
+    expect(result.isLoading).toBe(false)
+  })
+
+  it("cancel rejects pending promise and resets loading", async () => {
+    const mockHook = createMockHook({
+      pushEvent: vi.fn(),
+    })
+    let result: any
+
+    function TestComponent() {
+      result = useEventReply("fetch-data")
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    let promise: Promise<any>
+    act(() => {
+      promise = result.execute()
+    })
+
+    act(() => {
+      result.cancel()
+    })
+
+    await expect(promise!).rejects.toThrow("was cancelled")
+    expect(result.isLoading).toBe(false)
+  })
+})
+
+describe("useLiveConnection", () => {
+  let container: HTMLDivElement
+  let root: Root
+
+  beforeEach(() => {
+    container = document.createElement("div")
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    act(() => {
+      root?.unmount()
+    })
+    document.body.removeChild(container)
+  })
+
+  it("returns current connection state", () => {
+    const mockHook = createMockHook({
+      liveSocket: {
+        socket: {
+          connectionState: () => "open",
+          onOpen: vi.fn(),
+          onClose: vi.fn(),
+          onError: vi.fn(),
+          off: vi.fn(),
+        },
+      },
+    })
+    let result: any
+
+    function TestComponent() {
+      result = useLiveConnection()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(result.connectionState).toBe("open")
+    expect(result.isConnected).toBe(true)
+  })
+
+  it("updates state on socket events", () => {
+    let onOpenCb: any
+    let onCloseCb: any
+    const mockHook = createMockHook({
+      liveSocket: {
+        socket: {
+          connectionState: () => "open",
+          onOpen: vi.fn((cb: any) => { onOpenCb = cb; return "open-ref" }),
+          onClose: vi.fn((cb: any) => { onCloseCb = cb; return "close-ref" }),
+          onError: vi.fn(() => "error-ref"),
+          off: vi.fn(),
+        },
+      },
+    })
+    let result: any
+
+    function TestComponent() {
+      result = useLiveConnection()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(result.isConnected).toBe(true)
+
+    // Simulate disconnect
+    act(() => {
+      onCloseCb()
+    })
+    expect(result.connectionState).toBe("closed")
+    expect(result.isConnected).toBe(false)
+
+    // Simulate reconnect
+    act(() => {
+      onOpenCb()
+    })
+    expect(result.connectionState).toBe("open")
+    expect(result.isConnected).toBe(true)
+  })
+
+  it("cleans up socket listeners on unmount", () => {
+    const socket = {
+      connectionState: () => "open",
+      onOpen: vi.fn(() => "open-ref"),
+      onClose: vi.fn(() => "close-ref"),
+      onError: vi.fn(() => "error-ref"),
+      off: vi.fn(),
+    }
+    const mockHook = createMockHook({ liveSocket: { socket } })
+
+    function TestComponent() {
+      useLiveConnection()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    // Unmount
+    act(() => {
+      root.render(createElement(LiveContext.Provider, { value: mockHook as any }, null))
+    })
+
+    expect(socket.off).toHaveBeenCalledWith(["open-ref", "close-ref", "error-ref"])
+  })
+
+  it("throws when liveSocket is not initialized", () => {
+    const mockHook = createMockHook({ liveSocket: null })
+    const errors: Error[] = []
+
+    function TestComponent() {
+      try {
+        useLiveConnection()
+      } catch (e) {
+        errors.push(e as Error)
+      }
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(errors.length).toBe(1)
+    expect(errors[0].message).toContain("LiveSocket not initialized")
+  })
+
+  it("throws when socket is not available", () => {
+    const mockHook = createMockHook({ liveSocket: { socket: null } })
+    const errors: Error[] = []
+
+    function TestComponent() {
+      try {
+        useLiveConnection()
+      } catch (e) {
+        errors.push(e as Error)
+      }
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(errors.length).toBe(1)
+    expect(errors[0].message).toContain("Socket not available")
   })
 })
