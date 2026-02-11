@@ -140,6 +140,7 @@ defmodule LiveVite.E2E.Router do
       live "/react-events", ReactEventLive
       live "/react-streams", ReactStreamLive
       live "/react-slot-test", ReactSlotTestLive
+      live "/react-form-test", ReactFormTestLive
     end
   end
 
