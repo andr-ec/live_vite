@@ -4,6 +4,7 @@ import type { Component } from "vue"
 import { migrateToLiveViteApp } from "./app.js"
 import type { LiveViteOptions } from "./types.js"
 import type { FrameworkRenderer } from "./renderer.js"
+import type { RendererEntry } from "./hooks.js"
 import { createVueRenderer, type VueSetupFn } from "./renderers/vue.js"
 
 type Components = Record<string, Component>
@@ -29,6 +30,51 @@ export const getRendererRender = (
   return async (name: string, props: Record<string, any>, slots: Record<string, string>) => {
     const component = await resolve(name)
     return renderer.renderToString!({ component, props, slots })
+  }
+}
+
+/**
+ * Creates a server-side render function that dispatches to the correct renderer
+ * based on the `framework` argument.
+ *
+ * This mirrors `getMultiRendererHook` for the SSR side. Each renderer entry
+ * provides a renderer (with `renderToString`) and a component resolver.
+ *
+ * If only one renderer is registered, the `framework` argument is optional
+ * and the single renderer is used as a fallback.
+ *
+ * @param renderers - Map of framework name -> { renderer, resolve }
+ */
+export const getMultiRendererRender = (
+  renderers: Record<string, RendererEntry>,
+) => {
+  const rendererNames = Object.keys(renderers)
+
+  // Validate that all renderers support SSR
+  for (const [name, entry] of Object.entries(renderers)) {
+    if (!entry.renderer.renderToString) {
+      throw new Error(`Renderer "${name}" does not support server-side rendering`)
+    }
+  }
+
+  return async (name: string, props: Record<string, any>, slots: Record<string, string>, framework?: string) => {
+    let entry: RendererEntry
+
+    if (framework && renderers[framework]) {
+      entry = renderers[framework]
+    } else if (!framework && rendererNames.length === 1) {
+      entry = renderers[rendererNames[0]]
+    } else {
+      const available = rendererNames.join(", ")
+      throw new Error(
+        framework
+          ? `Unknown framework "${framework}" for SSR. Registered renderers: ${available}`
+          : `Missing framework for SSR. Registered renderers: ${available}`
+      )
+    }
+
+    const component = await entry.resolve(name)
+    return entry.renderer.renderToString!({ component, props, slots })
   }
 }
 

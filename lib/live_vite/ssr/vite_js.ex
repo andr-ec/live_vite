@@ -16,8 +16,8 @@ defmodule LiveVite.SSR.ViteJS do
   """
   @behaviour LiveVite.SSR
 
-  def render(name, props, slots) do
-    data = Jason.encode!(%{name: name, props: props, slots: slots})
+  def render(name, props, slots, framework \\ "vue") do
+    data = Jason.encode!(%{name: name, props: props, slots: slots, framework: framework})
     url = vite_path("/ssr_render")
     params = {String.to_charlist(url), [], ~c"application/json", data}
 

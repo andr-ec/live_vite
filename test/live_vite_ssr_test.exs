@@ -8,22 +8,22 @@ defmodule LiveVite.SSRTest do
     @behaviour SSR
 
     @impl true
-    def render("WithPreload", _props, _slots) do
+    def render("WithPreload", _props, _slots, _framework) do
       "<link rel=\"preload\" /><!-- preload --><div>Component HTML</div>"
     end
 
     @impl true
-    def render("NoPreload", _props, _slots) do
+    def render("NoPreload", _props, _slots, _framework) do
       "<div>Just HTML</div>"
     end
 
     @impl true
-    def render("MapResponse", _props, _slots) do
+    def render("MapResponse", _props, _slots, _framework) do
       %{preloadLinks: "<link rel=\"stylesheet\" />", html: "<div>Direct map</div>"}
     end
 
     @impl true
-    def render("Echo", props, slots) do
+    def render("Echo", props, slots, _framework) do
       props_str = Jason.encode!(props)
       slots_str = Jason.encode!(slots)
       "<div>Props: #{props_str}, Slots: #{slots_str}</div>"
@@ -154,17 +154,17 @@ defmodule LiveVite.SSRTest do
       @behaviour SSR
 
       @impl true
-      def render("MultipleDelimiters", _props, _slots) do
+      def render("MultipleDelimiters", _props, _slots, _framework) do
         "<link /><!-- preload --><div><!-- preload -->Another one</div>"
       end
 
       @impl true
-      def render("EmptyPreload", _props, _slots) do
+      def render("EmptyPreload", _props, _slots, _framework) do
         "<!-- preload --><div>No preload links</div>"
       end
 
       @impl true
-      def render("EmptyHTML", _props, _slots) do
+      def render("EmptyHTML", _props, _slots, _framework) do
         "<link /><!-- preload -->"
       end
     end

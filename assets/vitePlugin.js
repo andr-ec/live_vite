@@ -106,7 +106,7 @@ function liveVitePlugin(opts = {}) {
           jsonMiddleware(req, res, async () => {
             try {
               const render = (await server.ssrLoadModule(entrypoint)).render
-              const html = await render(req.body?.name, req.body?.props, req.body?.slots)
+              const html = await render(req.body?.name, req.body?.props, req.body?.slots, req.body?.framework)
               res.end(html)
             } catch (e) {
               e instanceof Error && server.ssrFixStacktrace(e)

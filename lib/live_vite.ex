@@ -85,6 +85,7 @@ defmodule LiveVite do
     use_diff = Map.get(assigns, :"v-diff", @diff_default)
     use_streams_diff = Enum.any?(assigns, fn {_k, v} -> match?(%LiveStream{}, v) end)
     render_ssr? = init and dead and Map.get(assigns, :"v-ssr", @ssr_default)
+    framework = Map.get(assigns, :"v-framework", "vue")
 
     # if we enable diffs, we use only changed props for all the remaining calculations
     base_assigns =
@@ -105,6 +106,7 @@ defmodule LiveVite do
       assigns
       |> Map.put_new(:class, nil)
       |> Map.put(:__component_name, Map.get(assigns, :"v-component"))
+      |> Map.put(:__framework, framework)
       |> Map.put(:props, props)
       # let's compress it a little bit, and decompress it on the client side
       |> Map.put(:props_diff, Enum.map(props_diff, &prepare_diff/1))
@@ -142,7 +144,7 @@ defmodule LiveVite do
     <div
       id={assigns[:id] || id(@__component_name)}
       data-name={@__component_name}
-      data-framework="vue"
+      data-framework={@__framework}
       data-props={"#{json(Encoder.encode(@props))}"}
       data-props-diff={"#{json(@props_diff)}"}
       data-streams-diff={"#{json(@streams_diff)}"}
@@ -266,7 +268,7 @@ defmodule LiveVite do
     end)
   end
 
-  defp normalize_key(key, _val) when key in ~w"id class v-ssr v-diff v-component v-socket __changed__ __given__"a,
+  defp normalize_key(key, _val) when key in ~w"id class v-ssr v-diff v-component v-framework v-socket __changed__ __given__"a,
     do: :special
 
   defp normalize_key(_key, [%{__slot__: _}]), do: :slots
@@ -281,8 +283,9 @@ defmodule LiveVite do
   defp ssr_render(assigns) do
     name = assigns[:"v-component"]
     encoded_props = Encoder.encode(assigns.props)
+    framework = assigns[:__framework] || "vue"
 
-    case SSR.render(name, encoded_props, assigns.slots) do
+    case SSR.render(name, encoded_props, assigns.slots, framework) do
       {:error, message} ->
         Logger.error("Vue SSR error: #{message}")
         nil

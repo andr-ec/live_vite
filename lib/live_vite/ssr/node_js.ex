@@ -9,11 +9,11 @@ defmodule LiveVite.SSR.NodeJS do
 
   @behaviour LiveVite.SSR
 
-  def render(name, props, slots) do
+  def render(name, props, slots, framework \\ "vue") do
     filename = Application.get_env(:live_vite, :ssr_filepath, "./static/server.mjs")
 
     try do
-      NodeJS.call!({filename, "render"}, [name, props, slots],
+      NodeJS.call!({filename, "render"}, [name, props, slots, framework],
         binary: true,
         esm: true
       )

@@ -20,6 +20,7 @@ defmodule LiveVite.SSR do
   @type component_name :: String.t()
   @type props :: %{optional(String.t() | atom) => any}
   @type slots :: %{optional(String.t() | atom) => any}
+  @type framework :: String.t()
 
   @typedoc """
   A render response which should have shape
@@ -31,20 +32,20 @@ defmodule LiveVite.SSR do
   """
   @type render_response :: %{optional(String.t() | atom) => any}
 
-  @callback render(component_name, props, slots) :: render_response | no_return
+  @callback render(component_name, props, slots, framework) :: render_response | no_return
 
-  @spec render(component_name, props, slots) :: render_response | no_return
-  def render(name, props, slots) do
+  @spec render(component_name, props, slots, framework) :: render_response | no_return
+  def render(name, props, slots, framework \\ "vue") do
     case Application.get_env(:live_vite, :ssr_module, nil) do
       nil ->
         %{preloadLinks: "", html: ""}
 
       mod ->
-        meta = %{component: name, props: props, slots: slots}
+        meta = %{component: name, props: props, slots: slots, framework: framework}
 
         body =
           :telemetry.span([:live_vite, :ssr], meta, fn ->
-            {mod.render(name, props, slots), meta}
+            {mod.render(name, props, slots, framework), meta}
           end)
 
         with body when is_binary(body) <- body do
