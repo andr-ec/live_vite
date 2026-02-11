@@ -129,7 +129,7 @@ describe("createReactRenderer", () => {
       expect(state.props.nested.value).toBe("patched")
     })
 
-    it("preserves the same object reference", () => {
+    it("creates a new object reference for React change detection", () => {
       const state = mountComponent({ props: { count: 0 } })
 
       const propsRef = state.props
@@ -137,7 +137,9 @@ describe("createReactRenderer", () => {
         renderer.patchProps(state, [{ op: "replace", path: "/count", value: 5 }])
       })
 
-      expect(state.props).toBe(propsRef)
+      // React needs new references to detect changes in hooks (useEffect, useMemo, etc.)
+      expect(state.props).not.toBe(propsRef)
+      expect(state.props).toStrictEqual({ count: 5 })
     })
   })
 

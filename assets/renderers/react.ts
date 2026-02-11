@@ -96,6 +96,10 @@ export function createReactRenderer(options: ReactRendererOptions = {}): Framewo
 
     patchProps(state: RendererState<ReactRendererState>, operations: Operation[]): void {
       applyPatch(state.props, operations)
+      // JSON Patch mutates objects in-place, but React needs new references
+      // to detect changes in hooks (useEffect, useMemo, etc.).
+      // Deep-clone the affected props so React sees fresh references.
+      state.props = JSON.parse(JSON.stringify(state.props))
       renderComponent(state)
     },
 

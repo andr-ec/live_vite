@@ -141,6 +141,7 @@ defmodule LiveVite.E2E.Router do
       live "/react-streams", ReactStreamLive
       live "/react-slot-test", ReactSlotTestLive
       live "/react-form-test", ReactFormTestLive
+      live "/react-upload/:mode", ReactUploadTestLive
     end
   end
 

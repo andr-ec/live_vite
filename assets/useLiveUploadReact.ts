@@ -92,10 +92,20 @@ export function useLiveUpload(
 
     const joinEntries = (entries: UploadEntry[]) => entries.map(e => e.ref).join(",")
 
-    input.setAttribute("data-phx-active-refs", joinEntries(uploadConfig.entries))
+    const activeRefs = joinEntries(uploadConfig.entries)
+    const preflightedRefs = joinEntries(uploadConfig.entries.filter(e => e.preflighted))
+
+    input.setAttribute("data-phx-active-refs", activeRefs)
     input.setAttribute("data-phx-done-refs", joinEntries(uploadConfig.entries.filter(e => e.done)))
-    input.setAttribute("data-phx-preflighted-refs", joinEntries(uploadConfig.entries.filter(e => e.preflighted)))
-  }, [uploadConfig.entries])
+    input.setAttribute("data-phx-preflighted-refs", preflightedRefs)
+
+    // For auto-upload: React's useEffect runs after render, so Phoenix misses the
+    // initial active refs during the change event. Re-dispatch change to trigger
+    // Phoenix's auto-upload preflight now that refs are set.
+    if (uploadConfig.auto_upload && activeRefs && !preflightedRefs) {
+      input.dispatchEvent(new Event("input", { bubbles: true }))
+    }
+  }, [uploadConfig.entries, uploadConfig.auto_upload])
 
   // Derived state
   const entries = uploadConfig.entries || []
