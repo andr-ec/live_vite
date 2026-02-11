@@ -27,6 +27,7 @@ export {
 export { findComponent } from "./utils.js"
 export { default as Link } from "./link.js"
 
-// Renderer interface and Vue renderer
+// Renderer interface and framework renderers
 export type { FrameworkRenderer, RendererState, MountContext, SSRContext } from "./renderer.js"
 export { createVueRenderer } from "./renderers/vue.js"
+export { createReactRenderer } from "./renderers/react.js"
