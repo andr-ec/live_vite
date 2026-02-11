@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from "react"
+import { createContext, useCallback, useContext, useEffect, useRef } from "react"
 import type { HookInterface } from "./phoenixFallbackTypes.js"
 
 /**
@@ -41,4 +41,42 @@ export function useLiveEvent<T>(event: string, callback: (data: T) => void): voi
       live.removeHandleEvent(ref)
     }
   }, [live, event])
+}
+
+/**
+ * Provides `patch()` and `navigate()` helpers for LiveView navigation.
+ * Mirrors the Vue `useLiveNavigation()` composable.
+ *
+ * - `patch(href | queryParams, opts?)` – updates the current LiveView URL
+ *   (equivalent to `live_patch`).
+ * - `navigate(href, opts?)` – performs a full LiveView redirect
+ *   (equivalent to `live_redirect`).
+ *
+ * @returns An object with `patch` and `navigate` functions.
+ */
+export function useLiveNavigation() {
+  const live = useLive()
+  const liveSocket = live.liveSocket
+  if (!liveSocket) throw new Error("LiveSocket not initialized")
+
+  const patch = useCallback(
+    (hrefOrQueryParams: string | Record<string, string>, opts: { replace?: boolean } = {}) => {
+      let href = typeof hrefOrQueryParams === "string" ? hrefOrQueryParams : window.location.pathname
+      if (typeof hrefOrQueryParams === "object") {
+        const queryParams = new URLSearchParams(hrefOrQueryParams)
+        href = `${href}?${queryParams.toString()}`
+      }
+      liveSocket.pushHistoryPatch(new Event("click"), href, opts.replace ? "replace" : "push", null)
+    },
+    [liveSocket],
+  )
+
+  const navigate = useCallback(
+    (href: string, opts: { replace?: boolean } = {}) => {
+      liveSocket.historyRedirect(new Event("click"), href, opts.replace ? "replace" : "push", null, null)
+    },
+    [liveSocket],
+  )
+
+  return { patch, navigate }
 }

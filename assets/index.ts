@@ -33,4 +33,4 @@ export { createVueRenderer } from "./renderers/vue.js"
 export { createReactRenderer } from "./renderers/react.js"
 
 // React hooks
-export { useLive, useLiveEvent as useLiveEventReact, LiveContext } from "./useReact.js"
+export { useLive, useLiveEvent as useLiveEventReact, useLiveNavigation as useLiveNavigationReact, LiveContext } from "./useReact.js"

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createElement, act, useState } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { LiveContext, useLive, useLiveEvent } from "./useReact"
+import { LiveContext, useLive, useLiveEvent, useLiveNavigation } from "./useReact"
 
 // Enable React act() environment for jsdom
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
@@ -9,7 +9,11 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 function createMockHook(overrides: Record<string, any> = {}) {
   return {
     el: document.createElement("div"),
-    liveSocket: { socket: { connectionState: () => "open" } },
+    liveSocket: {
+      socket: { connectionState: () => "open" },
+      pushHistoryPatch: vi.fn(),
+      historyRedirect: vi.fn(),
+    },
     pushEvent: vi.fn(() => Promise.resolve(0)),
     pushEventTo: vi.fn(() => Promise.resolve([])),
     handleEvent: vi.fn((_event: string, callback: (payload: any) => void) => ({
@@ -234,5 +238,211 @@ describe("useLiveEvent", () => {
 
     expect(callback1).not.toHaveBeenCalled()
     expect(callback2).toHaveBeenCalledWith({ value: "latest" })
+  })
+})
+
+describe("useLiveNavigation", () => {
+  let container: HTMLDivElement
+  let root: Root
+
+  beforeEach(() => {
+    container = document.createElement("div")
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    act(() => {
+      root?.unmount()
+    })
+    document.body.removeChild(container)
+  })
+
+  it("returns patch and navigate functions", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(nav).toBeDefined()
+    expect(typeof nav.patch).toBe("function")
+    expect(typeof nav.navigate).toBe("function")
+  })
+
+  it("patch with string href calls pushHistoryPatch", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    nav.patch("/new-path")
+
+    expect(mockHook.liveSocket.pushHistoryPatch).toHaveBeenCalledWith(
+      expect.any(Event),
+      "/new-path",
+      "push",
+      null,
+    )
+  })
+
+  it("patch with replace option uses 'replace' kind", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    nav.patch("/replaced", { replace: true })
+
+    expect(mockHook.liveSocket.pushHistoryPatch).toHaveBeenCalledWith(
+      expect.any(Event),
+      "/replaced",
+      "replace",
+      null,
+    )
+  })
+
+  it("patch with query params object builds URL from current pathname", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    nav.patch({ page: "2", sort: "name" })
+
+    const call = mockHook.liveSocket.pushHistoryPatch.mock.calls[0]
+    expect(call[1]).toContain("page=2")
+    expect(call[1]).toContain("sort=name")
+    expect(call[2]).toBe("push")
+  })
+
+  it("navigate calls historyRedirect", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    nav.navigate("/other-page")
+
+    expect(mockHook.liveSocket.historyRedirect).toHaveBeenCalledWith(
+      expect.any(Event),
+      "/other-page",
+      "push",
+      null,
+      null,
+    )
+  })
+
+  it("navigate with replace option uses 'replace' kind", () => {
+    const mockHook = createMockHook()
+    let nav: any
+
+    function TestComponent() {
+      nav = useLiveNavigation()
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    nav.navigate("/replaced-page", { replace: true })
+
+    expect(mockHook.liveSocket.historyRedirect).toHaveBeenCalledWith(
+      expect.any(Event),
+      "/replaced-page",
+      "replace",
+      null,
+      null,
+    )
+  })
+
+  it("throws when liveSocket is not initialized", () => {
+    const mockHook = createMockHook({ liveSocket: null })
+    const errors: Error[] = []
+
+    function TestComponent() {
+      try {
+        useLiveNavigation()
+      } catch (e) {
+        errors.push(e as Error)
+      }
+      return createElement("div", null, "test")
+    }
+
+    act(() => {
+      root = createRoot(container)
+      root.render(
+        createElement(LiveContext.Provider, { value: mockHook as any },
+          createElement(TestComponent)
+        )
+      )
+    })
+
+    expect(errors.length).toBe(1)
+    expect(errors[0].message).toContain("LiveSocket not initialized")
   })
 })
