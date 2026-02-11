@@ -1,10 +1,9 @@
-import { createApp, createSSRApp, h, reactive, type App } from "vue"
 import { migrateToLiveViteApp } from "./app.js"
 import type { ComponentMap, LiveViteApp, LiveViteOptions, Hook } from "./types.js"
-import { liveInjectKey } from "./use.js"
 import { mapValues, fromUtf8Base64 } from "./utils.js"
-import { applyPatch, type Operation } from "./jsonPatch.js"
-import type { FrameworkRenderer, RendererState } from "./renderer.js"
+import type { Operation } from "./jsonPatch.js"
+import type { FrameworkRenderer } from "./renderer.js"
+import { createVueRenderer, type VueSetupFn } from "./renderers/vue.js"
 
 /**
  * Parses the JSON object from the element's attribute and returns them as an object.
@@ -12,16 +11,6 @@ import type { FrameworkRenderer, RendererState } from "./renderer.js"
 const getAttributeJson = (el: HTMLElement, attributeName: string): Record<string, any> | null => {
   const data = el.getAttribute(attributeName)
   return data ? JSON.parse(data) : null
-}
-
-/**
- * Parses the slots from the element's attributes and returns them as a record.
- * The slots are parsed from the "data-slots" attribute.
- * The slots are converted to a function that returns a div with the innerHTML set to the base64 decoded slot.
- */
-const getSlots = (el: HTMLElement): Record<string, () => any> => {
-  const dataSlots = getAttributeJson(el, "data-slots") || {}
-  return mapValues(dataSlots, base64 => () => h("div", { innerHTML: fromUtf8Base64(base64).trim() }))
 }
 
 /**
@@ -131,56 +120,14 @@ export const getRendererHook = (
   },
 })
 
-export const getVueHook = ({ resolve, setup }: LiveViteApp): Hook => ({
-  async mounted() {
-    const componentName = this.el.getAttribute("data-name") as string
-    const component = await resolve(componentName)
+export const getVueHook = ({ resolve, setup }: LiveViteApp): Hook => {
+  // Adapt the LiveViteApp setup (object arg) to the VueSetupFn (positional args)
+  const vueSetup: VueSetupFn = (makeApp, component, props, slots, plugin, el, ssr) =>
+    setup({ createApp: makeApp, component, props, slots, plugin, el, ssr })
 
-    const makeApp = this.el.getAttribute("data-ssr") === "true" ? createSSRApp : createApp
-
-    const props = reactive(getProps(this.el, this.liveSocket))
-    const slots = reactive(getSlots(this.el))
-    // let's apply initial stream diff here, since all stream changes are sent in that attribute
-    applyPatch(props, getDiff(this.el, "data-streams-diff"))
-
-    this.vue = { props, slots, app: null }
-    const app = setup({
-      createApp: makeApp,
-      component,
-      props,
-      slots,
-      plugin: {
-        install: (app: App) => {
-          app.provide(liveInjectKey, this)
-          app.config.globalProperties.$live = this
-        },
-      },
-      el: this.el,
-      ssr: false,
-    })
-
-    if (!app) throw new Error("Setup function did not return a Vue app!")
-
-    this.vue.app = app
-  },
-  updated() {
-    if (this.el.getAttribute("data-use-diff") === "true") {
-      applyPatch(this.vue.props, getDiff(this.el, "data-props-diff"))
-    } else {
-      Object.assign(this.vue.props, getProps(this.el, this.liveSocket))
-    }
-    // we're always applying streams diff, since all stream changes are sent in that attribute
-    applyPatch(this.vue.props, getDiff(this.el, "data-streams-diff"))
-    Object.assign(this.vue.slots ?? {}, getSlots(this.el))
-  },
-  destroyed() {
-    const instance = this.vue.app
-    // TODO - is there maybe a better way to cleanup the app?
-    if (instance) {
-      window.addEventListener("phx:page-loading-stop", () => instance.unmount(), { once: true })
-    }
-  },
-})
+  const renderer = createVueRenderer({ setup: vueSetup })
+  return getRendererHook(renderer, resolve)
+}
 
 /**
  * Returns the hooks for the LiveVite app.

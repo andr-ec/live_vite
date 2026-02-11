@@ -85,7 +85,7 @@ describe("getVueHook", () => {
       expect(mockLiveViteApp.setup).toHaveBeenCalledWith(
         expect.objectContaining({
           component: MockComponent,
-          ssr: false,
+          ssr: true,
         })
       )
     })
