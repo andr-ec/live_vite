@@ -161,6 +161,20 @@ test.describe("LiveVite React Stream Integration", () => {
     await expect(itemsHeading).toHaveText("Items (3)")
   })
 
+  test("displays debug information correctly", async ({ page }) => {
+    // Check debug info shows correct type and length
+    await expect(page.locator('.debug-info p:has-text("Items type:")')).toBeVisible()
+    await expect(page.locator('.debug-info p:has-text("Items length:")')).toBeVisible()
+
+    // Check raw items data is displayed
+    await expect(page.locator('[data-testid="raw-items"]')).toBeVisible()
+
+    const rawItemsText = await page.locator('[data-testid="raw-items"]').textContent()
+    expect(rawItemsText).toContain('"id"')
+    expect(rawItemsText).toContain('"name"')
+    expect(rawItemsText).toContain('"description"')
+  })
+
   test("maintains item order during operations", async ({ page }) => {
     const item1Name = await page.locator('[data-testid="item-1"] [data-testid="item-name"]').textContent()
     const item2Name = await page.locator('[data-testid="item-2"] [data-testid="item-name"]').textContent()

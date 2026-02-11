@@ -142,7 +142,14 @@ mix igniter.new my_app --with phx.new --install live_vite
 
 **Existing project (Phoenix 1.8+ only):**
 ```bash
+# Vue (default)
 mix igniter.install live_vite
+
+# React only
+mix igniter.install live_vite --react
+
+# Both Vue and React
+mix igniter.install live_vite --react --vue
 ```
 
 Igniter installer works only for Phoenix 1.8+ projects. For detailed installation instructions, see the [Installation Guide](guides/installation.md).

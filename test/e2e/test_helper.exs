@@ -142,6 +142,7 @@ defmodule LiveVite.E2E.Router do
       live "/react-slot-test", ReactSlotTestLive
       live "/react-form-test", ReactFormTestLive
       live "/react-upload/:mode", ReactUploadTestLive
+      live "/react-event-reply-test", ReactEventReplyTestLive
 
       # Mixed framework E2E test routes
       live "/mixed-framework", MixedFrameworkLive
@@ -153,6 +154,7 @@ defmodule LiveVite.E2E.Router do
 
     get "/health", HealthController, :index
     get "/dead-view", DeadViewController, :show
+    get "/react-dead-view", DeadViewReactController, :show
   end
 end
 

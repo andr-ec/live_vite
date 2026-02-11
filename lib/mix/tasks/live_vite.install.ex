@@ -8,10 +8,17 @@ defmodule Mix.Tasks.LiveVite.Install do
   ## Options
 
     * `--bun` - Use Bun instead of Node.js/npm
+    * `--react` - Install React support (instead of Vue)
+    * `--vue` - Install Vue support (default if no framework flag given)
+
+  When both `--react` and `--vue` are given, both frameworks are installed
+  with a multi-renderer hook.
 
   ## Examples
 
       mix live_vite.install
+      mix live_vite.install --react
+      mix live_vite.install --react --vue
       mix live_vite.install --bun
 
   """
@@ -29,7 +36,7 @@ defmodule Mix.Tasks.LiveVite.Install do
     def info(_argv, _parent) do
       %Igniter.Mix.Task.Info{
         composes: ["phoenix_vite.install"],
-        schema: [bun: :boolean],
+        schema: [bun: :boolean, react: :boolean, vue: :boolean],
         aliases: [b: :bun]
       }
     end
@@ -37,23 +44,37 @@ defmodule Mix.Tasks.LiveVite.Install do
     @impl Igniter.Mix.Task
     def igniter(igniter) do
       app_name = Igniter.Project.Application.app_name(igniter)
+      frameworks = frameworks(igniter)
 
       igniter
       |> Igniter.compose_task("phoenix_vite.install", igniter.args.argv)
       |> configure_environments(app_name)
-      |> add_live_vite_to_html_helpers(app_name)
-      |> update_javascript_configuration()
-      |> update_vite_configuration()
+      |> add_live_vite_to_html_helpers(app_name, frameworks)
+      |> update_javascript_configuration(frameworks)
+      |> update_vite_configuration(frameworks)
       |> update_phoenix_vite_config()
-      |> configure_tailwind_for_vue()
-      |> update_package_json_for_vue()
-      |> create_vue_files()
+      |> configure_tailwind(frameworks)
+      |> update_package_json(frameworks)
+      |> create_framework_files(frameworks)
       |> setup_ssr_for_production(app_name)
       |> update_mix_aliases()
-      |> add_vue_demo_route()
-      |> update_home_template()
+      |> add_demo_routes(frameworks)
+      |> update_home_template(frameworks)
       |> update_gitignore()
       |> append_usage_rules_to_agents_md()
+    end
+
+    # Determine which frameworks to install based on flags
+    defp frameworks(igniter) do
+      opts = igniter.args.options
+      react? = Keyword.get(opts, :react, false)
+      vue? = Keyword.get(opts, :vue, false)
+
+      cond do
+        react? and vue? -> [:vue, :react]
+        react? -> [:react]
+        true -> [:vue]
+      end
     end
 
     # Configure environments (config/dev.exs and config/prod.exs)
@@ -67,10 +88,12 @@ defmodule Mix.Tasks.LiveVite.Install do
     end
 
     # Add LiveVite to html_helpers in lib/app_web.ex
-    defp add_live_vite_to_html_helpers(igniter, _app_name) do
+    defp add_live_vite_to_html_helpers(igniter, _app_name, frameworks) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
       web_file = Path.join(["lib", web_folder <> ".ex"])
+
+      components_line = components_use_line(frameworks, web_folder)
 
       Igniter.update_file(igniter, web_file, fn source ->
         Rewrite.Source.update(source, :content, fn content ->
@@ -87,41 +110,84 @@ defmodule Mix.Tasks.LiveVite.Install do
             String.replace(
               content,
               ~r/(defp html_helpers do\s+quote do\s+# Translation\s+use Gettext, backend: #{Regex.escape(web_module_name)}\.Gettext)/,
-              "\\1\n\n      # Add support for Vue components\n      use LiveVite\n\n      # Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">\n      use LiveVite.Components, vue_root: [\"./assets/vue\", \"./lib/#{web_folder}\"]"
+              "\\1\n\n      # Add support for LiveVite components\n      use LiveVite\n\n      #{components_line}"
             )
           end
         end)
       end)
     end
 
+    defp components_use_line(frameworks, web_folder) do
+      roots =
+        case frameworks do
+          [:vue] -> ~s(["./assets/vue", "./lib/#{web_folder}"])
+          [:react] -> ~s(["./assets/react", "./lib/#{web_folder}"])
+          [:vue, :react] -> ~s(["./assets/vue", "./assets/react", "./lib/#{web_folder}"])
+        end
+
+      comment =
+        case frameworks do
+          [:vue] -> "# Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">"
+          [:react] -> "# Generate component for each React file, so you can use <.ComponentName> syntax\n      # instead of <.react v-component=\"ComponentName\">"
+          [:vue, :react] -> "# Generate component for each Vue/React file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\"> or <.react v-component=\"ComponentName\">"
+        end
+
+      opt_name =
+        case frameworks do
+          [:vue] -> "vue_root"
+          _ -> "component_root"
+        end
+
+      "#{comment}\n      use LiveVite.Components, #{opt_name}: #{roots}"
+    end
+
     # Update JavaScript configuration (app.js)
-    defp update_javascript_configuration(igniter) do
+    defp update_javascript_configuration(igniter, frameworks) do
       Igniter.update_file(igniter, "assets/js/app.js", fn source ->
         Rewrite.Source.update(source, :content, fn content ->
           content
-          |> add_live_vite_imports()
-          |> update_live_socket_hooks()
+          |> add_live_vite_imports(frameworks)
+          |> update_live_socket_hooks(frameworks)
         end)
       end)
     end
 
-    defp add_live_vite_imports(content) do
-      if String.contains?(content, "import {getHooks} from \"live_vite\"") do
+    defp add_live_vite_imports(content, frameworks) do
+      if String.contains?(content, "live_vite") do
         content
       else
+        import_lines =
+          case frameworks do
+            [:vue] ->
+              ~s(import {getHooks} from "live_vite"\nimport liveViteApp from "../vue")
+
+            [:react] ->
+              ~s(import reactHook from "../react")
+
+            [:vue, :react] ->
+              ~s(import multiHook from "../vue")
+          end
+
         String.replace(
           content,
           "import topbar from \"topbar\"",
-          ~s(import topbar from "topbar"\nimport {getHooks} from "live_vite"\nimport liveViteApp from "../vue")
+          ~s(import topbar from "topbar"\n#{import_lines})
         )
       end
     end
 
-    defp update_live_socket_hooks(content) do
+    defp update_live_socket_hooks(content, frameworks) do
+      hook_value =
+        case frameworks do
+          [:vue] -> "...getHooks(liveViteApp)"
+          [:react] -> "VueHook: reactHook"
+          [:vue, :react] -> "VueHook: multiHook"
+        end
+
       String.replace(
         content,
         "hooks: {...colocatedHooks},",
-        "hooks: {...colocatedHooks, ...getHooks(liveViteApp)},"
+        "hooks: {...colocatedHooks, #{hook_value}},"
       )
     end
 
@@ -136,28 +202,40 @@ defmodule Mix.Tasks.LiveVite.Install do
     end
 
     # Update Vite configuration
-    defp update_vite_configuration(igniter) do
+    defp update_vite_configuration(igniter, frameworks) do
       Igniter.update_file(igniter, "assets/vite.config.mjs", fn source ->
         Rewrite.Source.update(source, :content, fn content ->
           content
-          |> add_vite_imports()
+          |> add_vite_imports(frameworks)
           |> update_vite_server_config()
           |> update_vite_optimized_deps()
-          |> update_vite_plugins()
+          |> update_vite_plugins(frameworks)
           |> update_vite_manifest()
           |> add_ssr_vite_entry()
         end)
       end)
     end
 
-    defp add_vite_imports(content) do
-      if String.contains?(content, "import vue from") do
+    defp add_vite_imports(content, frameworks) do
+      if String.contains?(content, "liveVitePlugin") do
         content
       else
+        import_lines =
+          case frameworks do
+            [:vue] ->
+              ~s(import vue from "@vitejs/plugin-vue";\nimport liveVitePlugin from "live_vite/vitePlugin";)
+
+            [:react] ->
+              ~s(import react from "@vitejs/plugin-react";\nimport liveVitePlugin from "live_vite/vitePlugin";)
+
+            [:vue, :react] ->
+              ~s(import vue from "@vitejs/plugin-vue";\nimport react from "@vitejs/plugin-react";\nimport liveVitePlugin from "live_vite/vitePlugin";)
+          end
+
         String.replace(
           content,
           "import { phoenixVitePlugin } from 'phoenix_vite'",
-          ~s(import vue from "@vitejs/plugin-vue";\nimport liveVitePlugin from "live_vite/vitePlugin";)
+          import_lines
         )
       end
     end
@@ -182,12 +260,19 @@ defmodule Mix.Tasks.LiveVite.Install do
       )
     end
 
-    defp update_vite_plugins(content) do
-      # Replace the phoenixVitePlugin call with the Vue plugins while keeping tailwindcss
+    defp update_vite_plugins(content, frameworks) do
+      plugin_lines =
+        case frameworks do
+          [:vue] -> "vue(),\n    liveVitePlugin()"
+          [:react] -> "react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
+          [:vue, :react] -> "vue(),\n    react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
+        end
+
+      # Replace the phoenixVitePlugin call with the framework plugins
       String.replace(
         content,
         ~r/phoenixVitePlugin\(\{\s*pattern: \/\\.\(ex\|heex\)\$\/\s*\}\)/s,
-        "vue(),\n    liveVitePlugin()"
+        plugin_lines
       )
     end
 
@@ -215,25 +300,67 @@ defmodule Mix.Tasks.LiveVite.Install do
       end
     end
 
-    # Configure Tailwind to include Vue files
-    defp configure_tailwind_for_vue(igniter) do
+    # Configure Tailwind to include framework files
+    defp configure_tailwind(igniter, frameworks) do
       Igniter.update_file(igniter, "assets/css/app.css", fn source ->
         Rewrite.Source.update(source, :content, fn content ->
-          if String.contains?(content, "@source \"../vue\";") do
-            content
-          else
-            String.replace(
-              content,
-              "@source \"../js\";",
-              ~s(@source "../js";\n@source "../vue";)
-            )
-          end
+          sources =
+            case frameworks do
+              [:vue] -> [~s(@source "../vue";)]
+              [:react] -> [~s(@source "../react";)]
+              [:vue, :react] -> [~s(@source "../vue";), ~s(@source "../react";)]
+            end
+
+          Enum.reduce(sources, content, fn source_line, acc ->
+            if String.contains?(acc, source_line) do
+              acc
+            else
+              String.replace(acc, "@source \"../js\";", "@source \"../js\";\n#{source_line}")
+            end
+          end)
         end)
       end)
     end
 
-    # Update package.json for Vue dependencies
-    defp update_package_json_for_vue(igniter) do
+    # Update package.json with framework dependencies
+    defp update_package_json(igniter, frameworks) do
+      vue? = :vue in frameworks
+      react? = :react in frameworks
+
+      deps =
+        [
+          vue? && {~s("@vueuse/core"), ~s("^13.7.0")},
+          true && {~s("live_vite"), ~s("file:./deps/live_vite")},
+          true && {~s("phoenix"), ~s("file:./deps/phoenix")},
+          true && {~s("phoenix_html"), ~s("file:./deps/phoenix_html")},
+          true && {~s("phoenix_live_view"), ~s("file:./deps/phoenix_live_view")},
+          react? && {~s("react"), ~s("^19.0.0")},
+          react? && {~s("react-dom"), ~s("^19.0.0")},
+          true && {~s("topbar"), ~s("^3.0.0")},
+          vue? && {~s("vue"), ~s("^3.4.21")}
+        ]
+        |> Enum.filter(& &1)
+        |> Enum.map(fn {k, v} -> "    #{k}: #{v}" end)
+        |> Enum.join(",\n")
+
+      dev_deps =
+        [
+          true && {~s("@tailwindcss/vite"), ~s("^4.1.0")},
+          react? && {~s("@types/react"), ~s("^19.0.0")},
+          react? && {~s("@types/react-dom"), ~s("^19.0.0")},
+          react? && {~s("@vitejs/plugin-react"), ~s("^4.3.0")},
+          vue? && {~s("@vitejs/plugin-vue"), ~s("^5.0.4")},
+          true && {~s("daisyui"), ~s("^5.0.0")},
+          true && {~s("phoenix_vite"), ~s("file:./deps/phoenix_vite")},
+          true && {~s("tailwindcss"), ~s("^4.1.0")},
+          true && {~s("typescript"), ~s("^5.4.5")},
+          true && {~s("vite"), ~s("^6.3.0")},
+          vue? && {~s("vue-tsc"), ~s("^2.0.13")}
+        ]
+        |> Enum.filter(& &1)
+        |> Enum.map(fn {k, v} -> "    #{k}: #{v}" end)
+        |> Enum.join(",\n")
+
       igniter
       |> Igniter.move_file("assets/package.json", "package.json")
       |> Igniter.update_file("package.json", fn source ->
@@ -241,23 +368,10 @@ defmodule Mix.Tasks.LiveVite.Install do
           """
           {
             "dependencies": {
-              "@vueuse/core": "^13.7.0",
-              "live_vite": "file:./deps/live_vite",
-              "phoenix": "file:./deps/phoenix",
-              "phoenix_html": "file:./deps/phoenix_html",
-              "phoenix_live_view": "file:./deps/phoenix_live_view",
-              "topbar": "^3.0.0",
-              "vue": "^3.4.21"
+          #{deps}
             },
             "devDependencies": {
-              "@tailwindcss/vite": "^4.1.0",
-              "@vitejs/plugin-vue": "^5.0.4",
-              "daisyui": "^5.0.0",
-              "phoenix_vite": "file:./deps/phoenix_vite",
-              "tailwindcss": "^4.1.0",
-              "typescript": "^5.4.5",
-              "vite": "^6.3.0",
-              "vue-tsc": "^2.0.13"
+          #{dev_deps}
             }
           }
           """
@@ -265,29 +379,83 @@ defmodule Mix.Tasks.LiveVite.Install do
       end)
     end
 
-    # Create Vue files from templates
-    defp create_vue_files(igniter) do
+    # Create framework files from templates
+    defp create_framework_files(igniter, frameworks) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
 
-      igniter
-      |> Igniter.compose_task("igniter.add_extension", ["phoenix"])
-      |> Igniter.mkdir("assets/vue")
-      |> Igniter.mkdir("lib/#{web_folder}/live")
-      |> Igniter.create_new_file("assets/vue/index.ts", vue_index_content())
-      |> Igniter.create_new_file("assets/vue/VueDemo.vue", demo_vue_content())
-      |> Igniter.create_new_file("assets/js/server.js", server_js_content())
-      |> Igniter.create_new_file(
-        "assets/vue/.gitignore",
-        "# Ignore automatically generated Vue files by the ~V sigil\n_build/"
-      )
-      |> Igniter.create_new_file("lib/#{web_folder}/live/vue_demo_live.ex", demo_live_view_content(igniter))
-      |> update_tsconfig_for_vue()
+      igniter =
+        igniter
+        |> Igniter.compose_task("igniter.add_extension", ["phoenix"])
+        |> Igniter.mkdir("lib/#{web_folder}/live")
+
+      igniter =
+        if :vue in frameworks do
+          igniter
+          |> Igniter.mkdir("assets/vue")
+          |> Igniter.create_new_file("assets/vue/VueDemo.vue", demo_vue_content())
+          |> Igniter.create_new_file(
+            "assets/vue/.gitignore",
+            "# Ignore automatically generated Vue files by the ~V sigil\n_build/"
+          )
+          |> Igniter.create_new_file("lib/#{web_folder}/live/vue_demo_live.ex", vue_demo_live_view_content(igniter))
+        else
+          igniter
+        end
+
+      igniter =
+        if :react in frameworks do
+          igniter
+          |> Igniter.mkdir("assets/react")
+          |> Igniter.create_new_file("assets/react/ReactDemo.tsx", demo_react_content())
+          |> Igniter.create_new_file("lib/#{web_folder}/live/react_demo_live.ex", react_demo_live_view_content(igniter))
+        else
+          igniter
+        end
+
+      # Create index.ts and server.js based on framework combination
+      igniter =
+        case frameworks do
+          [:vue] ->
+            igniter
+            |> Igniter.create_new_file("assets/vue/index.ts", vue_index_content())
+            |> Igniter.create_new_file("assets/js/server.js", vue_server_js_content())
+
+          [:react] ->
+            igniter
+            |> Igniter.create_new_file("assets/react/index.ts", react_index_content())
+            |> Igniter.create_new_file("assets/js/server.js", react_server_js_content())
+
+          [:vue, :react] ->
+            igniter
+            |> Igniter.create_new_file("assets/vue/index.ts", multi_vue_index_content())
+            |> Igniter.create_new_file("assets/react/index.ts", multi_react_index_content())
+            |> Igniter.create_new_file("assets/js/server.js", multi_server_js_content())
+        end
+
+      update_tsconfig(igniter, frameworks)
     end
 
-    defp update_tsconfig_for_vue(igniter) do
+    defp update_tsconfig(igniter, frameworks) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
+
+      includes =
+        [
+          ~s("./assets/js/**/*"),
+          if(:vue in frameworks, do: ~s("./assets/vue/**/*")),
+          if(:react in frameworks, do: ~s("./assets/react/**/*")),
+          ~s("./lib/#{web_folder}/**/*")
+        ]
+        |> Enum.filter(& &1)
+        |> Enum.join(",\n      ")
+
+      jsx_options =
+        if :react in frameworks do
+          ~s(,\n      "jsx": "react-jsx")
+        else
+          ""
+        end
 
       igniter
       |> Igniter.rm("assets/tsconfig.json")
@@ -305,12 +473,10 @@ defmodule Mix.Tasks.LiveVite.Install do
             "*": [ "./deps/*", "node_modules/*" ]
           },
           "strict": true,
-          "types": [ "vite/client" ]
+          "types": [ "vite/client" ]#{jsx_options}
         },
         "include": [
-          "./assets/js/**/*",
-          "./assets/vue/**/*",
-          "./lib/#{web_folder}/**/*"
+          #{includes}
         ],
         "exclude": [
           "node_modules"
@@ -340,6 +506,8 @@ defmodule Mix.Tasks.LiveVite.Install do
         end)
       end)
     end
+
+    # ── Vue-only index.ts (default, backward compatible) ──
 
     defp vue_index_content do
       """
@@ -382,7 +550,98 @@ defmodule Mix.Tasks.LiveVite.Install do
       """
     end
 
-    defp demo_live_view_content(igniter) do
+    # ── React-only index.ts ──
+
+    defp react_index_content do
+      """
+      import { createReactRenderer, getRendererHook, findComponent, type ComponentMap } from "live_vite"
+
+      const renderer = createReactRenderer()
+
+      const resolve = (name: string) => {
+        const components = {
+          ...import.meta.glob("./**/*.tsx", { eager: true }),
+          ...import.meta.glob("../../lib/**/*.tsx", { eager: true }),
+        } as ComponentMap
+
+        const mod = findComponent(components, name)
+        return mod && (mod as any).default ? (mod as any).default : mod
+      }
+
+      export default getRendererHook({ renderer, resolve })
+      """
+    end
+
+    # ── Multi-framework: vue/index.ts exports the multi-renderer hook ──
+
+    defp multi_vue_index_content do
+      """
+      import { h, type Component } from "vue"
+      import { createVueRenderer, createReactRenderer, getMultiRendererHook, findComponent, type LiveHook, type ComponentMap } from "live_vite"
+
+      // needed to make $live available in the Vue component
+      declare module "vue" {
+        interface ComponentCustomProperties {
+          $live: LiveHook
+        }
+      }
+
+      // Vue renderer
+      const vueRenderer = createVueRenderer({
+        setup: (createApp, component, props, slots, plugin, el) => {
+          const app = createApp({ render: () => h(component as Component, props, slots) })
+          app.use(plugin)
+          app.mount(el)
+          return app
+        },
+      })
+
+      const vueComponents = {
+        ...import.meta.glob("./**/*.vue", { eager: true }),
+        ...import.meta.glob("../../lib/**/*.vue", { eager: true }),
+      } as ComponentMap
+
+      // React renderer
+      const reactRenderer = createReactRenderer()
+
+      const reactComponents = {
+        ...import.meta.glob("../react/**/*.tsx", { eager: true }),
+        ...import.meta.glob("../../lib/**/*.tsx", { eager: true }),
+      } as ComponentMap
+
+      // Multi-renderer hook dispatches based on data-framework attribute
+      export default getMultiRendererHook({
+        vue: {
+          renderer: vueRenderer,
+          resolve: name => {
+            const mod = findComponent(vueComponents, name)
+            return mod && (mod as any).default ? (mod as any).default : mod
+          },
+        },
+        react: {
+          renderer: reactRenderer,
+          resolve: name => {
+            const mod = findComponent(reactComponents, name)
+            return mod && (mod as any).default ? (mod as any).default : mod
+          },
+        },
+      })
+      """
+    end
+
+    # ── Multi-framework: react/index.ts is just a marker for the react directory ──
+
+    defp multi_react_index_content do
+      """
+      // React components are discovered from ../vue/index.ts via the multi-renderer hook.
+      // Place your React components (.tsx) in this directory.
+      export {}
+      """
+    end
+
+    # ── Vue demo content (unchanged) ──
+
+    defp vue_demo_live_view_content(igniter) do
       web_module_name = Phoenix.web_module(igniter)
 
       """
@@ -630,7 +889,264 @@ defmodule Mix.Tasks.LiveVite.Install do
       """
     end
 
-    defp server_js_content do
+    # ── React demo component ──
+
+    defp demo_react_content do
+      """
+      import { useState, useMemo } from "react"
+      import { useLive, useLiveFormReact, useFieldReact, type Form } from "live_vite"
+
+      type FilterType = "all" | "active" | "completed"
+
+      interface Todo {
+        id: number
+        text: string
+        completed: boolean
+      }
+
+      interface Props {
+        todos: Todo[]
+        form: Form<{ text: string }>
+      }
+
+      export default function ReactDemo({ todos, form }: Props) {
+        const live = useLive()
+        const [filter, setFilter] = useState<FilterType>("all")
+
+        // Server-side validation using changesets
+        const { submit, isValid } = useLiveFormReact<{ text: string }>(() => form, {
+          submitEvent: "add_todo",
+          changeEvent: "validate_todo",
+          debounceInMiliseconds: 50,
+        })
+
+        const textField = useFieldReact<{ text: string }>("text")
+
+        const filterByType = (type: FilterType) => {
+          switch (type) {
+            case "active":
+              return todos.filter((todo) => !todo.completed)
+            case "completed":
+              return todos.filter((todo) => todo.completed)
+            default:
+              return todos
+          }
+        }
+
+        const filteredTodos = useMemo(() => filterByType(filter), [filter, todos])
+        const completedCount = useMemo(() => filterByType("completed").length, [todos])
+
+        return (
+          <div className="text-center">
+            <div className="max-w-2xl space-y-8">
+              {/* Header */}
+              <div>
+                <h1 className="text-5xl font-bold">🎉 Welcome to LiveVite!</h1>
+                <p className="text-lg text-base-content/70">React components seamlessly integrated with Phoenix LiveView</p>
+              </div>
+
+              {/* Todo Demo Card */}
+              <div>
+                {/* Add Todo Form */}
+                <form onSubmit={(e) => { e.preventDefault(); submit() }} className="form-control mb-6">
+                  <div className="join mb-2">
+                    <input
+                      {...textField.inputAttrs}
+                      type="text"
+                      placeholder="What needs to be done?"
+                      className="input input-bordered join-item flex-1"
+                    />
+                    <button type="submit" disabled={!isValid} className="btn btn-primary join-item">Add Todo</button>
+                  </div>
+                  {(textField.isTouched || textField.isDirty) && textField.errorMessage && (
+                    <div className="text-error text-xs">{textField.errorMessage}</div>
+                  )}
+                </form>
+
+                {/* Filter Buttons */}
+                <div className="join mb-6 mx-auto">
+                  {(["all", "active", "completed"] as FilterType[]).map((filterType) => (
+                    <button
+                      key={filterType}
+                      onClick={() => setFilter(filterType)}
+                      className={`btn btn-sm join-item ${filter === filterType ? "btn-active" : ""}`}
+                    >
+                      {filterType.charAt(0).toUpperCase() + filterType.slice(1)} ({filterByType(filterType).length})
+                    </button>
+                  ))}
+                </div>
+
+                {/* Todo List */}
+                {filteredTodos.length > 0 ? (
+                  <div className="space-y-2 mb-4">
+                    {filteredTodos.map((todo) => (
+                      <div key={todo.id} className="card card-compact bg-base-200">
+                        <div className="card-body">
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={todo.completed}
+                              onChange={() => live.pushEvent("toggle_todo", { id: todo.id })}
+                              className="checkbox checkbox-primary"
+                            />
+                            <span className={`flex-1 text-left ${todo.completed ? "line-through opacity-60" : ""}`}>
+                              {todo.text}
+                            </span>
+                            <button
+                              onClick={() => live.pushEvent("delete_todo", { id: todo.id })}
+                              className="btn btn-error btn-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{filter === "all" ? "No todos yet!" : `No ${filter} todos!`}</span>
+                  </div>
+                )}
+
+                {/* Actions */}
+                {todos.some((todo) => todo.completed) && (
+                  <div className="card-actions justify-between">
+                    <span className="text-sm opacity-70">{completedCount} completed</span>
+                    <button onClick={() => live.pushEvent("clear_completed", {})} className="btn btn-error btn-sm">
+                      Clear completed
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Features Info */}
+              <div className="alert alert-info">
+                <div>
+                  <h4 className="font-bold">LiveVite Features Demonstrated:</h4>
+                  <ul className="text-sm mt-2 space-y-1">
+                    <li>✅ <strong>Reactive Props:</strong> Todos flow from server state</li>
+                    <li>✅ <strong>Server Events:</strong> Add, toggle, delete todos send events to LiveView</li>
+                    <li>✅ <strong>Local State:</strong> Filter buttons work entirely client-side</li>
+                    <li>✅ <strong>Server-side Validation:</strong> Uses Ecto.Changeset</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      """
+    end
+
+    defp react_demo_live_view_content(igniter) do
+      web_module_name = Phoenix.web_module(igniter)
+
+      """
+      defmodule #{inspect(web_module_name)}.ReactDemoLive do
+        use #{inspect(web_module_name)}, :live_view
+
+        @impl true
+        def render(assigns) do
+          ~H\"\"\"
+          <Layouts.app flash={@flash}>
+            <.react
+              todos={@todos}
+              form={@form}
+              v-component="ReactDemo"
+              v-socket={@socket}
+            />
+          </Layouts.app>
+          \"\"\"
+        end
+
+        @impl true
+        def mount(_params, _session, socket) do
+          socket =
+            socket
+            |> assign(:todos, [
+              %{id: 1, text: "Learn LiveVite basics", completed: true},
+              %{id: 2, text: "Build an interactive component", completed: false},
+              %{id: 3, text: "Deploy to production", completed: false}
+            ])
+            |> assign(:next_id, 4)
+            |> assign(:form, add_todo_form(%{text: ""}))
+
+          {:ok, socket}
+        end
+
+        @impl true
+        def handle_event("validate_todo", %{"todo" => params}, socket) do
+          {:noreply, assign(socket, :form, add_todo_form(params))}
+        end
+
+        @impl true
+        def handle_event("add_todo", %{"todo" => params}, socket) do
+          changeset = add_todo_changeset(params, socket.assigns.next_id)
+
+          case Ecto.Changeset.apply_action(changeset, :insert) do
+            {:ok, new_todo} ->
+              socket =
+                socket
+                |> assign(:todos, socket.assigns.todos ++ [new_todo])
+                |> assign(:next_id, socket.assigns.next_id + 1)
+                |> assign(:form, add_todo_form(%{text: ""}))
+
+              {:noreply, socket}
+
+            {:error, changeset} ->
+              {:noreply, assign(socket, :form, to_form(changeset, as: :todo))}
+          end
+        end
+
+        @impl true
+        def handle_event("toggle_todo", %{"id" => id}, socket) do
+          todos =
+            Enum.map(socket.assigns.todos, fn todo ->
+              if todo.id == id, do: %{todo | completed: !todo.completed}, else: todo
+            end)
+
+          {:noreply, assign(socket, :todos, todos)}
+        end
+
+        @impl true
+        def handle_event("delete_todo", %{"id" => id}, socket) do
+          todos = Enum.reject(socket.assigns.todos, fn todo -> todo.id == id end)
+          {:noreply, assign(socket, :todos, todos)}
+        end
+
+        @impl true
+        def handle_event("clear_completed", _params, socket) do
+          todos = Enum.reject(socket.assigns.todos, fn todo -> todo.completed end)
+          {:noreply, assign(socket, :todos, todos)}
+        end
+
+        defp add_todo_changeset(params, id \\\\ nil) do
+          data = %{text: "", id: id, completed: false}
+          types = %{text: :string}
+
+          {data, types}
+          |> Ecto.Changeset.cast(params, Map.keys(types))
+          |> Ecto.Changeset.validate_required([:text])
+          |> Ecto.Changeset.validate_length(:text, min: 8, max: 50)
+        end
+
+        defp add_todo_form(params) do
+          params
+          |> add_todo_changeset()
+          |> Map.put(:action, :validate)
+          |> to_form(as: :todo)
+        end
+      end
+      """
+    end
+
+    # ── Server.js templates ──
+
+    defp vue_server_js_content do
       """
       import components from "../vue"
       import { getRender, loadManifest } from "live_vite/server"
@@ -642,8 +1158,57 @@ defmodule Mix.Tasks.LiveVite.Install do
       """
     end
 
-    # Add vue_demo route to dev section of router.ex
-    defp add_vue_demo_route(igniter) do
+    defp react_server_js_content do
+      """
+      import { createReactRenderer, getRendererRender, findComponent, loadManifest } from "live_vite/server"
+
+      const renderer = createReactRenderer()
+
+      const components = import.meta.glob("../react/**/*.tsx", { eager: true })
+
+      const resolve = (name) => {
+        const mod = findComponent(components, name)
+        return mod && mod.default ? mod.default : mod
+      }
+
+      const manifest = loadManifest("../priv/static/.vite/ssr-manifest.json")
+      export const render = getRendererRender(renderer, resolve, manifest)
+      """
+    end
+
+    defp multi_server_js_content do
+      """
+      import { createVueRenderer, createReactRenderer, getMultiRendererRender, findComponent, loadManifest } from "live_vite/server"
+
+      const vueRenderer = createVueRenderer()
+      const reactRenderer = createReactRenderer()
+
+      const vueComponents = import.meta.glob("../vue/**/*.vue", { eager: true })
+      const reactComponents = import.meta.glob("../react/**/*.tsx", { eager: true })
+
+      const manifest = loadManifest("../priv/static/.vite/ssr-manifest.json")
+
+      export const render = getMultiRendererRender({
+        vue: {
+          renderer: vueRenderer,
+          resolve: (name) => {
+            const mod = findComponent(vueComponents, name)
+            return mod && mod.default ? mod.default : mod
+          },
+        },
+        react: {
+          renderer: reactRenderer,
+          resolve: (name) => {
+            const mod = findComponent(reactComponents, name)
+            return mod && mod.default ? mod.default : mod
+          },
+        },
+      }, manifest)
+      """
+    end
+
+    # Add demo routes to dev section of router.ex
+    defp add_demo_routes(igniter, frameworks) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
       web_module_name = web_module |> Module.split() |> Enum.join(".")
@@ -651,56 +1216,107 @@ defmodule Mix.Tasks.LiveVite.Install do
 
       Igniter.update_file(igniter, router_file, fn source ->
         Rewrite.Source.update(source, :content, fn content ->
-          # Add the vue_demo route to the dev section after live_dashboard
-          if String.contains?(content, "live \"/vue_demo\"") do
-            content
-          else
-            if String.contains?(content, "live_dashboard") do
-              String.replace(
-                content,
-                ~r/(live_dashboard.*)/,
-                "\\1\n      live \"/vue_demo\", #{web_module_name}.VueDemoLive"
-              )
-            else
-              # there is no live_dashboard, so we need to add the route to the browser pipeline
-              String.replace(
-                content,
-                ~r/(pipe_through :browser.*)/,
-                "\\1\n      live \"/dev/vue_demo\", #{web_module_name}.VueDemoLive"
-              )
-            end
-          end
+          content
+          |> maybe_add_route(frameworks, :vue, web_module_name)
+          |> maybe_add_route(frameworks, :react, web_module_name)
         end)
       end)
     end
 
+    defp maybe_add_route(content, frameworks, framework, web_module_name) do
+      if framework not in frameworks, do: content, else: add_framework_route(content, framework, web_module_name)
+    end
+
+    defp add_framework_route(content, :vue, web_module_name) do
+      if String.contains?(content, "live \"/vue_demo\"") do
+        content
+      else
+        add_route_after_dashboard(content, "live \"/vue_demo\", #{web_module_name}.VueDemoLive", "/dev/vue_demo")
+      end
+    end
+
+    defp add_framework_route(content, :react, web_module_name) do
+      if String.contains?(content, "live \"/react_demo\"") do
+        content
+      else
+        add_route_after_dashboard(content, "live \"/react_demo\", #{web_module_name}.ReactDemoLive", "/dev/react_demo")
+      end
+    end
+
+    defp add_route_after_dashboard(content, route_line, fallback_path) do
+      if String.contains?(content, "live_dashboard") do
+        String.replace(
+          content,
+          ~r/(live_dashboard.*)/,
+          "\\1\n      #{route_line}"
+        )
+      else
+        String.replace(
+          content,
+          ~r/(pipe_through :browser.*)/,
+          "\\1\n      #{String.replace(route_line, ~r/"\/\w+_demo"/, "\"#{fallback_path}\"")}"
+        )
+      end
+    end
+
     # Update home.html.heex template with LiveVite content
-    defp update_home_template(igniter) do
+    defp update_home_template(igniter, frameworks) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
       home_template = Path.join(["lib", web_folder, "controllers", "page_html", "home.html.heex"])
+
+      {file_description, demo_links} =
+        case frameworks do
+          [:vue] ->
+            {
+              """
+              Congratulations, you've successfully created a LiveVite app with Phoenix!
+                    We've automatically created two files for you: <br />
+                    <code class="text-sm text-primary">assets/vue/VueDemo.vue</code>
+                    <br />
+                    <code class="text-sm text-primary">lib/#{web_folder}/live/vue_demo.ex</code>
+                    <br /> Click the button below to see it in action.\
+              """,
+              ~s(<a href={~p"/dev/vue_demo"} class="btn btn-primary mt-4">Vue Demo</a>)
+            }
+
+          [:react] ->
+            {
+              """
+              Congratulations, you've successfully created a LiveVite app with Phoenix!
+                    We've automatically created two files for you: <br />
+                    <code class="text-sm text-primary">assets/react/ReactDemo.tsx</code>
+                    <br />
+                    <code class="text-sm text-primary">lib/#{web_folder}/live/react_demo.ex</code>
+                    <br /> Click the button below to see it in action.\
+              """,
+              ~s(<a href={~p"/dev/react_demo"} class="btn btn-primary mt-4">React Demo</a>)
+            }
+
+          [:vue, :react] ->
+            {
+              """
+              Congratulations, you've successfully created a LiveVite app with Phoenix!
+                    We've set up both Vue and React for you. Click a button below to see a demo.\
+              """,
+              ~s(<a href={~p"/dev/vue_demo"} class="btn btn-primary mt-4">Vue Demo</a>\n    <a href={~p"/dev/react_demo"} class="btn btn-secondary mt-4 ml-2">React Demo</a>)
+            }
+        end
 
       Igniter.update_file(igniter, home_template, fn source ->
         Rewrite.Source.update(source, :content, fn content ->
           content
           |> String.replace(
             "Peace of mind from prototype to production.",
-            "End-to-end reactivity for your Live Vue apps."
+            "End-to-end reactivity for your LiveVite apps."
           )
           |> String.replace(
             ~r/Build rich, interactive web applications quickly.*at scale\./s,
-            """
-            Congratulations, you've successfully created a LiveVite app with Phoenix!
-                  We've automatically created two files for you: <br />
-                  <code class="text-sm text-primary">assets/vue/VueDemo.vue</code>
-                  <br />
-                  <code class="text-sm text-primary">lib/#{web_folder}/live/vue_demo.ex</code>
-                  <br /> Click the button below to see it in action.\
-            """
+            file_description
           )
           |> String.replace(
             ~s(<div class="flex">),
-            ~s(<a href={~p"/dev/vue_demo"} class="btn btn-primary mt-4">Vue Demo</a>\n    <div class="flex">)
+            ~s(#{demo_links}\n    <div class="flex">)
           )
         end)
       end)
