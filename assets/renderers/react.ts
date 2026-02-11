@@ -3,6 +3,7 @@ import { createRoot, hydrateRoot, type Root } from "react-dom/client"
 import type { FrameworkRenderer, MountContext, RendererState } from "../renderer.js"
 import { applyPatch, type Operation } from "../jsonPatch.js"
 import { mapValues } from "../utils.js"
+import { LiveContext } from "../useReact.js"
 
 /**
  * State specific to the React renderer.
@@ -27,15 +28,16 @@ function htmlSlotsToReact(slots: Record<string, string>): Record<string, () => a
 
 /**
  * Re-render the React component tree with current props and slots.
+ * Wraps the component in LiveContext.Provider so useLive()/useLiveEvent() work.
  */
 function renderComponent(state: RendererState<ReactRendererState>): void {
   const { root, component, hook } = state.app!
-  const element = createElement(component as any, {
+  const inner = createElement(component as any, {
     ...state.props,
     ...mapValues(state.slots, slotFn => slotFn()),
     live: hook,
   })
-  root.render(element)
+  root.render(createElement(LiveContext.Provider, { value: hook }, inner))
 }
 
 export interface ReactRendererOptions {
@@ -63,11 +65,12 @@ export function createReactRenderer(options: ReactRendererOptions = {}): Framewo
       const props = { ...ctx.props }
       const slots = htmlSlotsToReact(ctx.slots)
 
-      const element = createElement(ctx.component as any, {
+      const inner = createElement(ctx.component as any, {
         ...props,
         ...mapValues(slots, slotFn => slotFn()),
         live: ctx.hook,
       })
+      const element = createElement(LiveContext.Provider, { value: ctx.hook }, inner)
 
       let root: Root
       if (ctx.ssr) {

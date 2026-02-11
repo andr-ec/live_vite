@@ -31,3 +31,6 @@ export { default as Link } from "./link.js"
 export type { FrameworkRenderer, RendererState, MountContext, SSRContext } from "./renderer.js"
 export { createVueRenderer } from "./renderers/vue.js"
 export { createReactRenderer } from "./renderers/react.js"
+
+// React hooks
+export { useLive, useLiveEvent as useLiveEventReact, LiveContext } from "./useReact.js"
