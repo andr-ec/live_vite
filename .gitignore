@@ -33,6 +33,8 @@ node_modules/
 
 .elixir_ls/
 .vscode/
+.ralph-tui/
+.beads/
 
 # Playwright
 test/e2e/priv/static/
