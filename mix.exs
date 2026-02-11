@@ -17,7 +17,7 @@ defmodule LiveVite.MixProject do
       deps: deps(),
 
       # Hex
-      description: "E2E reactivity for Vue and LiveView",
+      description: "E2E reactivity for Vue, React, and Phoenix LiveView",
       package: package(),
 
       # Docs

@@ -1,11 +1,11 @@
 # Basic Usage
 
-This guide covers the fundamental patterns for using Vue components within LiveView.
+This guide covers the fundamental patterns for using Vue and React components within LiveView.
 
 ## Component Organization
 
-By default, Vue components should be placed in either:
-- `assets/vue` directory
+By default, components should be placed in either:
+- `assets/vue` directory (Vue `.vue` files and React `.tsx`/`.jsx` files)
 - Colocated with your LiveView files in `lib/my_app_web`
 
 For advanced component organization and custom resolution patterns, see [Configuration](configuration.md#component-organization).
@@ -14,14 +14,22 @@ For advanced component organization and custom resolution patterns, see [Configu
 
 ### Basic Syntax
 
-To render a Vue component from HEEX, use the `<.vue>` function:
+To render a Vue component from HEEX, use the `<.vue>` function. For React, use `<.react>`:
 
 ```elixir
+<%!-- Vue component --%>
 <.vue
   count={@count}
   v-component="Counter"
   v-socket={@socket}
   v-on:inc={JS.push("inc")}
+/>
+
+<%!-- React component --%>
+<.react
+  count={@count}
+  v-component="Counter"
+  v-socket={@socket}
 />
 ```
 
@@ -29,7 +37,7 @@ To render a Vue component from HEEX, use the `<.vue>` function:
 
 | Attribute    | Example                | Required        | Description                                    |
 |--------------|------------------------|-----------------|------------------------------------------------|
-| v-component  | `v-component="Counter"`| Yes            | Component name or path relative to vue_root    |
+| v-component  | `v-component="Counter"`| Yes            | Component name or path relative to component root |
 | v-socket     | `v-socket={@socket}`   | Yes in LiveView| Required for SSR and reactivity               |
 
 ### Optional Attributes
@@ -37,7 +45,7 @@ To render a Vue component from HEEX, use the `<.vue>` function:
 | Attribute    | Example              | Description                                    |
 |--------------|----------------------|------------------------------------------------|
 | v-ssr        | `v-ssr={true}`      | Override default SSR setting                   |
-| v-on:event   | `v-on:inc={JS.push("inc")}` | Handle Vue component events           |
+| v-on:event   | `v-on:inc={JS.push("inc")}` | Handle component events                |
 | prop={@value}| `count={@count}`     | Pass props to the component                   |
 
 ### Component Shortcut
@@ -48,7 +56,7 @@ Instead of writing `<.vue v-component="Counter">`, you can use the shortcut synt
 <.Counter count={@count} v-socket={@socket} />
 ```
 
-Function names are generated based on `.vue` file names. For files with identical names, use the full path:
+Function names are generated based on component file names (`.vue`, `.tsx`, `.jsx`). The framework is detected from the file extension. For files with identical names, use the full path:
 
 ```elixir
 <.vue v-component="helpers/nested/Modal" />
@@ -103,7 +111,7 @@ For complete implementation details including field selection and custom impleme
 
 ### Phoenix Events
 
-All standard Phoenix event handlers work inside Vue components:
+All standard Phoenix event handlers work inside Vue and React components:
 - `phx-click`
 - `phx-change`
 - `phx-submit`
@@ -112,6 +120,8 @@ All standard Phoenix event handlers work inside Vue components:
 They will be pushed directly to LiveView, exactly as happens with `HEEX` components.
 
 ### Programmatic access to hook instance
+
+#### Vue
 
 There are two ways to access the Phoenix LiveView hook instance from your Vue components:
 
@@ -157,6 +167,32 @@ There are two ways to access the Phoenix LiveView hook instance from your Vue co
     ```
 
 The `live` object provides all methods from [Phoenix.LiveView JS Interop](https://hexdocs.pm/phoenix_live_view/js-interop.html#client-hooks-via-phx-hook). For a complete API reference, see [Client-Side API](client_api.md).
+
+#### React
+
+In React components, use the `useLive()` hook to access the LiveView hook instance:
+
+```tsx
+import { useLive, useLiveEventReact } from "live_vite"
+
+export default function MyComponent() {
+  const live = useLive()
+
+  // Push events to the server
+  const handleClick = () => live.pushEvent("clicked", { value: 42 })
+
+  // Listen for server events
+  useLiveEventReact("response", (payload) => {
+    console.log(payload)
+  })
+
+  return <button onClick={handleClick}>Click me</button>
+}
+```
+
+The `live` prop is also passed directly to every React component rendered by LiveVite, providing an alternative way to access the hook instance without the `useLive()` hook.
+
+For the full list of React hooks, see [Client-Side API](client_api.md#react-hooks).
 
 ### LiveView Navigation
 
@@ -208,7 +244,7 @@ emit('inc', {value: 5})
 
 ## Slots Support
 
-Vue components can receive slots from LiveView templates:
+Both Vue and React components can receive slots from LiveView templates. In Vue, slots are rendered as `<slot>` elements. In React, slots are passed as props containing React elements.
 
 ```elixir
 <.Card title="Example Card" v-socket={@socket}>
@@ -241,10 +277,10 @@ Important notes about slots:
 
 > #### Hooks inside slots are not supported {: .warning}
 >
-> Slots are rendered server-side and then sent to the client as a raw HTML.
+> Slots are rendered server-side and then sent to the client as raw HTML.
 > It happens outside of the LiveView lifecycle, so hooks inside slots are not supported.
 >
-> As a consequence, since `.vue` components rely on hooks, it's not possible to nest `.vue` components inside other `.vue` components.
+> As a consequence, since LiveVite components rely on hooks, it's not possible to nest LiveVite components inside other LiveVite components.
 
 ## File Uploads
 
@@ -511,7 +547,7 @@ function addItem() {
 
 - **Memory Efficient**: Reduces server memory usage by not storing large collections in socket assigns
 - **Transparent Updates**: When you use `stream_insert()`, `stream_delete()`, or other stream operations, LiveVite automatically patches only the affected items
-- **State Preservation**: Vue component state (like form inputs, local variables) is preserved during stream updates
+- **State Preservation**: Component state (like form inputs, local variables) is preserved during stream updates
 - **Same API as HEEX**: Use `@streams.items` exactly as you would in a HEEX template
 - **Automatic Patches**: LiveVite's existing JSON patch system handles efficient client updates
 
@@ -533,7 +569,7 @@ stream(socket, :items, new_items, reset: true)
 stream_delete_by_dom_id(socket, :items, "item-123")
 ```
 
-The Vue component will automatically receive these updates and maintain its local state throughout all operations.
+Both Vue and React components will automatically receive these updates and maintain their local state throughout all operations.
 
 ## Dead Views vs Live Views
 
@@ -598,6 +634,47 @@ The `~VUE` sigil is a powerful macro that compiles the string content into a ful
 *   **Reusability:** When you need to use the same component in multiple LiveViews.
 *   **Large components:** For complex components, a dedicated file improves organization and editor support.
 *   **Collaboration:** Separate files are often easier for teams to work on simultaneously.
+
+## Using ~REACT Sigil
+
+The `~REACT` sigil lets you inline React (TSX) components directly in your LiveView, similar to `~VUE`:
+
+```elixir
+defmodule MyAppWeb.CounterLive do
+  use MyAppWeb, :live_view
+
+  def render(assigns) do
+    ~REACT"""
+    import { useState } from "react"
+
+    export default function Counter({ count }: { count: number }) {
+      const [diff, setDiff] = useState(1)
+
+      return (
+        <div>
+          Current count: {count}
+          <input type="range" min="1" max="10" value={diff}
+            onChange={e => setDiff(Number(e.target.value))} />
+          <button phx-click="inc" phx-value-diff={diff}>
+            Increase counter by {diff}
+          </button>
+        </div>
+      )
+    }
+    """
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, assign(socket, count: 0)}
+  end
+
+  def handle_event("inc", %{"diff" => diff}, socket) do
+    {:noreply, update(socket, :count, &(&1 + String.to_integer(diff)))}
+  end
+end
+```
+
+The `~REACT` sigil compiles the TSX content into a component file at compile time, just like `~VUE` does for Vue components.
 
 ## Next Steps
 

@@ -1,6 +1,6 @@
 # LiveVite Library Development
 
-Vue.js + Phoenix LiveView integration library. Version 1.0.0.
+Vue.js + React + Phoenix LiveView integration library. Version 1.0.0.
 
 > This is a living document. Claude sessions should update it with brief learnings as they arise. For detailed notes, see [docs/LEARNINGS.md](docs/LEARNINGS.md).
 
@@ -20,17 +20,24 @@ mix setup                         # First-time setup (deps + npm install)
 
 ```
 lib/
-├── live_vite.ex              # Main module, ~VUE sigil
-├── live_vite/components.ex   # <.vue> component, props handling
-├── live_vite/encoder.ex      # JSON encoding for Vue props
+├── live_vite.ex              # Main module, ~VUE/~REACT sigils, vue/1 + react/1 components
+├── live_vite/components.ex   # <.vue>/<.react> component helpers, auto-discovery
+├── live_vite/encoder.ex      # JSON encoding for props
 ├── live_vite/slots.ex        # Slot interoperability
 └── live_vite/ssr/            # SSR: NodeJS and ViteJS modes
 assets/
-├── index.ts                 # Main entry, getHooks()
-├── hooks.ts                 # Phoenix LiveView hooks
+├── index.ts                 # Main entry, exports all Vue + React APIs
+├── hooks.ts                 # Phoenix LiveView hooks (getMultiRendererHook, getRendererHook)
+├── renderer.ts              # FrameworkRenderer interface
+├── renderers/vue.ts         # Vue renderer implementation
+├── renderers/react.ts       # React renderer implementation
 ├── use.ts                   # Vue composables (useLiveEvent, etc.)
-├── useLiveForm.ts           # Form handling with Ecto changesets
-├── jsonPatch.ts             # Efficient prop diffing
+├── useReact.ts              # React hooks (useLive, useLiveEvent, useLiveNavigation)
+├── useLiveForm.ts           # Vue form handling with Ecto changesets
+├── useLiveFormReact.ts      # React form handling with Ecto changesets
+├── useLiveUploadReact.ts    # React file upload hook
+├── jsonPatch.ts             # Efficient prop diffing (framework-agnostic)
+├── server.ts                # SSR: getRendererRender, getMultiRendererRender
 └── vitePlugin.js            # Vite plugin for component discovery
 test/e2e/                    # Playwright E2E tests with Phoenix server
 ```
@@ -39,13 +46,15 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 
 ### Component Usage (Elixir)
 ```elixir
-# In LiveView template
+# Vue component
 <.vue count={@count} v-component="Counter" v-socket={@socket} />
 
-# Or with ~VUE sigil
-~VUE"""
-<Counter :count="count" />
-"""
+# React component
+<.react count={@count} v-component="Counter" v-socket={@socket} />
+
+# Or with sigils
+~VUE"""<Counter :count="count" />"""
+~REACT"""export default function Counter({ count }) { return <div>{count}</div> }"""
 ```
 
 ### Vue Composables (TypeScript)
@@ -54,6 +63,13 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 - `useLiveNavigation()` - `patch()` and `navigate()` helpers
 - `useLiveForm(formName)` - Server-side validation with Ecto
 - `useLiveUpload(uploadName)` - File upload integration
+
+### React Hooks (TypeScript)
+- `useLive()` - Access to hook instance (mirrors `useLiveVite()`)
+- `useLiveEventReact(name, handler)` - LiveView event subscription
+- `useLiveNavigationReact()` - `patch()` and `navigate()` helpers
+- `useLiveFormReact(form, options)` - Server-side validation with Ecto
+- `useLiveUploadReact(uploadName)` - File upload integration
 
 ### SSR Modes
 - `LiveVite.SSR.NodeJS` - Node.js subprocess (default)
@@ -76,7 +92,7 @@ test/e2e/features/
 
 To add a new E2E test:
 1. Create `test/e2e/features/my-feature/`
-2. Add `live.ex` (LiveView), `*.vue` (components), `*.spec.js` (test)
+2. Add `live.ex` (LiveView), `*.vue`/`*.tsx` (components), `*.spec.js` (test)
 3. Add route to `test/e2e/test_helper.exs` router
 
 Key utilities in `test/e2e/utils.js`:

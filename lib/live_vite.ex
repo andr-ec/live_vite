@@ -1,6 +1,6 @@
 defmodule LiveVite do
   @moduledoc """
-  LiveVite provides seamless integration between Phoenix LiveView and Vue.js components.
+  LiveVite provides seamless integration between Phoenix LiveView and Vue.js/React components.
 
   ## Installation and Configuration
 
@@ -11,29 +11,29 @@ defmodule LiveVite do
   When using the `vue/1`/`react/1` components or `~VUE`/`~REACT` sigils, the following options are supported:
 
   ### Required Attributes
-    * `v-component` (string) - Name of the Vue component (e.g., "YourComponent", "directory/Example")
+    * `v-component` (string) - Name of the component (e.g., "YourComponent", "directory/Example")
 
   > #### Tip {: .tip}
   >
-  > Value of `v-component` will be directly passed to `resolve` function of the `createLiveVite` instance.
-  > It should return Vue component or a promise that resolves to a Vue component.
+  > Value of `v-component` will be directly passed to the `resolve` function of the registered renderer.
+  > It should return a component (or a promise that resolves to one).
   > In a standard setup, you can find it in `assets/vue/index.js`.
 
   ### Optional Attributes
     * `id` (string) - Explicit ID of the wrapper component. If not provided, a random one will be
       generated. Useful to keep ID consistent in development (e.g., "vue-1")
-    * `class` (string) - CSS class(es) to apply to the Vue component wrapper
+    * `class` (string) - CSS class(es) to apply to the component wrapper
       (e.g., "my-class" or "my-class another-class")
     * `v-ssr` (boolean) - Whether to render the component on the server. Defaults to the value set
       in config (default: true)
     * `v-socket` (LiveView.Socket) - LiveView socket, should be provided when rendering inside LiveView
 
   ### Event Handlers
-    * `v-on:*` - Vue event handlers can be attached using the `v-on:` prefix
+    * `v-on:*` - Event handlers can be attached using the `v-on:` prefix
       (e.g., `v-on:click`, `v-on:input`)
 
   ### Props and Slots
-    * All other attributes are passed as props to the Vue component
+    * All other attributes are passed as props to the component
     * Slots can be passed as regular Phoenix slots
   """
 

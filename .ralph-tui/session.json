@@ -3,10 +3,10 @@
   "sessionId": "60b15e9d-b95b-4b21-a7d5-ddbd1d21a9dd",
   "status": "running",
   "startedAt": "2026-02-11T03:08:40.787Z",
-  "updatedAt": "2026-02-11T05:45:18.854Z",
-  "currentIteration": 16,
+  "updatedAt": "2026-02-11T05:51:33.437Z",
+  "currentIteration": 17,
   "maxIterations": 0,
-  "tasksCompleted": 16,
+  "tasksCompleted": 17,
   "isPaused": false,
   "agentPlugin": "claude",
   "trackerState": {
@@ -101,8 +101,8 @@
       {
         "id": "live-vite-8gy.17",
         "title": "US-017: Add React E2E tests for streams and advanced features",
-        "status": "open",
-        "completedInSession": false
+        "status": "completed",
+        "completedInSession": true
       },
       {
         "id": "live-vite-8gy.16",
@@ -284,6 +284,16 @@
       "durationMs": 400394,
       "startedAt": "2026-02-11T05:18:06.484Z",
       "endedAt": "2026-02-11T05:24:46.878Z"
+    },
+    {
+      "iteration": 17,
+      "status": "completed",
+      "taskId": "live-vite-8gy.17",
+      "taskTitle": "US-017: Add React E2E tests for streams and advanced features",
+      "taskCompleted": true,
+      "durationMs": 1230744,
+      "startedAt": "2026-02-11T05:24:48.057Z",
+      "endedAt": "2026-02-11T05:45:18.801Z"
     }
   ],
   "skippedTaskIds": [],

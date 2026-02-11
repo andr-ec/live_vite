@@ -5,22 +5,23 @@
 <a href="https://hexdocs.pm/live_vite"><img src="https://img.shields.io/badge/docs-hexdocs.pm-purple" alt="Hexdocs.pm"></a>
 <a href="https://github.com/Valian/live_vite"><img src="https://img.shields.io/github/stars/Valian/live_vite?style=social" alt="GitHub"></a>
 <br><br>
-Vue inside Phoenix LiveView with seamless end-to-end reactivity.
+Vue and React inside Phoenix LiveView with seamless end-to-end reactivity.
 </div>
 
 ## Features
 
 -   ⚡ **End-To-End Reactivity** with LiveView
 -   🧙‍♂️ **One-line Install** - Automated setup via Igniter installer
--   🔋 **Server-Side Rendered** (SSR) Vue
--   🐌 **Lazy-loading** Vue Components
+-   🔋 **Server-Side Rendered** (SSR) Vue and React
+-   🐌 **Lazy-loading** Components
 -   📦 **Efficient Props Diffing** - Only changed data is sent over WebSocket
--   🪄 **~VUE Sigil** as an alternative LiveView DSL with VS Code syntax highlighting
+-   🪄 **~VUE and ~REACT Sigils** as alternative LiveView DSLs
 -   🎯 **Phoenix Streams** Support with efficient patches
 -   🦄 **Tailwind** Support
 -   🦥 **Slot Interoperability**
--   📁 **File Upload Composable** - `useLiveUpload()` for seamless Vue integration with LiveView uploads
--   📝 **Comprehensive Form Handling** - `useLiveForm()` with server-side validation via Ecto changesets
+-   📁 **File Upload Hooks** - `useLiveUpload()` (Vue) and `useLiveUploadReact()` (React)
+-   📝 **Comprehensive Form Handling** - `useLiveForm()` (Vue) and `useLiveFormReact()` (React) with server-side validation via Ecto changesets
+-   🔌 **Multi-Framework** - Use Vue and React components in the same project
 -   🚀 **Amazing DX** with Vite
 
 
@@ -33,24 +34,21 @@ Vue inside Phoenix LiveView with seamless end-to-end reactivity.
 
 ## Example
 
-After installation, you can use Vue components in the same way as you'd use functional LiveView components. You can even handle Vue events with `JS` hooks! All the `phx-click`, `phx-change` attributes works inside Vue components as well.
+After installation, you can use Vue or React components in the same way as functional LiveView components. All the `phx-click`, `phx-change` attributes work inside components as well.
+
+### Vue
 
 ```html
 <script setup lang="ts">
 import {ref} from "vue"
 
-// props are passed from LiveView
 const props = defineProps<{count: number}>()
-
-// local state
 const diff = ref(1)
 </script>
 
 <template>
   Current count: {{ props.count }}
-  <label>Diff: </label>
   <input v-model.number="diff" type="range" min="1" max="10" />
-
   <button phx-click="inc" :phx-value-diff="diff">
     Increase counter by {{ diff }}
   </button>
@@ -77,21 +75,62 @@ defmodule MyAppWeb.CounterLive do
 end
 ```
 
+### React
+
+```tsx
+import { useState } from "react"
+
+export default function Counter({ count }: { count: number }) {
+  const [diff, setDiff] = useState(1)
+
+  return (
+    <div>
+      Current count: {count}
+      <input type="range" min="1" max="10" value={diff}
+        onChange={e => setDiff(Number(e.target.value))} />
+      <button phx-click="inc" phx-value-diff={diff}>
+        Increase counter by {diff}
+      </button>
+    </div>
+  )
+}
+```
+
+```elixir
+defmodule MyAppWeb.CounterLive do
+  use MyAppWeb, :live_view
+
+  def render(assigns) do
+    ~H"""
+    <.react count={@count} v-component="Counter" v-socket={@socket} />
+    """
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, assign(socket, count: 0)}
+  end
+
+  def handle_event("inc", %{"diff" => value}, socket) do
+    {:noreply, update(socket, :count, &(&1 + value))}
+  end
+end
+```
+
 ## Why?
 
-Phoenix Live View makes it possible to create rich, interactive web apps without writing JS.
+Phoenix LiveView makes it possible to create rich, interactive web apps without writing JS.
 
-But once you'll need to do anything even slightly complex on the client-side, you'll end up writing lots of imperative, hard-to-maintain hooks.
+But once you need to do anything slightly complex on the client-side, you'll end up writing lots of imperative, hard-to-maintain hooks.
 
-LiveVite allows to create hybrid apps, where part of the session state is on the server and part on the client.
+LiveVite lets you create hybrid apps where part of the session state is on the server and part on the client, using your favorite frontend framework.
 
 ### Reasons why you'd like to use LiveVite
 
 -   Your hooks are starting to look like jQuery
--   You have a complex local state
--   You'd like to use a massive Vue ecosystem
--   You want transitions, graphs etc.
--   You simply like Vue 😉
+-   You have complex local state
+-   You'd like to use the massive Vue or React ecosystem
+-   You want transitions, graphs, rich components etc.
+-   You can use Vue, React, or both in the same project
 
 ## Installation
 
@@ -110,23 +149,23 @@ Igniter installer works only for Phoenix 1.8+ projects. For detailed installatio
 
 ## VS Code Extension
 
-For syntax highlighting of the `~VUE` sigil:
+For syntax highlighting of the `~VUE` and `~REACT` sigils:
 - **VS Code Marketplace**: Install [LiveVite](https://marketplace.visualstudio.com/items?itemName=guilhermepsf23.livevite-sigil-highlighting) extension
 - **Manual Installation**: Download VSIX from [releases](https://github.com/GuilhermePSF/live-vite-sigil-highlighting/releases) and install via `Extensions > Install from VSIX...`
 
 ## Guides
 
 ### Getting Started
- - [Getting Started](guides/getting_started.md) - Create your first Vue component with transitions
+ - [Getting Started](guides/getting_started.md) - Create your first component with transitions
 
 ### Core Usage
- - [Basic Usage](guides/basic_usage.md) - Fundamental patterns, ~VUE sigil, and common examples
+ - [Basic Usage](guides/basic_usage.md) - Fundamental patterns, ~VUE/~REACT sigils, and common examples
  - [Forms and Validation](guides/forms.md) - Complex forms with server-side validation using useLiveForm
  - [Configuration](guides/configuration.md) - Advanced setup, SSR, and customization options
 
 ### Reference
  - [Component Reference](guides/component_reference.md) - Complete syntax documentation
- - [Client-Side API](guides/client_api.md) - Vue composables and utilities
+ - [Client-Side API](guides/client_api.md) - Vue composables, React hooks, and utilities
 
 ### Advanced Topics
  - [Architecture](guides/architecture.md) - How LiveVite works under the hood
@@ -166,6 +205,37 @@ Then run `mix deps.get && npm install`. The installer already configures `packag
 
 Elixir changes are reflected immediately. For TypeScript changes, run `npm install` again to pick them up.
 
+### Multi-Framework Setup
+
+LiveVite supports Vue, React, or both in the same project. On the client side, register renderers for each framework:
+
+```typescript
+import { getMultiRendererHook, createVueRenderer, createReactRenderer, findComponent } from "live_vite"
+
+const vueComponents = import.meta.glob("./**/*.vue")
+const reactComponents = import.meta.glob("./**/*.{tsx,jsx}")
+
+const hooks = {
+  VueHook: getMultiRendererHook({
+    vue: {
+      renderer: createVueRenderer(),
+      resolve: name => findComponent(vueComponents, name),
+    },
+    react: {
+      renderer: createReactRenderer(),
+      resolve: name => findComponent(reactComponents, name),
+    },
+  }),
+}
+```
+
+On the server side, use `<.vue>` for Vue components and `<.react>` for React components:
+
+```elixir
+<.vue v-component="Counter" count={@count} v-socket={@socket} />
+<.react v-component="Dashboard" data={@data} v-socket={@socket} />
+```
+
 ### Releasing
 
 Release is done with `expublish` package.
@@ -195,6 +265,9 @@ mix expublish.minor --allow-untracked --branch=main
 - [x] `useEventReply` - easy handling of `{:reply, data, socket}` responses
 - [x] `useLiveForm` - Ecto changesets & server-side validation
 - [x] Phoenix Streams - full support for `stream()` operations
+- [x] **React support** - `createReactRenderer`, `useLive`, `useLiveFormReact`, `useLiveUploadReact`
+- [x] **Multi-framework** - use Vue and React in the same project via `getMultiRendererHook`
+- [x] `~REACT` sigil - inline React (TSX) components in LiveView
 
 ## Credits
 

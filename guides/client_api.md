@@ -1,12 +1,12 @@
 # Client-Side API Reference
 
-This guide documents all client-side utilities, composables, and APIs available in LiveVite for Vue components.
+This guide documents all client-side utilities, composables, and APIs available in LiveVite for Vue and React components.
 
 > #### Getting Started {: .tip}
 >
 > New to LiveVite? Check out [Basic Usage](basic_usage.md) for fundamental patterns before diving into the API details.
 
-## Composables
+## Vue Composables
 
 LiveVite provides several Vue Composables to make interacting with the LiveView instance from your components easier and more declarative. These should be your first choice when working inside `.vue` files.
 
@@ -546,6 +546,148 @@ def handle_event("fetch_user", %{"id" => user_id}, socket) do
 end
 ```
 
+## React Hooks
+
+LiveVite provides React hooks that mirror the Vue composables. Use these inside `.tsx` / `.jsx` components.
+
+### `useLive()`
+
+Returns the LiveView hook instance from React context. Mirrors `useLiveVite()` for Vue.
+
+```tsx
+import { useLive } from "live_vite"
+
+export default function MyComponent() {
+  const live = useLive()
+
+  return (
+    <button onClick={() => live.pushEvent("clicked", {})}>
+      Click Me
+    </button>
+  )
+}
+```
+
+### `useLiveEventReact(event, callback)`
+
+Subscribes to a server-sent event and automatically cleans up on unmount. Mirrors `useLiveEvent()` for Vue.
+
+```tsx
+import { useLiveEventReact } from "live_vite"
+
+export default function Notifications() {
+  useLiveEventReact("notification", (payload) => {
+    alert(payload.message)
+  })
+
+  return <div>Listening for notifications...</div>
+}
+```
+
+### `useLiveNavigationReact()`
+
+Provides `patch()` and `navigate()` helpers for LiveView navigation. Mirrors `useLiveNavigation()` for Vue.
+
+```tsx
+import { useLiveNavigationReact } from "live_vite"
+
+export default function Nav() {
+  const { patch, navigate } = useLiveNavigationReact()
+
+  return (
+    <div>
+      <button onClick={() => patch({ tab: "settings" })}>Settings</button>
+      <button onClick={() => navigate("/dashboard")}>Dashboard</button>
+    </div>
+  )
+}
+```
+
+### `useLiveFormReact(form, options)`
+
+React hook for form handling with server-side validation via Ecto changesets. Mirrors `useLiveForm()` for Vue.
+
+**Parameters:**
+
+- `form` - The form data from LiveView props
+- `options.changeEvent` - Optional event name for sending field changes to server
+- `options.submitEvent` - Event name for form submission (default: "submit")
+- `options.debounceInMiliseconds` - Delay before sending change events (default: 300)
+
+**Returns:**
+
+- `field(path)` - Get a typed field instance for the given path
+- `fieldArray(path)` - Get an array field instance for managing dynamic lists
+- `submit()` - Submit the form to the server
+- `reset()` - Reset form to initial state
+
+```tsx
+import { useLiveFormReact, useFieldReact } from "live_vite"
+
+export default function UserForm({ form }) {
+  const { field, submit } = useLiveFormReact(form, {
+    changeEvent: "validate",
+    submitEvent: "save",
+  })
+
+  const name = field("name")
+
+  return (
+    <form onSubmit={e => { e.preventDefault(); submit() }}>
+      <input {...name.inputProps} />
+      {name.error && <span>{name.error}</span>}
+      <button type="submit">Save</button>
+    </form>
+  )
+}
+```
+
+### `useLiveUploadReact(uploadConfig, options)`
+
+React hook for Phoenix LiveView file uploads. Mirrors `useLiveUpload()` for Vue.
+
+**Parameters:**
+
+- `uploadConfig` - The upload configuration from LiveView props
+- `options.changeEvent` - Optional event name for file validation
+- `options.submitEvent` - Required event name for upload submission
+
+**Returns:**
+
+- `entries` - Array of current upload entries with progress and metadata
+- `showFilePicker()` - Opens the native file picker dialog
+- `addFiles(files)` - Manually add files (for drag-and-drop)
+- `submit()` - Submit all queued files
+- `cancel(ref?)` - Cancel specific entry or all entries
+- `clear()` - Clear input and reset state
+- `progress` - Overall progress percentage (0-100)
+- `valid` - Whether the current file selection is valid
+
+```tsx
+import { useLiveUploadReact } from "live_vite"
+
+export default function FileUploader({ upload }) {
+  const { entries, showFilePicker, submit, cancel, progress } =
+    useLiveUploadReact(upload, {
+      changeEvent: "validate",
+      submitEvent: "save",
+    })
+
+  return (
+    <div>
+      <button onClick={showFilePicker}>Choose Files</button>
+      {entries.length > 0 && <div>Progress: {progress}%</div>}
+      {entries.map(entry => (
+        <div key={entry.ref}>
+          {entry.client_name} - {entry.progress}%
+          <button onClick={() => cancel(entry.ref)}>Cancel</button>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
 ## Low-Level API
 
 While composables are recommended for most component-based use cases, you can also access the underlying hook instance for more control or for use outside of components.
@@ -849,7 +991,7 @@ If the component is not found, it throws an error listing all available componen
 
 ### getHooks(liveViteApp)
 
-Generates Phoenix LiveView hooks for LiveVite integration.
+Generates Phoenix LiveView hooks for a Vue-only setup.
 
 ```typescript
 import { getHooks } from 'live_vite'
@@ -860,6 +1002,54 @@ const hooks = getHooks(liveViteApp)
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: hooks
 })
+```
+
+### getMultiRendererHook(renderers)
+
+Creates a LiveView hook that dispatches to the correct renderer based on the `data-framework` attribute. This is the primary way to support multiple frameworks in the same project.
+
+If only one renderer is registered, the `data-framework` attribute is optional and the single renderer is used as a fallback.
+
+```typescript
+import {
+  getMultiRendererHook,
+  createVueRenderer,
+  createReactRenderer,
+  findComponent,
+} from "live_vite"
+
+const vueComponents = import.meta.glob("./**/*.vue")
+const reactComponents = import.meta.glob("./**/*.{tsx,jsx}")
+
+const hooks = {
+  VueHook: getMultiRendererHook({
+    vue: {
+      renderer: createVueRenderer(),
+      resolve: name => findComponent(vueComponents, name),
+    },
+    react: {
+      renderer: createReactRenderer(),
+      resolve: name => findComponent(reactComponents, name),
+    },
+  }),
+}
+```
+
+### getRendererHook(renderer, resolve)
+
+Creates a hook for a single renderer. Convenience wrapper around `getMultiRendererHook` for single-framework setups.
+
+```typescript
+import { getRendererHook, createReactRenderer, findComponent } from "live_vite"
+
+const components = import.meta.glob("./**/*.{tsx,jsx}")
+
+const hooks = {
+  VueHook: getRendererHook(
+    createReactRenderer(),
+    name => findComponent(components, name),
+  ),
+}
 ```
 
 ## AsyncResult Type
