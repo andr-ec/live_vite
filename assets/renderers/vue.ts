@@ -1,0 +1,144 @@
+import { createApp, createSSRApp, h, reactive, type App, type Plugin } from "vue"
+import type { FrameworkRenderer, MountContext, RendererState, SSRContext as RendererSSRContext } from "../renderer.js"
+import { applyPatch, type Operation } from "../jsonPatch.js"
+import { liveInjectKey } from "../use.js"
+import { mapValues } from "../utils.js"
+
+type VueApp = App<Element>
+
+/**
+ * Convert slot name -> HTML string into Vue slot functions.
+ * Each slot renders as a div with innerHTML set to the decoded HTML.
+ */
+function htmlSlotsToVue(slots: Record<string, string>): Record<string, () => any> {
+  return mapValues(slots, html => () => h("div", { innerHTML: html.trim() }))
+}
+
+/**
+ * The default Vue setup function. Creates a Vue app, installs the LiveVite
+ * plugin, and mounts it. Users can override this via `createLiveVite({ setup })`.
+ */
+export const defaultVueSetup = (
+  makeApp: typeof createApp | typeof createSSRApp,
+  component: any,
+  props: Record<string, any>,
+  slots: Record<string, () => any>,
+  plugin: Plugin<[]>,
+  el: Element,
+): VueApp => {
+  const app = makeApp({ render: () => h(component, props, slots) })
+  app.use(plugin)
+  app.mount(el)
+  return app
+}
+
+export type VueSetupFn = (
+  makeApp: typeof createApp | typeof createSSRApp,
+  component: any,
+  props: Record<string, any>,
+  slots: Record<string, () => any>,
+  plugin: Plugin<[]>,
+  el: Element,
+  ssr: boolean,
+) => VueApp
+
+export interface VueRendererOptions {
+  /** Custom setup function for creating the Vue app. Defaults to `defaultVueSetup`. */
+  setup?: VueSetupFn
+}
+
+/** Mock LiveView hook used during SSR (no real socket available) */
+const mockHook = {
+  el: {},
+  liveSocket: { socket: { connectionState: () => "closed" } } as any,
+  pushEvent: () => Promise.resolve(0),
+  pushEventTo: () => Promise.resolve([]),
+  handleEvent: () => ({ event: "", callback: () => {} }),
+  removeHandleEvent: () => {},
+  upload: () => {},
+  uploadTo: () => {},
+  vue: { props: {}, slots: {}, app: {} },
+}
+
+/**
+ * Creates a Vue framework renderer.
+ *
+ * This is the reference implementation of the `FrameworkRenderer` interface.
+ * It handles Vue-specific concerns: `reactive()` for props, `h()` for slots,
+ * `createApp`/`createSSRApp` for mounting, and `app.unmount()` for cleanup.
+ */
+export function createVueRenderer(options: VueRendererOptions = {}): FrameworkRenderer<VueApp> {
+  const setup = options.setup ?? defaultVueSetup
+
+  return {
+    name: "vue",
+
+    mount(ctx: MountContext): RendererState<VueApp> {
+      const makeApp = ctx.ssr ? createSSRApp : createApp
+      const props = reactive(ctx.props)
+      const slots = reactive(htmlSlotsToVue(ctx.slots))
+
+      const plugin: Plugin<[]> = {
+        install: (app: App) => {
+          app.provide(liveInjectKey, ctx.hook)
+          app.config.globalProperties.$live = ctx.hook
+        },
+      }
+
+      const app = setup(makeApp, ctx.component, props, slots, plugin, ctx.el, ctx.ssr)
+
+      if (!app) throw new Error("Vue setup function did not return an app!")
+
+      return { props, slots, app }
+    },
+
+    updateProps(state: RendererState<VueApp>, newProps: Record<string, any>): void {
+      Object.assign(state.props, newProps)
+    },
+
+    patchProps(state: RendererState<VueApp>, operations: Operation[]): void {
+      applyPatch(state.props, operations)
+    },
+
+    updateSlots(state: RendererState<VueApp>, newSlots: Record<string, string>): void {
+      Object.assign(state.slots, htmlSlotsToVue(newSlots))
+    },
+
+    unmount(state: RendererState<VueApp>): void {
+      if (state.app) {
+        window.addEventListener("phx:page-loading-stop", () => state.app!.unmount(), { once: true })
+      }
+    },
+
+    async renderToString(ctx: RendererSSRContext): Promise<string> {
+      // Dynamic import to avoid bundling server-only deps in client builds
+      const { renderToString: vueRenderToString } = await import("vue/server-renderer")
+
+      const component = ctx.component
+      const slotComponents = htmlSlotsToVue(ctx.slots)
+
+      const ssrSetup = options.setup ?? ((makeApp, component, props, slots, plugin, el) => {
+        const app = makeApp({ render: () => h(component, props, slots) })
+        app.use(plugin)
+        // Don't mount in SSR - no real DOM
+        return app
+      })
+
+      const plugin: Plugin<[]> = {
+        install: (app: App) => {
+          app.mount = (...args: unknown[]): any => undefined
+          app.provide("_live_vite", Object.assign({}, mockHook))
+        },
+      }
+
+      const app = ssrSetup(createSSRApp, component, ctx.props, slotComponents, plugin, {} as Element, true)
+
+      if (!app) throw new Error("Vue SSR setup function did not return an app!")
+
+      const vueCtx: import("vue/server-renderer").SSRContext = {}
+      const html = await vueRenderToString(app, vueCtx)
+
+      return html
+    },
+  }
+}

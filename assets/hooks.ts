@@ -4,6 +4,7 @@ import type { ComponentMap, LiveViteApp, LiveViteOptions, Hook } from "./types.j
 import { liveInjectKey } from "./use.js"
 import { mapValues, fromUtf8Base64 } from "./utils.js"
 import { applyPatch, type Operation } from "./jsonPatch.js"
+import type { FrameworkRenderer, RendererState } from "./renderer.js"
 
 /**
  * Parses the JSON object from the element's attribute and returns them as an object.
@@ -21,6 +22,15 @@ const getAttributeJson = (el: HTMLElement, attributeName: string): Record<string
 const getSlots = (el: HTMLElement): Record<string, () => any> => {
   const dataSlots = getAttributeJson(el, "data-slots") || {}
   return mapValues(dataSlots, base64 => () => h("div", { innerHTML: fromUtf8Base64(base64).trim() }))
+}
+
+/**
+ * Parses raw slot data from the element's attributes.
+ * Returns slot name -> decoded HTML string pairs (framework-agnostic).
+ */
+const getRawSlots = (el: HTMLElement): Record<string, string> => {
+  const dataSlots = getAttributeJson(el, "data-slots") || {}
+  return mapValues(dataSlots, base64 => fromUtf8Base64(base64))
 }
 
 const getDiff = (el: HTMLElement, attributeName: string): Operation[] => {
@@ -71,6 +81,54 @@ const getHandlers = (el: HTMLElement, liveSocket: any): Record<string, (event: a
 const getProps = (el: HTMLElement, liveSocket: any): Record<string, any> => ({
   ...(getAttributeJson(el, "data-props") || {}),
   ...getHandlers(el, liveSocket),
+})
+
+/**
+ * Creates a framework-agnostic LiveView hook using the given renderer.
+ *
+ * This is the primary way to integrate any framework with LiveView.
+ * The hook handles DOM attribute parsing, prop diffing, and stream patches,
+ * while delegating all framework-specific operations to the renderer.
+ */
+export const getRendererHook = (
+  renderer: FrameworkRenderer,
+  resolve: (name: string) => Promise<unknown> | unknown,
+): Hook => ({
+  async mounted() {
+    const componentName = this.el.getAttribute("data-name") as string
+    const component = await resolve(componentName)
+    const ssr = this.el.getAttribute("data-ssr") === "true"
+
+    const props = getProps(this.el, this.liveSocket)
+    const slots = getRawSlots(this.el)
+
+    const state = await renderer.mount({
+      component,
+      props,
+      slots,
+      el: this.el,
+      ssr,
+      hook: this,
+    })
+
+    // apply initial stream diff after mount, since all stream changes are sent in that attribute
+    renderer.patchProps(state, getDiff(this.el, "data-streams-diff"))
+
+    this.vue = state
+  },
+  updated() {
+    if (this.el.getAttribute("data-use-diff") === "true") {
+      renderer.patchProps(this.vue, getDiff(this.el, "data-props-diff"))
+    } else {
+      renderer.updateProps(this.vue, getProps(this.el, this.liveSocket))
+    }
+    // we're always applying streams diff, since all stream changes are sent in that attribute
+    renderer.patchProps(this.vue, getDiff(this.el, "data-streams-diff"))
+    renderer.updateSlots(this.vue, getRawSlots(this.el))
+  },
+  destroyed() {
+    renderer.unmount(this.vue)
+  },
 })
 
 export const getVueHook = ({ resolve, setup }: LiveViteApp): Hook => ({

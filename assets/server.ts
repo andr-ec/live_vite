@@ -6,6 +6,7 @@ import { renderToString, type SSRContext } from "vue/server-renderer"
 import { migrateToLiveViteApp } from "./app.js"
 import type { LiveViteOptions, VueArgs } from "./types.js"
 import { mapValues } from "./utils.js"
+import type { FrameworkRenderer } from "./renderer.js"
 
 type Components = Record<string, Component>
 type Manifest = Record<string, string[]>
@@ -32,6 +33,30 @@ const mockLive: Partial<Omit<ViewHook, "el">> & {
     app: {},
   },
 }
+
+/**
+ * Creates a server-side render function using any FrameworkRenderer.
+ *
+ * The renderer must implement `renderToString`. This is the framework-agnostic
+ * alternative to `getRender` (which is Vue-specific).
+ *
+ * @param renderer - A FrameworkRenderer with renderToString implemented
+ * @param resolve - Component resolver function (name -> component)
+ */
+export const getRendererRender = (
+  renderer: FrameworkRenderer,
+  resolve: (name: string) => Promise<unknown> | unknown,
+) => {
+  if (!renderer.renderToString) {
+    throw new Error(`Renderer "${renderer.name}" does not support server-side rendering`)
+  }
+
+  return async (name: string, props: Record<string, any>, slots: Record<string, string>) => {
+    const component = await resolve(name)
+    return renderer.renderToString!({ component, props, slots })
+  }
+}
+
 export const getRender = (componentsOrApp: Components | LiveViteOptions, manifest: Manifest = {}) => {
   const { resolve, setup } = migrateToLiveViteApp(componentsOrApp)
 
