@@ -169,4 +169,61 @@ describe("createReactRenderer", () => {
       )
     })
   })
+
+  describe("renderToString", () => {
+    it("is defined on the renderer", () => {
+      expect(typeof renderer.renderToString).toBe("function")
+    })
+
+    it("renders a component to an HTML string", async () => {
+      const html = await renderer.renderToString!({
+        component: TestComponent,
+        props: { count: 42, message: "ssr" },
+        slots: {},
+      })
+
+      expect(html).toContain("ssr: 42")
+    })
+
+    it("returns HTML with preload separator", async () => {
+      const html = await renderer.renderToString!({
+        component: TestComponent,
+        props: { count: 0, message: "test" },
+        slots: {},
+      })
+
+      expect(html).toContain("<!-- preload -->")
+      const [preloadLinks, content] = html.split("<!-- preload -->")
+      expect(preloadLinks).toBe("")
+      expect(content).toContain("test: 0")
+    })
+
+    it("renders slots as React elements with dangerouslySetInnerHTML", async () => {
+      function SlotComponent(props: { header?: any }) {
+        return createElement("div", null, props.header || "no slot")
+      }
+
+      const html = await renderer.renderToString!({
+        component: SlotComponent,
+        props: {},
+        slots: { header: "<h1>Slot Content</h1>" },
+      })
+
+      expect(html).toContain("Slot Content")
+    })
+
+    it("renders with empty props and slots", async () => {
+      function EmptyComponent() {
+        return createElement("div", null, "empty")
+      }
+
+      const html = await renderer.renderToString!({
+        component: EmptyComponent,
+        props: {},
+        slots: {},
+      })
+
+      expect(html).toContain("empty")
+    })
+  })
 })
