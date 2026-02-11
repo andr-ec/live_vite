@@ -1,6 +1,6 @@
 export type {
-  LiveVueApp,
-  LiveVueOptions,
+  LiveViteApp,
+  LiveViteOptions,
   SetupContext,
   VueComponent,
   LiveHook,
@@ -10,9 +10,9 @@ export type {
   UploadOptions,
   AsyncResult,
 } from "./types.js"
-export { createLiveVue } from "./app.js"
+export { createLiveVite } from "./app.js"
 export { getHooks } from "./hooks.js"
-export { useLiveVue, useLiveEvent, useLiveNavigation, useLiveUpload, useEventReply, useLiveConnection } from "./use.js"
+export { useLiveVite, useLiveEvent, useLiveNavigation, useLiveUpload, useEventReply, useLiveConnection } from "./use.js"
 export {
   useLiveForm,
   useField,

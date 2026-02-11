@@ -1,28 +1,28 @@
-defmodule LiveVueInternalsTest do
+defmodule LiveViteInternalsTest do
   use ExUnit.Case
 
   import Phoenix.Component
 
-  alias LiveVue.Test
+  alias LiveVite.Test
   alias Phoenix.LiveView.LiveStream
   alias Phoenix.LiveView.Socket
 
   # Test module for Encoder protocol
   defmodule ItemWithoutId do
     @moduledoc false
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     defstruct [:name, :value]
   end
 
   defmodule ItemWithId do
     @moduledoc false
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     defstruct [:id, :name]
   end
 
   # Utility function to render Vue assigns and get parsed Vue properties
   defp render_vue_assigns(assigns) do
-    rendered = LiveVue.vue(assigns)
+    rendered = LiveVite.vue(assigns)
     html = rendered |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Test.get_vue(html)
   end
@@ -446,7 +446,7 @@ defmodule LiveVueInternalsTest do
         __changed__: nil
       }
 
-      result = LiveVue.get_socket(assigns)
+      result = LiveVite.get_socket(assigns)
       assert result == socket
     end
 
@@ -460,7 +460,7 @@ defmodule LiveVueInternalsTest do
         __changed__: nil
       }
 
-      result = LiveVue.get_socket(assigns)
+      result = LiveVite.get_socket(assigns)
       assert result == socket
     end
 
@@ -476,7 +476,7 @@ defmodule LiveVueInternalsTest do
         __changed__: nil
       }
 
-      result = LiveVue.get_socket(assigns)
+      result = LiveVite.get_socket(assigns)
       assert result == socket2
     end
 
@@ -487,7 +487,7 @@ defmodule LiveVueInternalsTest do
         __changed__: nil
       }
 
-      result = LiveVue.get_socket(assigns)
+      result = LiveVite.get_socket(assigns)
       assert result == nil
     end
 
@@ -498,7 +498,7 @@ defmodule LiveVueInternalsTest do
         __changed__: nil
       }
 
-      result = LiveVue.get_socket(assigns)
+      result = LiveVite.get_socket(assigns)
       assert result == nil
     end
   end

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import { ref, nextTick, effectScope } from "vue"
 
-// Mock useLiveVue to prevent injection errors
+// Mock useLiveVite to prevent injection errors
 vi.mock("./use", () => ({
-  useLiveVue: vi.fn(),
+  useLiveVite: vi.fn(),
 }))
 
 // Mock provide() to prevent warnings in tests
@@ -16,10 +16,10 @@ vi.mock("vue", async () => {
 })
 
 import { useLiveForm, type Form, type FormErrors } from "./useLiveForm"
-import { useLiveVue } from "./use"
+import { useLiveVite } from "./use"
 
-const mockUseLiveVue = useLiveVue as any
-let mockLiveVue: any
+const mockUseLiveVite = useLiveVite as any
+let mockLiveVite: any
 
 // Helper to create forms within effect scope to avoid onScopeDispose warnings
 function createFormInScope<T extends object>(formRef: any, options?: any) {
@@ -94,8 +94,8 @@ function createFormWithErrors() {
 
 describe("useLiveForm - Integration Tests", () => {
   beforeEach(() => {
-    // Setup fresh mock LiveVue instance for each test
-    mockLiveVue = {
+    // Setup fresh mock LiveVite instance for each test
+    mockLiveVite = {
       pushEvent: vi.fn().mockImplementation((_event: any, _payload: any, callback: any) => {
         // Simulate async callback behavior with successful reset response
         if (callback) {
@@ -104,7 +104,7 @@ describe("useLiveForm - Integration Tests", () => {
         return Promise.resolve({ reset: true })
       }),
     }
-    mockUseLiveVue.mockReturnValue(mockLiveVue)
+    mockUseLiveVite.mockReturnValue(mockLiveVite)
   })
 
   describe("basic form initialization", () => {
@@ -756,7 +756,7 @@ describe("useLiveForm - Integration Tests", () => {
       // 3. Wait for debounced validation event to be sent
       await new Promise(resolve => setTimeout(resolve, 150))
 
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("validate", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("validate", {
         test_form: expect.objectContaining({
           name: "Jane Smith",
           email: "john@example.com",
@@ -798,7 +798,7 @@ describe("useLiveForm - Integration Tests", () => {
       // Submit the form
       await form.submit()
 
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("submit_form", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("submit_form", {
         test_form: expect.objectContaining({
           name: "John Doe",
           email: "john@example.com",
@@ -821,13 +821,13 @@ describe("useLiveForm - Integration Tests", () => {
           name: "Modified Name",
         })
       )
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("submit", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("submit", {
         test_form: { transformed: expect.objectContaining({ name: "Modified Name" }) },
       }, expect.any(Function))
     })
 
     it("should handle cases when LiveView is not available", async () => {
-      mockUseLiveVue.mockReturnValue(null)
+      mockUseLiveVite.mockReturnValue(null)
 
       const formRef = createFormRef()
       const form = createFormInScope(formRef)
@@ -910,14 +910,14 @@ describe("useLiveForm - Integration Tests", () => {
       await nextTick()
 
       // Should not have sent any events yet
-      expect(mockLiveVue.pushEvent).not.toHaveBeenCalled()
+      expect(mockLiveVite.pushEvent).not.toHaveBeenCalled()
 
       // Wait for debounce delay
       await new Promise(resolve => setTimeout(resolve, 15))
 
       // Should have sent only one validation event with final value
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledTimes(1)
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("validate_field", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledTimes(1)
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("validate_field", {
         test_form: expect.objectContaining({
           name: "Jane",
         }),
@@ -939,7 +939,7 @@ describe("useLiveForm - Integration Tests", () => {
       await new Promise(resolve => setTimeout(resolve, 15))
 
       // Should not have sent any validation events
-      expect(mockLiveVue.pushEvent).not.toHaveBeenCalled()
+      expect(mockLiveVite.pushEvent).not.toHaveBeenCalled()
     })
 
     it("should not send duplicate change events when server updates the form", async () => {
@@ -962,8 +962,8 @@ describe("useLiveForm - Integration Tests", () => {
       await new Promise(resolve => setTimeout(resolve, 15))
 
       // Should have sent one change event
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledTimes(1)
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("validate", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledTimes(1)
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("validate", {
         test_form: expect.objectContaining({
           name: "John Updated",
         }),
@@ -988,7 +988,7 @@ describe("useLiveForm - Integration Tests", () => {
       await new Promise(resolve => setTimeout(resolve, 15))
 
       // Should NOT have sent any additional change events (this was the bug)
-      expect(mockLiveVue.pushEvent).not.toHaveBeenCalled()
+      expect(mockLiveVite.pushEvent).not.toHaveBeenCalled()
 
       // Verify the field was updated from server
       expect(nameField.value.value).toBe("John Server Updated")
@@ -1011,7 +1011,7 @@ describe("useLiveForm - Integration Tests", () => {
       // Wait for debounce delay for change event
       await new Promise(resolve => setTimeout(resolve, 15))
 
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("validate", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("validate", {
         user_form: expect.objectContaining({
           name: "New Name",
         }),
@@ -1020,7 +1020,7 @@ describe("useLiveForm - Integration Tests", () => {
       // Test submit event as well
       await form.submit()
 
-      expect(mockLiveVue.pushEvent).toHaveBeenCalledWith("save", {
+      expect(mockLiveVite.pushEvent).toHaveBeenCalledWith("save", {
         user_form: expect.objectContaining({
           name: "New Name",
         }),
@@ -1244,7 +1244,7 @@ describe("useLiveForm - Integration Tests", () => {
     it("should not reset on failed submission", async () => {
       // Mock a failed submission - the current implementation doesn't handle errors in callbacks
       // so we need to test the scenario where pushEvent doesn't provide a reset response
-      mockLiveVue.pushEvent.mockImplementation((_event: any, _payload: any, callback: any) => {
+      mockLiveVite.pushEvent.mockImplementation((_event: any, _payload: any, callback: any) => {
         if (callback) {
           // Simulate server error response without reset flag
           setTimeout(() => callback({ error: "Submission failed" }), 0)

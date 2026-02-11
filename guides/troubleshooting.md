@@ -1,10 +1,10 @@
 # Troubleshooting Guide
 
-This guide helps you diagnose and fix common issues when working with LiveVue.
+This guide helps you diagnose and fix common issues when working with LiveVite.
 
 > #### Quick Start {: .tip}
 >
-> New to LiveVue? Start with [Getting Started](getting_started.md) for a working example, then check [Basic Usage](basic_usage.md) for common patterns.
+> New to LiveVite? Start with [Getting Started](getting_started.md) for a working example, then check [Basic Usage](basic_usage.md) for common patterns.
 
 ## Component Issues
 
@@ -89,19 +89,19 @@ This guide helps you diagnose and fix common issues when working with LiveVue.
    Check if the component is receiving the correct props.
    Check if the component is re-rendering when the props change.
 
-### LiveVue.Encoder Protocol Issues
+### LiveVite.Encoder Protocol Issues
 
 **Symptoms:**
 - `Protocol.UndefinedError` when passing structs as props
 - Component doesn't render with custom struct props
-- Error mentions "LiveVue.Encoder protocol must always be explicitly implemented"
+- Error mentions "LiveVite.Encoder protocol must always be explicitly implemented"
 
 **Solutions:**
 
 1. **Implement the encoder protocol for your structs**
    ```elixir
    defmodule User do
-     @derive LiveVue.Encoder
+     @derive LiveVite.Encoder
      defstruct [:name, :email, :age]
    end
    ```
@@ -109,14 +109,14 @@ This guide helps you diagnose and fix common issues when working with LiveVue.
 2. **For third-party structs, use Protocol.derive/3**
    ```elixir
    # In your application.ex or relevant module
-   Protocol.derive(LiveVue.Encoder, SomeLibrary.User, only: [:id, :name])
+   Protocol.derive(LiveVite.Encoder, SomeLibrary.User, only: [:id, :name])
    ```
 
 3. **Debug encoder issues**
    ```elixir
    # Test your encoder implementation
    iex> user = %User{name: "John", email: "john@example.com"}
-   iex> LiveVue.Encoder.encode(user)
+   iex> LiveVite.Encoder.encode(user)
    %{name: "John", email: "john@example.com"}
    ```
 
@@ -129,13 +129,13 @@ For complete implementation details including field selection and custom impleme
 
 ### TypeScript Errors
 
-**Common Error: `Cannot find module 'live_vue'`**
+**Common Error: `Cannot find module 'live_vite'`**
 
 ```typescript
 // Add to your env.d.ts or types.d.ts
-declare module 'live_vue' {
-  export function useLiveVue(): any
-  export function createLiveVue(config: any): any
+declare module 'live_vite' {
+  export function useLiveVite(): any
+  export function createLiveVite(config: any): any
   export function findComponent(components: any, name: string): any
   export function getHooks(app: any): any
 }
@@ -289,8 +289,8 @@ npm run build
 **Check SSR configuration:**
 ```elixir
 # config/dev.exs
-config :live_vue,
-  ssr_module: LiveVue.SSR.ViteJS,
+config :live_vite,
+  ssr_module: LiveVite.SSR.ViteJS,
   vite_host: "http://localhost:5173",
   ssr: true
 ```
@@ -308,7 +308,7 @@ node --version  # Should be 19+
 ```elixir
 # application.ex
 children = [
-  {NodeJS.Supervisor, [path: LiveVue.SSR.NodeJS.server_path(), pool_size: 4]},
+  {NodeJS.Supervisor, [path: LiveVite.SSR.NodeJS.server_path(), pool_size: 4]},
   # ... other children
 ]
 ```
@@ -345,9 +345,9 @@ For production SSR setup details, see [Configuration](configuration.md#productio
 ```html
 <script setup>
 import { onUnmounted } from 'vue'
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
-const live = useLiveVue()
+const live = useLiveVite()
 
 const cleanup = live.handleEvent('data_update', handleUpdate)
 
@@ -378,7 +378,7 @@ onUnmounted(() => {
 
 ```javascript
 // In browser console or app.js
-window.liveVueDebug = true
+window.liveViteDebug = true
 ```
 
 ### Component Inspection
@@ -437,7 +437,7 @@ export default defineConfig({
 })
 ```
 
-### `Module "live_vue" has been externalized`
+### `Module "live_vite" has been externalized`
 
 **Cause:** SSR configuration issue
 
@@ -446,7 +446,7 @@ export default defineConfig({
 // vite.config.js
 export default defineConfig({
   ssr: {
-    noExternal: ['live_vue']
+    noExternal: ['live_vite']
   }
 })
 ```
@@ -470,7 +470,7 @@ export default defineConfig({
 ### Creating Bug Reports
 
 Include:
-1. **LiveVue version**
+1. **LiveVite version**
 2. **Phoenix/LiveView versions**
 3. **Node.js version**
 4. **Minimal reproduction case**
@@ -483,4 +483,4 @@ Include:
 - [FAQ](faq.md) for conceptual questions
 - [Architecture](architecture.md) to understand how things work
 - [Configuration](configuration.md) for advanced setup options
-- [GitHub Issues](https://github.com/Valian/live_vue/issues) to report bugs
+- [GitHub Issues](https://github.com/Valian/live_vite/issues) to report bugs

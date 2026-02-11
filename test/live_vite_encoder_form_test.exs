@@ -1,11 +1,11 @@
-defmodule LiveVue.EncoderFormTest do
+defmodule LiveVite.EncoderFormTest do
   use ExUnit.Case
 
   import Ecto.Changeset
   import Phoenix.Component, only: [to_form: 2]
 
   alias Ecto.Association.NotLoaded
-  alias LiveVue.Encoder
+  alias LiveVite.Encoder
   alias Phoenix.HTML.FormData
 
   # Utility function to simplify test patterns
@@ -49,7 +49,7 @@ defmodule LiveVue.EncoderFormTest do
 
     import Ecto.Changeset
 
-    alias LiveVue.EncoderFormTest.Simple
+    alias LiveVite.EncoderFormTest.Simple
 
     # Hide private_data from encoder
     @derive {Encoder, except: [:private_data]}
@@ -118,8 +118,8 @@ defmodule LiveVue.EncoderFormTest do
 
     import Ecto.Changeset
 
-    alias LiveVue.EncoderFormTest.AssocComment
-    alias LiveVue.EncoderFormTest.AssocProfile
+    alias LiveVite.EncoderFormTest.AssocComment
+    alias LiveVite.EncoderFormTest.AssocProfile
 
     @derive {Encoder, except: [:private_data]}
     schema "complex_assocs" do
@@ -158,7 +158,7 @@ defmodule LiveVue.EncoderFormTest do
     end
   end
 
-  defimpl LiveVue.Encoder, for: CustomFormData do
+  defimpl LiveVite.Encoder, for: CustomFormData do
     def encode(struct, opts) do
       # Only expose public fields and transform metadata
       Encoder.encode(
@@ -1064,7 +1064,7 @@ defmodule LiveVue.EncoderFormTest do
 
     import Ecto.Changeset
 
-    alias LiveVue.EncoderFormTest.AssocProfile
+    alias LiveVite.EncoderFormTest.AssocProfile
 
     # Exclude the association field
     @derive {Encoder, except: [:profile]}
@@ -1085,8 +1085,8 @@ defmodule LiveVue.EncoderFormTest do
 
     import Ecto.Changeset
 
-    alias LiveVue.EncoderFormTest.AssocComment
-    alias LiveVue.EncoderFormTest.AssocProfile
+    alias LiveVite.EncoderFormTest.AssocComment
+    alias LiveVite.EncoderFormTest.AssocProfile
 
     @derive {Encoder, except: [:profile, :secret, :comments]}
     schema "test_multiple_excluded" do

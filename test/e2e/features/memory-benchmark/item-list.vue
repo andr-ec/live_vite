@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
 interface ItemMetadata {
   extra_field_1: string
@@ -36,7 +36,7 @@ const props = defineProps<{
   memory: Memory | null
 }>()
 
-const live = useLiveVue()
+const live = useLiveVite()
 
 const itemCount = computed(() => props.items.length)
 const tagCount = computed(() => props.items.reduce((acc, item) => acc + item.tags.length, 0))

@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { useLiveVue, useLiveEvent } from "live_vue"
+import { useLiveVite, useLiveEvent } from "live_vite"
 
 interface Props {
   message: string
@@ -61,7 +61,7 @@ interface CustomEvent {
 }
 
 const props = defineProps<Props>()
-const live = useLiveVue()
+const live = useLiveVite()
 
 const messageInput = ref("")
 const customDataInput = ref("")

@@ -1,9 +1,9 @@
-defmodule Mix.Tasks.LiveVue.InstallTest do
+defmodule Mix.Tasks.LiveVite.InstallTest do
   use ExUnit.Case, async: true
 
   import Igniter.Test
 
-  describe "live_vue.install" do
+  describe "live_vite.install" do
     test "installs successfully with core Vue components" do
       project =
         phx_test_project()
@@ -11,24 +11,24 @@ defmodule Mix.Tasks.LiveVue.InstallTest do
           "AGENTS.md",
           "# My Project Agents\n\nExisting content here. <!-- usage-rules-end -->"
         )
-        |> Igniter.compose_task("live_vue.install", [])
+        |> Igniter.compose_task("live_vite.install", [])
         |> apply_igniter!()
 
-      # Verify content contains expected LiveVue patterns
+      # Verify content contains expected LiveVite patterns
       vue_index = project.rewrite.sources["assets/vue/index.ts"]
-      assert vue_index.content =~ "createLiveVue"
+      assert vue_index.content =~ "createLiveVite"
       assert vue_index.content =~ "findComponent"
 
       vue_demo = project.rewrite.sources["assets/vue/VueDemo.vue"]
-      assert vue_demo.content =~ "useLiveVue"
+      assert vue_demo.content =~ "useLiveVite"
 
       server_js = project.rewrite.sources["assets/js/server.js"]
       assert server_js.content =~ "getRender"
 
-      # Check for LiveVue usage
+      # Check for LiveVite usage
       web_file = project.rewrite.sources["lib/test_web.ex"]
-      assert web_file.content =~ "use LiveVue"
-      assert web_file.content =~ "use LiveVue.Components"
+      assert web_file.content =~ "use LiveVite"
+      assert web_file.content =~ "use LiveVite.Components"
 
       # Check if config.exs was updated
       config_exs = project.rewrite.sources["config/config.exs"]
@@ -37,9 +37,9 @@ defmodule Mix.Tasks.LiveVue.InstallTest do
       # Check if Vite config was updated
       vite_config = project.rewrite.sources["assets/vite.config.mjs"]
       assert vite_config.content =~ "vue()"
-      assert vite_config.content =~ "liveVuePlugin()"
+      assert vite_config.content =~ "liveVitePlugin()"
       assert vite_config.content =~ "import vue from"
-      assert vite_config.content =~ "import liveVuePlugin from"
+      assert vite_config.content =~ "import liveVitePlugin from"
       assert vite_config.content =~ "manifest: false"
       assert vite_config.content =~ "ssrManifest: false"
       assert vite_config.content =~ "ssr: { noExternal: process.env.NODE_ENV === \"production\" ? true : undefined },"
@@ -74,7 +74,7 @@ defmodule Mix.Tasks.LiveVue.InstallTest do
       router_file = project.rewrite.sources["lib/test_web/router.ex"]
       assert router_file.content =~ ~r/live "\/vue_demo", TestWeb.VueDemoLive/
 
-      # Check for LiveVue-specific content
+      # Check for LiveVite-specific content
       home_template = project.rewrite.sources["lib/test_web/controllers/page_html/home.html.heex"]
       assert home_template.content =~ ~r/End-to-end reactivity for your Live Vue apps/
       assert home_template.content =~ ~r/VueDemo.vue/
@@ -90,24 +90,24 @@ defmodule Mix.Tasks.LiveVue.InstallTest do
       # Check that SSR production setup was applied
       app_file = project.rewrite.sources["lib/test/application.ex"]
       assert app_file.content =~ ~r/NodeJS\.Supervisor/
-      assert app_file.content =~ ~r/path: LiveVue\.SSR\.NodeJS\.server_path\(\)/
+      assert app_file.content =~ ~r/path: LiveVite\.SSR\.NodeJS\.server_path\(\)/
       assert app_file.content =~ ~r/pool_size: 4/
 
       # Check that AGENTS.md was updated with usage rules
       agents_md = project.rewrite.sources["AGENTS.md"]
       assert agents_md.content =~ "# My Project Agents"
       assert agents_md.content =~ "Existing content here."
-      assert agents_md.content =~ "<!-- live_vue-start -->"
-      assert agents_md.content =~ "<!-- live_vue-end -->"
-      assert agents_md.content =~ "# LiveVue Usage Rules"
+      assert agents_md.content =~ "<!-- live_vite-start -->"
+      assert agents_md.content =~ "<!-- live_vite-end -->"
+      assert agents_md.content =~ "# LiveVite Usage Rules"
       assert agents_md.content =~ "Component Organization"
-      assert String.ends_with?(agents_md.content, "<!-- live_vue-end -->\n<!-- usage-rules-end -->")
+      assert String.ends_with?(agents_md.content, "<!-- live_vite-end -->\n<!-- usage-rules-end -->")
     end
 
     test "installs successfully with bun flag" do
       project =
         phx_test_project()
-        |> Igniter.compose_task("live_vue.install", ["--bun"])
+        |> Igniter.compose_task("live_vite.install", ["--bun"])
         |> apply_igniter!()
 
       # Verify bun dependency is added

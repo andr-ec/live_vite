@@ -71,11 +71,11 @@ Props can be passed in three equivalent ways:
 
 ### Custom Structs as Props
 
-When passing custom structs as props, you must implement the `LiveVue.Encoder` protocol:
+When passing custom structs as props, you must implement the `LiveVite.Encoder` protocol:
 
 ```elixir
 defmodule User do
-  @derive LiveVue.Encoder
+  @derive LiveVite.Encoder
   defstruct [:name, :email, :age]
 end
 
@@ -97,7 +97,7 @@ For complete implementation details including field selection and custom impleme
 
 > #### Protocol.UndefinedError {: .warning}
 >
-> If you get a `Protocol.UndefinedError` when passing structs as props, it means you need to implement the `LiveVue.Encoder` protocol for that struct. This is a safety feature to prevent accidental exposure of sensitive data.
+> If you get a `Protocol.UndefinedError` when passing structs as props, it means you need to implement the `LiveVite.Encoder` protocol for that struct. This is a safety feature to prevent accidental exposure of sensitive data.
 
 ## Handling Events
 
@@ -115,16 +115,16 @@ They will be pushed directly to LiveView, exactly as happens with `HEEX` compone
 
 There are two ways to access the Phoenix LiveView hook instance from your Vue components:
 
-1.  **`useLiveVue()` Composable (in `<script setup>`):**
+1.  **`useLiveVite()` Composable (in `<script setup>`):**
 
-    Use the `useLiveVue()` composable when you need to access the hook instance for logic within your `<script setup>` block. It's ideal for pushing events programmatically.
+    Use the `useLiveVite()` composable when you need to access the hook instance for logic within your `<script setup>` block. It's ideal for pushing events programmatically.
 
     ```html
     <script setup>
-    import { useLiveVue } from "live_vue"
+    import { useLiveVite } from "live_vite"
     import { ref } from "vue"
 
-    const live = useLiveVue()
+    const live = useLiveVite()
     const name = ref("")
 
     function save() {
@@ -137,7 +137,7 @@ There are two ways to access the Phoenix LiveView hook instance from your Vue co
 
     ```html
     <script setup>
-    import { useLiveEvent } from "live_vue"
+    import { useLiveEvent } from "live_vite"
 
     // Example: listening for a server event
     useLiveEvent("response", (payload) => { console.log(payload) })
@@ -146,7 +146,7 @@ There are two ways to access the Phoenix LiveView hook instance from your Vue co
 
 2.  **`$live` Property (in `<template>`):**
 
-    For convenience, the hook instance is also available directly in your template as the `$live` property. This is the preferred method for simple, one-off event pushes directly from the template, as it avoids the need to import and call `useLiveVue()`.
+    For convenience, the hook instance is also available directly in your template as the `$live` property. This is the preferred method for simple, one-off event pushes directly from the template, as it avoids the need to import and call `useLiveVite()`.
 
     ```html
     <template>
@@ -160,11 +160,11 @@ The `live` object provides all methods from [Phoenix.LiveView JS Interop](https:
 
 ### LiveView Navigation
 
-For navigation, LiveVue provides a built-in `Link` component that makes using `live_patch` and `live_redirect` as easy as using a standard `<a>` tag.
+For navigation, LiveVite provides a built-in `Link` component that makes using `live_patch` and `live_redirect` as easy as using a standard `<a>` tag.
 
 ```html
 <script setup>
-import { Link } from "live_vue"
+import { Link } from "live_vite"
 </script>
 
 <template>
@@ -248,7 +248,7 @@ Important notes about slots:
 
 ## File Uploads
 
-LiveVue provides seamless integration with Phoenix LiveView's file upload system through the `useLiveUpload()` composable. This handles all the complexity of managing upload state, progress tracking, and DOM elements automatically.
+LiveVite provides seamless integration with Phoenix LiveView's file upload system through the `useLiveUpload()` composable. This handles all the complexity of managing upload state, progress tracking, and DOM elements automatically.
 
 ### Server Setup
 
@@ -308,7 +308,7 @@ Create a Vue component that uses `useLiveUpload()`:
 ```html
 <!-- assets/vue/FileUploader.vue -->
 <script setup lang="ts">
-import { useLiveUpload, UploadConfig } from 'live_vue'
+import { useLiveUpload, UploadConfig } from 'live_vite'
 
 interface Props {
   upload: UploadConfig
@@ -409,7 +409,7 @@ For the complete API reference, see [`useLiveUpload()` in the Client API guide](
 
 ## Phoenix Streams
 
-LiveVue provides full support for Phoenix LiveView's `stream()` operations. Since LiveVue already sends minimal JSON patches for all props updates, streams primarily help reduce server memory consumption by not keeping large collections in the socket assigns.
+LiveVite provides full support for Phoenix LiveView's `stream()` operations. Since LiveVite already sends minimal JSON patches for all props updates, streams primarily help reduce server memory consumption by not keeping large collections in the socket assigns.
 
 ### Why Use Streams?
 
@@ -417,7 +417,7 @@ Streams are ideal for:
 - Lists with many items where you want to avoid keeping all data in memory
 - Real-time data like chat messages, notifications, or live feeds
 
-Note: LiveVue's automatic JSON patch diffing already ensures efficient client updates for regular props, so the main benefit of streams is server-side memory efficiency.
+Note: LiveVite's automatic JSON patch diffing already ensures efficient client updates for regular props, so the main benefit of streams is server-side memory efficiency.
 
 ### Server Setup
 
@@ -463,7 +463,7 @@ Create a Vue component that receives and renders the stream:
 ```html
 <!-- assets/vue/ItemList.vue -->
 <script setup lang="ts">
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -473,7 +473,7 @@ const props = defineProps<{
   }[]
 }>()
 
-const live = useLiveVue()
+const live = useLiveVite()
 const newName = ref('')
 
 function addItem() {
@@ -510,10 +510,10 @@ function addItem() {
 ### Key Features
 
 - **Memory Efficient**: Reduces server memory usage by not storing large collections in socket assigns
-- **Transparent Updates**: When you use `stream_insert()`, `stream_delete()`, or other stream operations, LiveVue automatically patches only the affected items
+- **Transparent Updates**: When you use `stream_insert()`, `stream_delete()`, or other stream operations, LiveVite automatically patches only the affected items
 - **State Preservation**: Vue component state (like form inputs, local variables) is preserved during stream updates
 - **Same API as HEEX**: Use `@streams.items` exactly as you would in a HEEX template
-- **Automatic Patches**: LiveVue's existing JSON patch system handles efficient client updates
+- **Automatic Patches**: LiveVite's existing JSON patch system handles efficient client updates
 
 ### Advanced Stream Operations
 

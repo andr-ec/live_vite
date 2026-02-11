@@ -1,4 +1,4 @@
-defmodule LiveVue.Slots do
+defmodule LiveVite.Slots do
   @moduledoc false
 
   import Phoenix.Component

@@ -1,9 +1,9 @@
 <div align="center">
-    <img src="https://github.com/Valian/live_vue/blob/main/live_vue_logo_rounded.png?raw=true" alt="Description" height="256px">
+    <img src="https://github.com/Valian/live_vite/blob/main/live_vite_logo_rounded.png?raw=true" alt="Description" height="256px">
 <br>
-<a href="https://hex.pm/packages/live_vue"><img src="https://img.shields.io/hexpm/v/live_vue.svg" alt="Hex.pm"></a>
-<a href="https://hexdocs.pm/live_vue"><img src="https://img.shields.io/badge/docs-hexdocs.pm-purple" alt="Hexdocs.pm"></a>
-<a href="https://github.com/Valian/live_vue"><img src="https://img.shields.io/github/stars/Valian/live_vue?style=social" alt="GitHub"></a>
+<a href="https://hex.pm/packages/live_vite"><img src="https://img.shields.io/hexpm/v/live_vite.svg" alt="Hex.pm"></a>
+<a href="https://hexdocs.pm/live_vite"><img src="https://img.shields.io/badge/docs-hexdocs.pm-purple" alt="Hexdocs.pm"></a>
+<a href="https://github.com/Valian/live_vite"><img src="https://img.shields.io/github/stars/Valian/live_vite?style=social" alt="GitHub"></a>
 <br><br>
 Vue inside Phoenix LiveView with seamless end-to-end reactivity.
 </div>
@@ -27,8 +27,8 @@ Vue inside Phoenix LiveView with seamless end-to-end reactivity.
 ## Resources
 
 -   [Live Examples](https://livevue.skalecki.dev) - Interactive demos
--   [HexDocs](https://hexdocs.pm/live_vue)
--   [HexPackage](https://hex.pm/packages/live_vue)
+-   [HexDocs](https://hexdocs.pm/live_vite)
+-   [HexPackage](https://hex.pm/packages/live_vite)
 -   [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view)
 
 ## Example
@@ -83,9 +83,9 @@ Phoenix Live View makes it possible to create rich, interactive web apps without
 
 But once you'll need to do anything even slightly complex on the client-side, you'll end up writing lots of imperative, hard-to-maintain hooks.
 
-LiveVue allows to create hybrid apps, where part of the session state is on the server and part on the client.
+LiveVite allows to create hybrid apps, where part of the session state is on the server and part on the client.
 
-### Reasons why you'd like to use LiveVue
+### Reasons why you'd like to use LiveVite
 
 -   Your hooks are starting to look like jQuery
 -   You have a complex local state
@@ -98,12 +98,12 @@ LiveVue allows to create hybrid apps, where part of the session state is on the 
 **New project:**
 ```bash
 mix archive.install hex igniter_new
-mix igniter.new my_app --with phx.new --install live_vue
+mix igniter.new my_app --with phx.new --install live_vite
 ```
 
 **Existing project (Phoenix 1.8+ only):**
 ```bash
-mix igniter.install live_vue
+mix igniter.install live_vite
 ```
 
 Igniter installer works only for Phoenix 1.8+ projects. For detailed installation instructions, see the [Installation Guide](guides/installation.md).
@@ -111,8 +111,8 @@ Igniter installer works only for Phoenix 1.8+ projects. For detailed installatio
 ## VS Code Extension
 
 For syntax highlighting of the `~VUE` sigil:
-- **VS Code Marketplace**: Install [LiveVue](https://marketplace.visualstudio.com/items?itemName=guilhermepsf23.livevue-sigil-highlighting) extension
-- **Manual Installation**: Download VSIX from [releases](https://github.com/GuilhermePSF/live-vue-sigil-highlighting/releases) and install via `Extensions > Install from VSIX...`
+- **VS Code Marketplace**: Install [LiveVite](https://marketplace.visualstudio.com/items?itemName=guilhermepsf23.livevite-sigil-highlighting) extension
+- **Manual Installation**: Download VSIX from [releases](https://github.com/GuilhermePSF/live-vite-sigil-highlighting/releases) and install via `Extensions > Install from VSIX...`
 
 ## Guides
 
@@ -129,22 +129,22 @@ For syntax highlighting of the `~VUE` sigil:
  - [Client-Side API](guides/client_api.md) - Vue composables and utilities
 
 ### Advanced Topics
- - [Architecture](guides/architecture.md) - How LiveVue works under the hood
+ - [Architecture](guides/architecture.md) - How LiveVite works under the hood
  - [Testing](guides/testing.md) - Testing Vue components in LiveView
  - [Deployment](guides/deployment.md) - Production deployment guide
 
 ### Help & Troubleshooting
  - [FAQ](guides/faq.md) - Common questions and comparisons
  - [Troubleshooting](guides/troubleshooting.md) - Debug common issues
- - [Comparison](guides/comparison.md) - LiveVue vs other solutions
+ - [Comparison](guides/comparison.md) - LiveVite vs other solutions
 
 ## Relation to LiveSvelte
 
-This project is heavily inspired by ✨ [LiveSvelte](https://github.com/woutdp/live_svelte) ✨. Both projects try to solve the same problem. LiveVue was started as a fork of LiveSvelte with adjusted ESbuild settings, and evolved to use Vite and a slightly different syntax. I strongly believe more options are always better, and since I love Vue and it's ecosystem I've decided to give it a go 😉
+This project is heavily inspired by ✨ [LiveSvelte](https://github.com/woutdp/live_svelte) ✨. Both projects try to solve the same problem. LiveVite was started as a fork of LiveSvelte with adjusted ESbuild settings, and evolved to use Vite and a slightly different syntax. I strongly believe more options are always better, and since I love Vue and it's ecosystem I've decided to give it a go 😉
 
-You can read more about differences between Vue and Svelte [in FAQ](guides/faq.md#how-does-livevue-compare-to-livesvelte) or [in comparison guide](guides/comparison.md).
+You can read more about differences between Vue and Svelte [in FAQ](guides/faq.md#how-does-livevite-compare-to-livesvelte) or [in comparison guide](guides/comparison.md).
 
-## LiveVue Development
+## LiveVite Development
 
 ### Local Setup
 
@@ -156,13 +156,13 @@ Use `npm run e2e:test` to run the Playwright E2E tests.
 
 ### Testing Local Changes in Another Project
 
-To test local LiveVue changes in a separate Phoenix project, use a path dependency in your project's `mix.exs`:
+To test local LiveVite changes in a separate Phoenix project, use a path dependency in your project's `mix.exs`:
 
 ```elixir
-{:live_vue, path: "../live_vue"}
+{:live_vite, path: "../live_vite"}
 ```
 
-Then run `mix deps.get && npm install`. The installer already configures `package.json` to use `file:./deps/live_vue`, so both Elixir and npm will point to your local copy.
+Then run `mix deps.get && npm install`. The installer already configures `package.json` to use `file:./deps/live_vite`, so both Elixir and npm will point to your local copy.
 
 Elixir changes are reflected immediately. For TypeScript changes, run `npm install` again to pick them up.
 
@@ -202,4 +202,4 @@ mix expublish.minor --allow-untracked --branch=main
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Valian/live_vue&type=Date)](https://star-history.com/#Valian/live_vue&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Valian/live_vite&type=Date)](https://star-history.com/#Valian/live_vite&Date)

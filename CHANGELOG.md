@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0 - 2026-01-06
 
-After over four months of release candidates and community feedback, LiveVue 1.0 is ready. This release brings a complete rewrite of the developer experience—from a simplified no-build-step architecture to powerful new composables for forms, file uploads, and real-time communication. Whether you're building interactive dashboards, complex forms with server-side validation, or real-time collaborative features, LiveVue now provides first-class tooling to make Vue and Phoenix LiveView work together seamlessly.
+After over four months of release candidates and community feedback, LiveVite 1.0 is ready. This release brings a complete rewrite of the developer experience—from a simplified no-build-step architecture to powerful new composables for forms, file uploads, and real-time communication. Whether you're building interactive dashboards, complex forms with server-side validation, or real-time collaborative features, LiveVite now provides first-class tooling to make Vue and Phoenix LiveView work together seamlessly.
 
 ### Breaking Changes
 
 - **Removed `shared_props` configuration** - This feature had a fundamental flaw: LiveView only re-renders components when explicitly-passed assigns change. Since shared props were injected at render time (not in the template), changes to shared props would not trigger component re-renders. Pass props explicitly instead: `<.vue flash={@flash} user={@current_user} ... />`
-- **Renamed `nillify_not_loaded` to `nilify_not_loaded` in `LiveVue.Encoder`**. It was a typo and the new spelling is consistent with rest of the Elixir ecosystem.
+- **Renamed `nillify_not_loaded` to `nilify_not_loaded` in `LiveVite.Encoder`**. It was a typo and the new spelling is consistent with rest of the Elixir ecosystem.
 
 ### Features
 
@@ -23,7 +23,7 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 - **`useLiveConnection` composable** - Reactive WebSocket connectivity monitoring for connection status indicators and offline handling
 - **Phoenix Streams support** - Full integration with LiveView streams for efficient list rendering
 - **Phoenix AsyncResult support** - `assign_async` works correctly out of the box when passed as a prop
-- **Igniter-based installer** - Run `mix igniter.install live_vue` for automated project setup
+- **Igniter-based installer** - Run `mix igniter.install live_vite` for automated project setup
 
 ### Improvements
 
@@ -33,7 +33,7 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 - **LazyHTML for testing** - Replaced Floki with LazyHTML for lighter testing utilities
 - **Elixir 1.19 and OTP 28 support**
 - **VS Code extension** - Syntax highlighting for Vue sigils (`~VUE`)
-- **AGENTS.md integration** - Installation appends LiveVue usage rules for AI-assisted development
+- **AGENTS.md integration** - Installation appends LiveVite usage rules for AI-assisted development
 
 ### Bug Fixes
 
@@ -44,7 +44,7 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 - Fixed stream items inserted at index 0 appearing in wrong order
 - Fixed SSR bundle overwriting client bundle files
 - Fixed encoder compilation without Ecto dependency
-- Fixed installer skipping html_helpers modification for LiveVue-prefixed projects
+- Fixed installer skipping html_helpers modification for LiveVite-prefixed projects
 - Exported `useField` and `useArrayField` from `useLiveForm.ts`
 
 ## 1.0.0-rc.4 - 2025-10-19
@@ -55,32 +55,32 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 
 ### Bug Fixes
 
-- Fixed a bug when [diff values were not always correctly encoded](https://github.com/Valian/live_vue/commit/56fe9956d9144950ed3460f0412250a112f25f80)
-- Fixed a bug with [removal of embedded items in the form](https://github.com/Valian/live_vue/commit/140e060ddf80bef4c20a12ce6ebe332c9ad321b8)
+- Fixed a bug when [diff values were not always correctly encoded](https://github.com/Valian/live_vite/commit/56fe9956d9144950ed3460f0412250a112f25f80)
+- Fixed a bug with [removal of embedded items in the form](https://github.com/Valian/live_vite/commit/140e060ddf80bef4c20a12ce6ebe332c9ad321b8)
 
 
 ## 1.0.0-rc.3 - 2025-10-01
 
 ### Improvements
 
-- Replaced Floki with LazyHTML for testing utilities [#92](https://github.com/Valian/live_vue/pull/92)
+- Replaced Floki with LazyHTML for testing utilities [#92](https://github.com/Valian/live_vite/pull/92)
 
 ### Bug Fixes
 
-- Streams work correctly when using diff is disabled [#91](https://github.com/Valian/live_vue/pull/91)
+- Streams work correctly when using diff is disabled [#91](https://github.com/Valian/live_vite/pull/91)
 
 
 ## 1.0.0-rc.2 - 2025-09-28
 
 ### Improvements
 
-- Added usage rules to AGENTS.md file when running `mix live_vue.install` [#87](https://github.com/Valian/live_vue/pull/87)
-- Added installation instructions about LiveVue VS code extension to README.md [#86](https://github.com/Valian/live_vue/pull/86)
+- Added usage rules to AGENTS.md file when running `mix live_vite.install` [#87](https://github.com/Valian/live_vite/pull/87)
+- Added installation instructions about LiveVite VS code extension to README.md [#86](https://github.com/Valian/live_vite/pull/86)
 
 
 ### Bug Fixes
 
-- Exporting useField and useArrayField from useLiveForm.ts [#81](https://github.com/Valian/live_vue/pull/81)
+- Exporting useField and useArrayField from useLiveForm.ts [#81](https://github.com/Valian/live_vite/pull/81)
 - When inserting items at index 0 of stream, the items were not inserted in the correct order
 - Fixed bug when building SSR bundle overriden files from client bundle in priv/static
 
@@ -90,17 +90,17 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 
 ### Features
 
-- **New `useLiveForm` Composable**: Added comprehensive form handling with server-side validation, nested objects, and dynamic arrays [#70](https://github.com/Valian/live_vue/pull/70)
-- **New `useEventReply` Composable**: Added reactive composable for bi-directional LiveView event communication with server responses [#75](https://github.com/Valian/live_vue/pull/75)
-- **New `useLiveConnection` Composable**: Added reactive WebSocket connectivity monitoring for connection status indicators and offline handling [#76](https://github.com/Valian/live_vue/pull/76)
-- added support for **Phoenix Streams** [#72](https://github.com/Valian/live_vue/pull/72)
-- added support for **Phoenix AsyncResult** - `assign_async` should work correctly out of the box when passed as a prop. On the Vue side, it can be typed as [#77](https://github.com/Valian/live_vue/pull/77)
-- added support for **shared props** - props that are shared between all components [#78](https://github.com/Valian/live_vue/pull/71)
+- **New `useLiveForm` Composable**: Added comprehensive form handling with server-side validation, nested objects, and dynamic arrays [#70](https://github.com/Valian/live_vite/pull/70)
+- **New `useEventReply` Composable**: Added reactive composable for bi-directional LiveView event communication with server responses [#75](https://github.com/Valian/live_vite/pull/75)
+- **New `useLiveConnection` Composable**: Added reactive WebSocket connectivity monitoring for connection status indicators and offline handling [#76](https://github.com/Valian/live_vite/pull/76)
+- added support for **Phoenix Streams** [#72](https://github.com/Valian/live_vite/pull/72)
+- added support for **Phoenix AsyncResult** - `assign_async` should work correctly out of the box when passed as a prop. On the Vue side, it can be typed as [#77](https://github.com/Valian/live_vite/pull/77)
+- added support for **shared props** - props that are shared between all components [#78](https://github.com/Valian/live_vite/pull/71)
 
 ### Improvements
 
-- aded Igniter installer instead of a lengthy manual installation process [#73](https://github.com/Valian/live_vue/pull/73)
-- added `usage-rules.md` to help with AI-assisted development using LiveVue
+- aded Igniter installer instead of a lengthy manual installation process [#73](https://github.com/Valian/live_vite/pull/73)
+- added `usage-rules.md` to help with AI-assisted development using LiveVite
 
 
 ## 0.7.3 - 2025-08-18
@@ -116,7 +116,7 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 
 ### Improvements
 
-- Docs links are now working in both Github and docs [#66](https://github.com/Valian/live_vue/pull/66)
+- Docs links are now working in both Github and docs [#66](https://github.com/Valian/live_vite/pull/66)
 
 ### Bug fixes
 
@@ -151,10 +151,10 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 ### 🧪 Testing Improvements
 
 - **Frontend Test Suite**: Added comprehensive test suite for frontend TypeScript code using Vitest framework
-  - Tests for JSON Patch functionality (`assets/js/live_vue/jsonPatch.ts`) with 36 test cases covering all operations
+  - Tests for JSON Patch functionality (`assets/js/live_vite/jsonPatch.ts`) with 36 test cases covering all operations
   - Test configuration with jsdom environment for DOM testing
   - Coverage includes edge cases like escaped characters, deep cloning, and complex patch sequences
-- **End-to-End Test Suite**: Added comprehensive E2E test suite using Playwright framework ([#64](https://github.com/Valian/live_vue/pull/64))
+- **End-to-End Test Suite**: Added comprehensive E2E test suite using Playwright framework ([#64](https://github.com/Valian/live_vite/pull/64))
   - Tests for Vue component rendering, props passing, event emission, and LiveView/Vue synchronization
   - 5 test suites covering basic functionality, navigation, events, prop diffs, and file uploads
   - Test server setup with dedicated Phoenix endpoint for isolated testing
@@ -183,14 +183,14 @@ After over four months of release candidates and community feedback, LiveVue 1.0
 
 ### ✨ Features and Improvements
 
-*   **JSON Patch Diffs for Props**: LiveVue now uses JSON Patch operations to send only the minimal differences when props change, dramatically reducing WebSocket payload sizes. Instead of sending entire prop objects, only the specific fields that changed are transmitted using RFC 6902 JSON Patch format. This optimization works seamlessly with complex nested structures, lists, and custom structs through the `LiveVue.Encoder` protocol. It's possible to skip diffs by setting `v-diff` to `false` on the component or by setting `config :live_vue, enable_props_diff: false` in your config. ([#60](https://github.com/Valian/live_vue/pull/60))
-*   **New `useLiveNavigation` Composable**: A new `useLiveNavigation` composable has been added for programmatic navigation, mirroring the functionality of `live_patch` and `live_redirect`. ([#59](https://github.com/Valian/live_vue/pull/59)).
-*   **New `useLiveEvent` Composable**: A new `useLiveEvent` composable has been added to simplify listening to server-pushed events. It automatically manages event listener lifecycle, reducing boilerplate and preventing memory leaks ([#58](https://github.com/Valian/live_vue/pull/58)).
-*   **New `Link` Component**: A new `<Link>` Vue component has been added to simplify `live_patch` and `live_redirect` navigation within your Vue components. ([#47](https://github.com/Valian/live_vue/pull/47)).
+*   **JSON Patch Diffs for Props**: LiveVite now uses JSON Patch operations to send only the minimal differences when props change, dramatically reducing WebSocket payload sizes. Instead of sending entire prop objects, only the specific fields that changed are transmitted using RFC 6902 JSON Patch format. This optimization works seamlessly with complex nested structures, lists, and custom structs through the `LiveVite.Encoder` protocol. It's possible to skip diffs by setting `v-diff` to `false` on the component or by setting `config :live_vite, enable_props_diff: false` in your config. ([#60](https://github.com/Valian/live_vite/pull/60))
+*   **New `useLiveNavigation` Composable**: A new `useLiveNavigation` composable has been added for programmatic navigation, mirroring the functionality of `live_patch` and `live_redirect`. ([#59](https://github.com/Valian/live_vite/pull/59)).
+*   **New `useLiveEvent` Composable**: A new `useLiveEvent` composable has been added to simplify listening to server-pushed events. It automatically manages event listener lifecycle, reducing boilerplate and preventing memory leaks ([#58](https://github.com/Valian/live_vite/pull/58)).
+*   **New `Link` Component**: A new `<Link>` Vue component has been added to simplify `live_patch` and `live_redirect` navigation within your Vue components. ([#47](https://github.com/Valian/live_vite/pull/47)).
 *   **TypeScript by Default**: The client-side entrypoint at `assets/vue/index.ts` is now a TypeScript file by default, improving type safety and the development experience out of the box.
-*   **`$live` Template Property**: The LiveView hook instance is now automatically available in all Vue templates as the `$live` property, providing a convenient alternative to `useLiveVue()`. The property is now also fully typed, providing autocompletion and type checking in your editor. ([#56](https://github.com/Valian/live_vue/pull/56)).
-*   **Documentation Overhaul**: The documentation has been completely rewritten and expanded. It now includes comprehensive guides on architecture, basic and advanced usage, a full client-side API reference, a component reference, and much more. ([#49](https://github.com/Valian/live_vue/pull/49))
-*   **Testing Utilities**: The new `LiveVue.Test` module provides helpers to inspect Vue component configuration (props, slots, event handlers) within your LiveView tests, making it easier to write assertions. ([#46](https://github.com/Valian/live_vue/pull/46))
+*   **`$live` Template Property**: The LiveView hook instance is now automatically available in all Vue templates as the `$live` property, providing a convenient alternative to `useLiveVite()`. The property is now also fully typed, providing autocompletion and type checking in your editor. ([#56](https://github.com/Valian/live_vite/pull/56)).
+*   **Documentation Overhaul**: The documentation has been completely rewritten and expanded. It now includes comprehensive guides on architecture, basic and advanced usage, a full client-side API reference, a component reference, and much more. ([#49](https://github.com/Valian/live_vite/pull/49))
+*   **Testing Utilities**: The new `LiveVite.Test` module provides helpers to inspect Vue component configuration (props, slots, event handlers) within your LiveView tests, making it easier to write assertions. ([#46](https://github.com/Valian/live_vite/pull/46))
 *   **GitHub CI**: A new GitHub Actions workflow has been added to run tests automatically.
 
 ### ⬆️ Migration Guide
@@ -205,7 +205,7 @@ This version transitions the default client-side setup to TypeScript and renames
     // polyfill recommended by Vite https://vitejs.dev/config/build-options#build-modulepreload
     import "vite/modulepreload-polyfill"
     import { Component, h } from "vue"
-    import { createLiveVue, findComponent, type LiveHook, type ComponentMap } from "live_vue"
+    import { createLiveVite, findComponent, type LiveHook, type ComponentMap } from "live_vite"
 
     // needed to make $live available in the Vue component
     declare module "vue" {
@@ -214,7 +214,7 @@ This version transitions the default client-side setup to TypeScript and renames
       }
     }
 
-    export default createLiveVue({
+    export default createLiveVite({
       // name will be passed as-is in v-component of the .vue HEEX component
       resolve: name => {
         // we're importing from ../../lib to allow collocating Vue files with LiveView files
@@ -269,36 +269,36 @@ This version transitions the default client-side setup to TypeScript and renames
 
 ### Fixes
 
-- Fix the `useLiveVue` hook typings to show all available functions and properties.
+- Fix the `useLiveVite` hook typings to show all available functions and properties.
 
 
 ## 0.5.6 - 2024-11-27
 
 ### Improvements
 
-- Much better typing for the library [#41](https://github.com/Valian/live_vue/pull/41). Big thanks to [@francois-codes](https://github.com/francois-codes) for the contribution!
-- Added `worker` option to `vite.config.js`, and added instruction how to deal with typescript error [#45](https://github.com/Valian/live_vue/pull/45)
+- Much better typing for the library [#41](https://github.com/Valian/live_vite/pull/41). Big thanks to [@francois-codes](https://github.com/francois-codes) for the contribution!
+- Added `worker` option to `vite.config.js`, and added instruction how to deal with typescript error [#45](https://github.com/Valian/live_vite/pull/45)
 
 
 ## 0.5.5 - 2024-11-14
 
 ### Fixes
 
-- Slots are now rendered correctly in SSR [#39](https://github.com/Valian/live_vue/pull/39)
+- Slots are now rendered correctly in SSR [#39](https://github.com/Valian/live_vite/pull/39)
 
 
 ## 0.5.4 - 2024-11-13
 
 ### Fixed
 
-- added type: module to package.json in live_vue to fix the older nodejs module resolution issue [#36](https://github.com/Valian/live_vue/issues/36)
+- added type: module to package.json in live_vite to fix the older nodejs module resolution issue [#36](https://github.com/Valian/live_vite/issues/36)
 
 
 ## 0.5.3 - 2024-11-12
 
 ### Fixed
 
-- Added explicit extensions to all JS imports. It should fix some issues with module resulution. [#36](https://github.com/Valian/live_vue/issues/36)
+- Added explicit extensions to all JS imports. It should fix some issues with module resulution. [#36](https://github.com/Valian/live_vite/issues/36)
 
 
 ## 0.5.2 - 2024-10-08
@@ -327,13 +327,13 @@ config :my_app, MyAppWeb.Endpoint,
 
 ### Changed
 
-- Migrated the project to TypeScript 💜 [#32](https://github.com/Valian/live_vue/pull/32)
-- Added `createLiveVue` entrypoint to make it easier to customize Vue app initialization
+- Migrated the project to TypeScript 💜 [#32](https://github.com/Valian/live_vite/pull/32)
+- Added `createLiveVite` entrypoint to make it easier to customize Vue app initialization
 
 
 ### Deprecations
 
-- `assets/vue/index.js` should export app created by `createLiveVue()`, not just available components. See migration below.
+- `assets/vue/index.js` should export app created by `createLiveVite()`, not just available components. See migration below.
 
 
 ### Migration
@@ -352,9 +352,9 @@ use:
 // polyfill recommended by Vite https://vitejs.dev/config/build-options#build-modulepreload
 import "vite/modulepreload-polyfill"
 import { h } from "vue"
-import { createLiveVue, findComponent } from "live_vue"
+import { createLiveVite, findComponent } from "live_vite"
 
-export default createLiveVue({
+export default createLiveVite({
   resolve: name => {
     const components = {
       ...import.meta.glob("./**/*.vue", { eager: true }),
@@ -384,34 +384,34 @@ import components from "./vue"
 simply do
 
 ```js
-import { getHooks } from "live_vue"
-import liveVueApp from "./vue"
+import { getHooks } from "live_vite"
+import liveViteApp from "./vue"
 // ...
 
-const hooks = { ...getHooks(liveVueApp) }
+const hooks = { ...getHooks(liveViteApp) }
 ```
 
-If you had any custom initialization code, you have to move it to `createLiveVue().setup()` function.
+If you had any custom initialization code, you have to move it to `createLiveVite().setup()` function.
 
 
 ### Fixed
 
-- Nicely formatted JS error stracktraces during SSR [commit](https://github.com/Valian/live_vue/commit/10f672bce4104a38523905c52c4879083e4bc6db)
-- Previously `initializeVueApp` was not working in SSR mode, since it was declared in app.js which couldn't be imported by server bundle. Now it's in a separate file as `createLiveVue().setup()` and can be imported by both client and server bundles.
+- Nicely formatted JS error stracktraces during SSR [commit](https://github.com/Valian/live_vite/commit/10f672bce4104a38523905c52c4879083e4bc6db)
+- Previously `initializeVueApp` was not working in SSR mode, since it was declared in app.js which couldn't be imported by server bundle. Now it's in a separate file as `createLiveVite().setup()` and can be imported by both client and server bundles.
 
 
 ## 0.4.1 - 2024-08-30
 
 ### Changed
 
--   Improved `pathToFullPathAndFilename` to work with `index.vue` files. Now `../ComponentName/index.vue` can be referenced as `ComponentName` [#23](https://github.com/Valian/live_vue/pull/23)
+-   Improved `pathToFullPathAndFilename` to work with `index.vue` files. Now `../ComponentName/index.vue` can be referenced as `ComponentName` [#23](https://github.com/Valian/live_vite/pull/23)
 
 
 ## 0.4.0 - 2024-06-12
 
 ### New feature
 
--   Support for custom Vue instance initialization [#13](https://github.com/Valian/live_vue/pull/13) by @morfert
+-   Support for custom Vue instance initialization [#13](https://github.com/Valian/live_vite/pull/13) by @morfert
 
 
 ## 0.3.9 - 2024-06-07
@@ -423,12 +423,12 @@ If you had any custom initialization code, you have to move it to `createLiveVue
 
 ### Fixed
 
--   Invalid live_vue import in copied package.json (`file:../..` -> `file:../deps/live_vue`)
--   Changed `useLiveVue` inject key from `Symbol()` to `_live_vue` string, so it's working if Vite does a reload and Symbol is re-evaluated.
+-   Invalid live_vite import in copied package.json (`file:../..` -> `file:../deps/live_vite`)
+-   Changed `useLiveVite` inject key from `Symbol()` to `_live_vite` string, so it's working if Vite does a reload and Symbol is re-evaluated.
 
 ### Added
 
--   Added live_vue, phoenix, phoenix_html and phonenix_live_vue to vite `optimizeDeps.include` config options. It should pre-bundle these packages in development, making it consistent with packages imported from node_modules and improve DX.
+-   Added live_vite, phoenix, phoenix_html and phonenix_live_vite to vite `optimizeDeps.include` config options. It should pre-bundle these packages in development, making it consistent with packages imported from node_modules and improve DX.
 -   Added initial typescript definitions. Apparently it's enough to name them `<filename>.d.mts`, so I've created them both for `index.mjs` and `server.mjs`
 
 
@@ -436,13 +436,13 @@ If you had any custom initialization code, you have to move it to `createLiveVue
 
 ### Changed
 
--   Added a Mix.Task to make JS file setup more straightforward and cross-platform [#11](https://github.com/Valian/live_vue/pull/11). Contribution by @morfert 🔥
+-   Added a Mix.Task to make JS file setup more straightforward and cross-platform [#11](https://github.com/Valian/live_vite/pull/11). Contribution by @morfert 🔥
 -   Installation instruction was moved to the separate file
--   Package.json was added to files automatically copied from live_vue when using `mix live_vue.setup`
+-   Package.json was added to files automatically copied from live_vite when using `mix live_vite.setup`
 
 ### Fixed
 
--   Removed `build: {modulePreload: { polyfill: false }}` from vite.config.js as it made it impossible to use `vite/modulepreload-polyfill`. To migrate: please remove that line from yours vite.config.js. Fixed [#12](https://github.com/Valian/live_vue/issues/12)
+-   Removed `build: {modulePreload: { polyfill: false }}` from vite.config.js as it made it impossible to use `vite/modulepreload-polyfill`. To migrate: please remove that line from yours vite.config.js. Fixed [#12](https://github.com/Valian/live_vite/issues/12)
 
 
 ## 0.3.6 - 2024-05-24
@@ -457,7 +457,7 @@ If you had any custom initialization code, you have to move it to `createLiveVue
 
 ### Changed
 
--   Removed `body-parser` dependency from `live_vue`. Should fix [#9](https://github.com/Valian/live_vue/issues/9)
+-   Removed `body-parser` dependency from `live_vite`. Should fix [#9](https://github.com/Valian/live_vite/issues/9)
 
 
 ## 0.3.4 - 2024-05-22
@@ -472,7 +472,7 @@ If you had any custom initialization code, you have to move it to `createLiveVue
 ### Fixed
 
 -   Javascript imports were mixed - vitePlugin.js was using CJS, rest was using ESM. Now it's explicit by adding ".mjs" extension.
--   Removed `:attr` declarations for `<.vue>` component to avoid warnings related to unexpected props being passed to `:rest` attribute [#8](https://github.com/Valian/live_vue/pull/8)
+-   Removed `:attr` declarations for `<.vue>` component to avoid warnings related to unexpected props being passed to `:rest` attribute [#8](https://github.com/Valian/live_vite/pull/8)
 
 
 ## 0.3.2 - 2024-05-19
@@ -491,7 +491,7 @@ If you had any custom initialization code, you have to move it to `createLiveVue
 
 ### CHANGED
 
--   removed esbuild from live_vue, `package.json` points directly to `assets/js/live_vue`
+-   removed esbuild from live_vite, `package.json` points directly to `assets/js/live_vite`
 -   added support to lazy loading components. See more in README. To migrate, ensure all steps from installation are up-to-date.
 
 ## 0.2.0 - 2024-05-17

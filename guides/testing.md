@@ -1,16 +1,16 @@
 # Testing Guide
 
-LiveVue provides a robust testing module `LiveVue.Test` that makes it easy to test Vue components within your Phoenix LiveView tests.
+LiveVite provides a robust testing module `LiveVite.Test` that makes it easy to test Vue components within your Phoenix LiveView tests.
 
 ## Overview
 
-Testing LiveVue components differs from traditional Phoenix LiveView testing in a key way:
+Testing LiveVite components differs from traditional Phoenix LiveView testing in a key way:
 - Traditional LiveView testing uses `render_component/2` to get final HTML
-- LiveVue testing provides helpers to inspect the Vue component configuration before client-side rendering
+- LiveVite testing provides helpers to inspect the Vue component configuration before client-side rendering
 
 ## Dependencies
 
-The `LiveVue.Test` module requires the `lazy_html` package for parsing HTML. Add it to your test dependencies:
+The `LiveVite.Test` module requires the `lazy_html` package for parsing HTML. Add it to your test dependencies:
 
 ```elixir
 # mix.exs
@@ -24,15 +24,15 @@ end
 
 ## Testing Configuration
 
-For comprehensive testing, you should disable props diffing in your test environment to ensure `LiveVue.Test.get_vue/2` always returns complete props data:
+For comprehensive testing, you should disable props diffing in your test environment to ensure `LiveVite.Test.get_vue/2` always returns complete props data:
 
 ```elixir
 # config/test.exs
-config :live_vue,
+config :live_vite,
   enable_props_diff: false
 ```
 
-When props diffing is enabled (the default), LiveVue only sends changed properties to optimize performance. However, during testing, you typically want to inspect the complete component state rather than just the incremental changes. Disabling diffing ensures that all props are always available for testing assertions.
+When props diffing is enabled (the default), LiveVite only sends changed properties to optimize performance. However, during testing, you typically want to inspect the complete component state rather than just the incremental changes. Disabling diffing ensures that all props are always available for testing assertions.
 
 This configuration should be set globally for the test environment rather than per-component, as it affects the behavior of the testing helpers.
 
@@ -43,7 +43,7 @@ Let's start with a simple component test:
 ```elixir
 defmodule MyAppWeb.CounterTest do
   use MyAppWeb.ConnCase
-  alias LiveVue.Test
+  alias LiveVite.Test
 
   test "renders counter component with initial props", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/counter")
@@ -118,7 +118,7 @@ end
 
 ## Testing Slots
 
-LiveVue provides tools to test both default and named slots:
+LiveVite provides tools to test both default and named slots:
 
 ```elixir
 def component_with_slots(assigns) do
@@ -179,7 +179,7 @@ For full integration tests with client-side Vue rendering, use a headless browse
 
 ### Playwright Setup
 
-LiveVue's E2E tests use Playwright. Here's a typical test structure:
+LiveVite's E2E tests use Playwright. Here's a typical test structure:
 
 ```javascript
 // tests/e2e/example.spec.js

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { ref, reactive, type App } from "vue"
 import { getVueHook } from "./hooks"
-import type { LiveVueApp, Hook } from "./types"
+import type { LiveViteApp, Hook } from "./types"
 import { toUtf8Base64 } from "./utils"
 
 // Mock Vue component for testing
@@ -32,8 +32,8 @@ const createMockLiveViewHook = (elementAttributes: Record<string, string> = {}) 
   } as any // Type assertion to avoid strict type checking for test mocks
 }
 
-// Mock LiveVue app configuration
-const createMockLiveVueApp = (component = MockComponent): LiveVueApp => ({
+// Mock LiveVite app configuration
+const createMockLiveViteApp = (component = MockComponent): LiveViteApp => ({
   resolve: vi.fn().mockResolvedValue(component),
   setup: vi.fn(({ createApp, component, props, slots, plugin, el }) => {
     const app = createApp({
@@ -49,15 +49,15 @@ const createMockLiveVueApp = (component = MockComponent): LiveVueApp => ({
 })
 
 describe("getVueHook", () => {
-  let mockLiveVueApp: LiveVueApp
+  let mockLiveViteApp: LiveViteApp
   let mockHookContext: ReturnType<typeof createMockLiveViewHook>
   let vueHook: Hook
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockLiveVueApp = createMockLiveVueApp()
+    mockLiveViteApp = createMockLiveViteApp()
     mockHookContext = createMockLiveViewHook()
-    vueHook = getVueHook(mockLiveVueApp)
+    vueHook = getVueHook(mockLiveViteApp)
   })
 
   describe("mounted lifecycle", () => {
@@ -69,7 +69,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      expect(mockLiveVueApp.resolve).toHaveBeenCalledWith("TestComponent")
+      expect(mockLiveViteApp.resolve).toHaveBeenCalledWith("TestComponent")
     })
 
     it("should create SSR app when data-ssr is true", async () => {
@@ -82,7 +82,7 @@ describe("getVueHook", () => {
       await vueHook.mounted!.call(mockHookContext)
 
       // Verify setup was called with correct parameters
-      expect(mockLiveVueApp.setup).toHaveBeenCalledWith(
+      expect(mockLiveViteApp.setup).toHaveBeenCalledWith(
         expect.objectContaining({
           component: MockComponent,
           ssr: false,
@@ -99,7 +99,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      expect(mockLiveVueApp.setup).toHaveBeenCalledWith(
+      expect(mockLiveViteApp.setup).toHaveBeenCalledWith(
         expect.objectContaining({
           component: MockComponent,
           ssr: false,
@@ -117,7 +117,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      expect(mockLiveVueApp.setup).toHaveBeenCalledWith(
+      expect(mockLiveViteApp.setup).toHaveBeenCalledWith(
         expect.objectContaining({
           props: expect.objectContaining(mockProps),
         })
@@ -134,7 +134,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      const setupCall = (mockLiveVueApp.setup as any).mock.calls[0][0]
+      const setupCall = (mockLiveViteApp.setup as any).mock.calls[0][0]
       expect(setupCall.props).toHaveProperty("onClick")
       expect(typeof setupCall.props.onClick).toBe("function")
     })
@@ -149,7 +149,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      const setupCall = (mockLiveVueApp.setup as any).mock.calls[0][0]
+      const setupCall = (mockLiveViteApp.setup as any).mock.calls[0][0]
       expect(setupCall.slots).toHaveProperty("default")
       expect(typeof setupCall.slots.default).toBe("function")
     })
@@ -162,7 +162,7 @@ describe("getVueHook", () => {
 
       await vueHook.mounted!.call(mockHookContext)
 
-      const setupCall = (mockLiveVueApp.setup as any).mock.calls[0][0]
+      const setupCall = (mockLiveViteApp.setup as any).mock.calls[0][0]
       expect(setupCall.plugin).toBeDefined()
 
       // Test plugin install function

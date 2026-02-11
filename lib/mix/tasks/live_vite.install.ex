@@ -1,9 +1,9 @@
-defmodule Mix.Tasks.LiveVue.Install do
+defmodule Mix.Tasks.LiveVite.Install do
   @moduledoc """
-  Installer for LiveVue with Vite.
+  Installer for LiveVite with Vite.
 
   This task first installs Vite using the PhoenixVite installer,
-  then configures the project for LiveVue.
+  then configures the project for LiveVite.
 
   ## Options
 
@@ -11,8 +11,8 @@ defmodule Mix.Tasks.LiveVue.Install do
 
   ## Examples
 
-      mix live_vue.install
-      mix live_vue.install --bun
+      mix live_vite.install
+      mix live_vite.install --bun
 
   """
 
@@ -41,7 +41,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       igniter
       |> Igniter.compose_task("phoenix_vite.install", igniter.args.argv)
       |> configure_environments(app_name)
-      |> add_live_vue_to_html_helpers(app_name)
+      |> add_live_vite_to_html_helpers(app_name)
       |> update_javascript_configuration()
       |> update_vite_configuration()
       |> update_phoenix_vite_config()
@@ -59,35 +59,35 @@ defmodule Mix.Tasks.LiveVue.Install do
     # Configure environments (config/dev.exs and config/prod.exs)
     defp configure_environments(igniter, _app_name) do
       igniter
-      |> Config.configure("config.exs", :live_vue, [:ssr], true)
-      |> Config.configure("dev.exs", :live_vue, [:vite_host], "http://localhost:5173")
-      |> Config.configure("dev.exs", :live_vue, [:ssr_module], {:code, Sourceror.parse_string!("LiveVue.SSR.ViteJS")})
-      |> Config.configure("prod.exs", :live_vue, [:ssr_module], {:code, Sourceror.parse_string!("LiveVue.SSR.NodeJS")})
-      |> Config.configure("prod.exs", :live_vue, [:ssr], true)
+      |> Config.configure("config.exs", :live_vite, [:ssr], true)
+      |> Config.configure("dev.exs", :live_vite, [:vite_host], "http://localhost:5173")
+      |> Config.configure("dev.exs", :live_vite, [:ssr_module], {:code, Sourceror.parse_string!("LiveVite.SSR.ViteJS")})
+      |> Config.configure("prod.exs", :live_vite, [:ssr_module], {:code, Sourceror.parse_string!("LiveVite.SSR.NodeJS")})
+      |> Config.configure("prod.exs", :live_vite, [:ssr], true)
     end
 
-    # Add LiveVue to html_helpers in lib/app_web.ex
-    defp add_live_vue_to_html_helpers(igniter, _app_name) do
+    # Add LiveVite to html_helpers in lib/app_web.ex
+    defp add_live_vite_to_html_helpers(igniter, _app_name) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
       web_file = Path.join(["lib", web_folder <> ".ex"])
 
       Igniter.update_file(igniter, web_file, fn source ->
         Rewrite.Source.update(source, :content, fn content ->
-          # Check if LiveVue is already added to avoid duplicate additions.
-          # Use regex to match "use LiveVue" as a standalone module, not as part of
-          # another module name (e.g., "use LiveVueWebsiteWeb" should not match).
-          if Regex.match?(~r/use LiveVue\b/, content) do
+          # Check if LiveVite is already added to avoid duplicate additions.
+          # Use regex to match "use LiveVite" as a standalone module, not as part of
+          # another module name (e.g., "use LiveViteWebsiteWeb" should not match).
+          if Regex.match?(~r/use LiveVite\b/, content) do
             content
           else
             # Get the short module name (without Elixir. prefix)
             web_module_name = web_module |> Module.split() |> Enum.join(".")
 
-            # Add LiveVue support only in the html_helpers function
+            # Add LiveVite support only in the html_helpers function
             String.replace(
               content,
               ~r/(defp html_helpers do\s+quote do\s+# Translation\s+use Gettext, backend: #{Regex.escape(web_module_name)}\.Gettext)/,
-              "\\1\n\n      # Add support for Vue components\n      use LiveVue\n\n      # Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">\n      use LiveVue.Components, vue_root: [\"./assets/vue\", \"./lib/#{web_folder}\"]"
+              "\\1\n\n      # Add support for Vue components\n      use LiveVite\n\n      # Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">\n      use LiveVite.Components, vue_root: [\"./assets/vue\", \"./lib/#{web_folder}\"]"
             )
           end
         end)
@@ -99,20 +99,20 @@ defmodule Mix.Tasks.LiveVue.Install do
       Igniter.update_file(igniter, "assets/js/app.js", fn source ->
         Rewrite.Source.update(source, :content, fn content ->
           content
-          |> add_live_vue_imports()
+          |> add_live_vite_imports()
           |> update_live_socket_hooks()
         end)
       end)
     end
 
-    defp add_live_vue_imports(content) do
-      if String.contains?(content, "import {getHooks} from \"live_vue\"") do
+    defp add_live_vite_imports(content) do
+      if String.contains?(content, "import {getHooks} from \"live_vite\"") do
         content
       else
         String.replace(
           content,
           "import topbar from \"topbar\"",
-          ~s(import topbar from "topbar"\nimport {getHooks} from "live_vue"\nimport liveVueApp from "../vue")
+          ~s(import topbar from "topbar"\nimport {getHooks} from "live_vite"\nimport liveViteApp from "../vue")
         )
       end
     end
@@ -121,7 +121,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       String.replace(
         content,
         "hooks: {...colocatedHooks},",
-        "hooks: {...colocatedHooks, ...getHooks(liveVueApp)},"
+        "hooks: {...colocatedHooks, ...getHooks(liveViteApp)},"
       )
     end
 
@@ -157,7 +157,7 @@ defmodule Mix.Tasks.LiveVue.Install do
         String.replace(
           content,
           "import { phoenixVitePlugin } from 'phoenix_vite'",
-          ~s(import vue from "@vitejs/plugin-vue";\nimport liveVuePlugin from "live_vue/vitePlugin";)
+          ~s(import vue from "@vitejs/plugin-vue";\nimport liveVitePlugin from "live_vite/vitePlugin";)
         )
       end
     end
@@ -178,7 +178,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       String.replace(
         content,
         ~s(include: ["phoenix", "phoenix_html", "phoenix_live_view"],),
-        ~s(include: ["live_vue", "phoenix", "phoenix_html", "phoenix_live_view"],)
+        ~s(include: ["live_vite", "phoenix", "phoenix_html", "phoenix_live_view"],)
       )
     end
 
@@ -187,7 +187,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       String.replace(
         content,
         ~r/phoenixVitePlugin\(\{\s*pattern: \/\\.\(ex\|heex\)\$\/\s*\}\)/s,
-        "vue(),\n    liveVuePlugin()"
+        "vue(),\n    liveVitePlugin()"
       )
     end
 
@@ -242,7 +242,7 @@ defmodule Mix.Tasks.LiveVue.Install do
           {
             "dependencies": {
               "@vueuse/core": "^13.7.0",
-              "live_vue": "file:./deps/live_vue",
+              "live_vite": "file:./deps/live_vite",
               "phoenix": "file:./deps/phoenix",
               "phoenix_html": "file:./deps/phoenix_html",
               "phoenix_live_view": "file:./deps/phoenix_live_view",
@@ -332,7 +332,7 @@ defmodule Mix.Tasks.LiveVue.Install do
             String.replace(
               content,
               ~r/(children = \[\s*\n)/,
-              "\\1      {NodeJS.Supervisor, [path: LiveVue.SSR.NodeJS.server_path(), pool_size: 4]},\n"
+              "\\1      {NodeJS.Supervisor, [path: LiveVite.SSR.NodeJS.server_path(), pool_size: 4]},\n"
             )
           else
             content
@@ -344,7 +344,7 @@ defmodule Mix.Tasks.LiveVue.Install do
     defp vue_index_content do
       """
       import { h, type Component } from "vue"
-      import { createLiveVue, findComponent, type LiveHook, type ComponentMap } from "live_vue"
+      import { createLiveVite, findComponent, type LiveHook, type ComponentMap } from "live_vite"
 
       // needed to make $live available in the Vue component
       declare module "vue" {
@@ -353,7 +353,7 @@ defmodule Mix.Tasks.LiveVue.Install do
         }
       }
 
-      export default createLiveVue({
+      export default createLiveVite({
         // name will be passed as-is in v-component of the .vue HEEX component
         resolve: name => {
           // we're importing from ../../lib to allow collocating Vue files with LiveView files
@@ -408,7 +408,7 @@ defmodule Mix.Tasks.LiveVue.Install do
           socket =
             socket
             |> assign(:todos, [
-              %{id: 1, text: "Learn LiveVue basics", completed: true},
+              %{id: 1, text: "Learn LiveVite basics", completed: true},
               %{id: 2, text: "Build an interactive component", completed: false},
               %{id: 3, text: "Deploy to production", completed: false}
             ])
@@ -488,7 +488,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       """
       <script setup lang="ts">
       import { ref, computed } from "vue"
-      import { useLiveVue, Form, useLiveForm } from "live_vue"
+      import { useLiveVite, Form, useLiveForm } from "live_vite"
 
       type FilterType = "all" | "active" | "completed"
 
@@ -499,7 +499,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       }>()
 
       // Phoenix hook instance responsible for syncing this Vue component
-      const live = useLiveVue()
+      const live = useLiveVite()
 
       // Server-side validation using changesets
       const { field, submit, isValid } = useLiveForm<{ text: string }>(() => props.form, {
@@ -533,7 +533,7 @@ defmodule Mix.Tasks.LiveVue.Install do
           <div class="max-w-2xl space-y-8">
             <!-- Header -->
             <div>
-              <h1 class="text-5xl font-bold">🎉 Welcome to LiveVue!</h1>
+              <h1 class="text-5xl font-bold">🎉 Welcome to LiveVite!</h1>
               <p class="text-lg text-base-content/70">Vue.js components seamlessly integrated with Phoenix LiveView</p>
             </div>
 
@@ -615,7 +615,7 @@ defmodule Mix.Tasks.LiveVue.Install do
             <!-- Features Info -->
             <div class="alert alert-info">
               <div>
-                <h4 class="font-bold">LiveVue Features Demonstrated:</h4>
+                <h4 class="font-bold">LiveVite Features Demonstrated:</h4>
                 <ul class="text-sm mt-2 space-y-1">
                   <li>✅ <strong>Reactive Props:</strong> Todos flow from server state</li>
                   <li>✅ <strong>Server Events:</strong> Add, toggle, delete todos send events to LiveView</li>
@@ -633,7 +633,7 @@ defmodule Mix.Tasks.LiveVue.Install do
     defp server_js_content do
       """
       import components from "../vue"
-      import { getRender, loadManifest } from "live_vue/server"
+      import { getRender, loadManifest } from "live_vite/server"
 
       // present only in prod build. Returns empty obj if doesn't exist
       // used to render preload links
@@ -674,7 +674,7 @@ defmodule Mix.Tasks.LiveVue.Install do
       end)
     end
 
-    # Update home.html.heex template with LiveVue content
+    # Update home.html.heex template with LiveVite content
     defp update_home_template(igniter) do
       web_module = Phoenix.web_module(igniter)
       web_folder = Macro.underscore(web_module)
@@ -690,7 +690,7 @@ defmodule Mix.Tasks.LiveVue.Install do
           |> String.replace(
             ~r/Build rich, interactive web applications quickly.*at scale\./s,
             """
-            Congratulations, you've successfully created a LiveVue app with Phoenix!
+            Congratulations, you've successfully created a LiveVite app with Phoenix!
                   We've automatically created two files for you: <br />
                   <code class="text-sm text-primary">assets/vue/VueDemo.vue</code>
                   <br />
@@ -729,11 +729,11 @@ defmodule Mix.Tasks.LiveVue.Install do
       if Igniter.exists?(igniter, "AGENTS.md") do
         Igniter.update_file(igniter, "AGENTS.md", fn source ->
           Rewrite.Source.update(source, :content, fn content ->
-            # Check if LiveVue usage rules are already added
-            if String.contains?(content, "<!-- live_vue-start -->") do
+            # Check if LiveVite usage rules are already added
+            if String.contains?(content, "<!-- live_vite-start -->") do
               content
             else
-              rules = "\n\n<!-- live_vue-start -->\n" <> @usage_rules_content <> "\n<!-- live_vue-end -->\n"
+              rules = "\n\n<!-- live_vite-start -->\n" <> @usage_rules_content <> "\n<!-- live_vite-end -->\n"
               # Append just before the end of the file
               if String.contains?(content, "<!-- usage-rules-end -->") do
                 String.replace(content, ~r/(<!-- usage-rules-end -->)/, rules <> "\\1")
@@ -761,7 +761,7 @@ defmodule Mix.Tasks.LiveVue.Install do
     @impl Mix.Task
     def run(_argv) do
       Mix.shell().error("""
-      The task 'live_vue.install' requires igniter. Please install igniter and try again.
+      The task 'live_vite.install' requires igniter. Please install igniter and try again.
 
       For more information, see: https://hexdocs.pm/igniter/readme.html#installation
       """)

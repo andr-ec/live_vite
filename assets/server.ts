@@ -3,8 +3,8 @@ import { basename, resolve } from "path"
 import type { ViewHook } from "phoenix_live_view"
 import { type App, type Component, createSSRApp, h } from "vue"
 import { renderToString, type SSRContext } from "vue/server-renderer"
-import { migrateToLiveVueApp } from "./app.js"
-import type { LiveVueOptions, VueArgs } from "./types.js"
+import { migrateToLiveViteApp } from "./app.js"
+import type { LiveViteOptions, VueArgs } from "./types.js"
 import { mapValues } from "./utils.js"
 
 type Components = Record<string, Component>
@@ -32,8 +32,8 @@ const mockLive: Partial<Omit<ViewHook, "el">> & {
     app: {},
   },
 }
-export const getRender = (componentsOrApp: Components | LiveVueOptions, manifest: Manifest = {}) => {
-  const { resolve, setup } = migrateToLiveVueApp(componentsOrApp)
+export const getRender = (componentsOrApp: Components | LiveViteOptions, manifest: Manifest = {}) => {
+  const { resolve, setup } = migrateToLiveViteApp(componentsOrApp)
 
   return async (name: string, props: Record<string, any>, slots: Record<string, string>) => {
     const component = await resolve(name)
@@ -48,7 +48,7 @@ export const getRender = (componentsOrApp: Components | LiveVueOptions, manifest
           // we don't want to mount the app in SSR
           app.mount = (...args: unknown[]): any => undefined
           // we don't have hook instance in SSR, so we need to mock it
-          app.provide("_live_vue", Object.assign({}, mockLive))
+          app.provide("_live_vite", Object.assign({}, mockLive))
         },
       },
       // @ts-ignore - this is just an IDE issue. the compiler is correctly processing this with the server tsconfig

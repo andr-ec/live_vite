@@ -1,14 +1,14 @@
-# LiveVue vs Alternatives
+# LiveVite vs Alternatives
 
-This guide compares LiveVue with other Phoenix LiveView frontend integration libraries to help you choose the right solution for your project.
+This guide compares LiveVite with other Phoenix LiveView frontend integration libraries to help you choose the right solution for your project.
 
 ## Overview
 
-LiveVue is part of a growing ecosystem of libraries that integrate modern frontend frameworks with Phoenix LiveView. Each library takes a different approach to solving the challenge of combining server-side state management with rich client-side interactivity.
+LiveVite is part of a growing ecosystem of libraries that integrate modern frontend frameworks with Phoenix LiveView. Each library takes a different approach to solving the challenge of combining server-side state management with rich client-side interactivity.
 
 ## Comparison Matrix
 
-| Feature | LiveVue | LiveSvelte | LiveReact | LiveState |
+| Feature | LiveVite | LiveSvelte | LiveReact | LiveState |
 |---------|---------|------------|-----------|-----------|
 | **Framework** | Vue.js | Svelte | React | Framework-agnostic |
 | **SSR Support** | ✅ | ✅ | ✅ | ❌ |
@@ -183,9 +183,9 @@ liveState.dispatchEvent('add_todo', { title: 'New todo' })
 - Different mental model from traditional LiveView
 - Best suited for specific use cases (embeddable apps)
 
-## LiveVue
+## LiveVite
 
-LiveVue provides seamless Vue.js integration with Phoenix LiveView.
+LiveVite provides seamless Vue.js integration with Phoenix LiveView.
 
 ### Key Features
 
@@ -222,7 +222,7 @@ defineEmits(['increment'])
 </script>
 ```
 
-### When to Choose LiveVue
+### When to Choose LiveVite
 
 - Your team has Vue.js expertise
 - You want a balance between simplicity and power
@@ -232,7 +232,7 @@ defineEmits(['increment'])
 
 ## Decision Framework
 
-### Choose **LiveVue** if:
+### Choose **LiveVite** if:
 - You're experienced with Vue.js
 - You want excellent documentation and examples
 - You need a balance of features and simplicity
@@ -285,7 +285,7 @@ Most integrations follow similar patterns, making migration feasible:
 ### Bundle Size
 - **LiveState**: Smallest (framework-agnostic)
 - **LiveSvelte**: Small (Svelte compiles to minimal code)
-- **LiveVue**: Medium (Vue runtime)
+- **LiveVite**: Medium (Vue runtime)
 - **LiveReact**: Largest (React + ReactDOM)
 
 ### Runtime Performance
@@ -304,7 +304,7 @@ All integrations have similar server load characteristics since they use LiveVie
 - **Community**: Active development and community
 - **Documentation**: Comprehensive with examples
 
-### LiveVue
+### LiveVite
 - **Maturity**: Stable and well-documented
 - **Community**: Growing community
 - **Documentation**: Extensive guides and examples
@@ -325,7 +325,7 @@ For current GitHub star counts, check each project's repository directly.
 
 Each library serves different needs in the Phoenix LiveView ecosystem:
 
-- **LiveVue** offers excellent Vue.js integration with comprehensive features
+- **LiveVite** offers excellent Vue.js integration with comprehensive features
 - **LiveSvelte** provides the most mature integration with unique DSL capabilities
 - **LiveReact** brings React's ecosystem to LiveView applications
 - **LiveState** enables embeddable applications and framework flexibility
@@ -334,7 +334,7 @@ Choose based on your team's expertise, project requirements, and long-term goals
 
 ## Further Reading
 
-- [LiveVue Documentation](https://hexdocs.pm/live_vue)
+- [LiveVite Documentation](https://hexdocs.pm/live_vite)
 - [LiveSvelte Documentation](https://hexdocs.pm/live_svelte)
 - [LiveReact Documentation](https://hexdocs.pm/live_react)
 - [LiveState Documentation](https://hexdocs.pm/live_state)

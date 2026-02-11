@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import { syncLV } from "../../utils.js"
 
-test.describe("LiveVue Basic E2E Tests", () => {
+test.describe("LiveVite Basic E2E Tests", () => {
   test("renders Vue component inside LiveView and handles increment events", async ({ page }) => {
     await page.goto("/test")
     await syncLV(page)

@@ -3,9 +3,9 @@ import type {
   ComponentOrComponentModule,
   ComponentOrComponentPromise,
   SetupContext,
-  LiveVueOptions,
+  LiveViteOptions,
   ComponentMap,
-  LiveVueApp,
+  LiveViteApp,
 } from "./types.js"
 
 /**
@@ -20,15 +20,15 @@ export const defaultSetup = ({ createApp, component, props, slots, plugin, el }:
   return app
 }
 
-export const migrateToLiveVueApp = (
+export const migrateToLiveViteApp = (
   components: ComponentMap,
   options: { initializeApp?: (context: SetupContext) => App } = {}
-): LiveVueApp => {
+): LiveViteApp => {
   if ("resolve" in components && "setup" in components) {
-    return components as LiveVueApp
+    return components as LiveViteApp
   } else {
-    console.warn("deprecation warning:\n\nInstead of passing components, use createLiveVue({resolve, setup})")
-    return createLiveVue({
+    console.warn("deprecation warning:\n\nInstead of passing components, use createLiveVite({resolve, setup})")
+    return createLiveVite({
       resolve: (name: string) => {
         for (const [key, value] of Object.entries(components)) {
           if (key.endsWith(`${name}.vue`) || key.endsWith(`${name}/index.vue`)) {
@@ -57,7 +57,7 @@ const resolveComponent = async (component: ComponentOrComponentModule): Promise<
   return component
 }
 
-export const createLiveVue = ({ resolve, setup }: LiveVueOptions) => {
+export const createLiveVite = ({ resolve, setup }: LiveViteOptions) => {
   return {
     setup: setup || defaultSetup,
     resolve: async (path: string): Promise<Component> => {

@@ -88,16 +88,16 @@ export interface SetupContext {
   ssr: boolean
 }
 
-export type LiveVueOptions = {
+export type LiveViteOptions = {
   resolve: (path: string) => ComponentOrComponentPromise | undefined | null
   setup?: (context: SetupContext) => App
 }
 
-export type LiveVueApp = {
+export type LiveViteApp = {
   setup: (context: SetupContext) => App
   resolve: (path: string) => ComponentOrComponentPromise
 }
 
-export interface LiveVue {
+export interface LiveVite {
   VueHook: ViewHook
 }

@@ -2,16 +2,16 @@ import { inject, onMounted, onUnmounted, ref, computed, watchEffect, toValue, ty
 import type { MaybeRefOrGetter } from "vue"
 import type { LiveHook, UploadConfig, UploadEntry, UploadOptions } from "./types.js"
 
-export const liveInjectKey = "_live_vue"
+export const liveInjectKey = "_live_vite"
 
 /**
- * Returns the LiveVue instance.
- * Can be used to access the LiveVue instance from within a LiveVue component.
+ * Returns the LiveVite instance.
+ * Can be used to access the LiveVite instance from within a LiveVite component.
  * It allows to e.g. push events to the LiveView.
  */
-export const useLiveVue = (): LiveHook => {
+export const useLiveVite = (): LiveHook => {
   const live = inject<LiveHook>(liveInjectKey)
-  if (!live) throw new Error("LiveVue not provided. Are you using this inside a LiveVue component?")
+  if (!live) throw new Error("LiveVite not provided. Are you using this inside a LiveVite component?")
   return live
 }
 
@@ -24,11 +24,11 @@ export const useLiveVue = (): LiveHook => {
 export function useLiveEvent<T>(event: string, callback: (data: T) => void) {
   let callbackRef: ReturnType<LiveHook["handleEvent"]> | null = null
   onMounted(() => {
-    const live = useLiveVue()
+    const live = useLiveVite()
     callbackRef = live.handleEvent(event, callback)
   })
   onUnmounted(() => {
-    const live = useLiveVue()
+    const live = useLiveVite()
     if (callbackRef) live.removeHandleEvent(callbackRef)
     callbackRef = null
   })
@@ -41,7 +41,7 @@ export function useLiveEvent<T>(event: string, callback: (data: T) => void) {
  * @returns An object with `patch` and `navigate` functions.
  */
 export const useLiveNavigation = () => {
-  const live = useLiveVue()
+  const live = useLiveVite()
   const liveSocket = live.liveSocket
   if (!liveSocket) throw new Error("LiveSocket not initialized")
 
@@ -106,7 +106,7 @@ export const useLiveUpload = (
   uploadConfig: MaybeRefOrGetter<UploadConfig>,
   options: UploadOptions
 ): UseLiveUploadReturn => {
-  const live = useLiveVue()
+  const live = useLiveVite()
   const inputEl = ref<HTMLInputElement | null>(null)
 
   // Create and manage the hidden file input element with Phoenix upload attributes
@@ -301,8 +301,8 @@ export const useEventReply = <T = any, P extends Record<string, any> | void = Re
   eventName: string,
   options?: UseEventReplyOptions<T>
 ): UseEventReplyReturn<T, P> => {
-  const live = useLiveVue()
-  
+  const live = useLiveVite()
+
   const data = ref<T | null>(options?.defaultValue ?? null) as Ref<T | null>
   const isLoading = ref(false)
   
@@ -372,7 +372,7 @@ export interface UseLiveConnectionReturn {
  * @returns An object with reactive connection state and computed connection status
  */
 export const useLiveConnection = (): UseLiveConnectionReturn => {
-  const live = useLiveVue()
+  const live = useLiveVite()
   const liveSocket = live.liveSocket
   if (!liveSocket) throw new Error("LiveSocket not initialized")
   

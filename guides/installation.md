@@ -1,6 +1,6 @@
 # Installation
 
-LiveVue replaces `esbuild` with [Vite](https://vitejs.dev/) for both client side code and SSR to achieve an amazing development experience.
+LiveVite replaces `esbuild` with [Vite](https://vitejs.dev/) for both client side code and SSR to achieve an amazing development experience.
 
 ## Why Vite?
 
@@ -29,33 +29,33 @@ mix archive.install hex igniter_new
 
 ### New Project
 
-Create a new Phoenix project with LiveVue pre-installed:
+Create a new Phoenix project with LiveVite pre-installed:
 
 ```bash
-mix igniter.new my_app --with phx.new --install live_vue
+mix igniter.new my_app --with phx.new --install live_vite
 ```
 
 This command will:
 - Create a new Phoenix project using `phx.new`
-- Install and configure LiveVue automatically
+- Install and configure LiveVite automatically
 - Set up Vite, Vue, TypeScript, and all necessary files
 - Create a working Vue demo component
 
 ### Existing Project
 
-To add LiveVue to an existing Phoenix 1.8+ project:
+To add LiveVite to an existing Phoenix 1.8+ project:
 
 ```bash
-mix igniter.install live_vue
+mix igniter.install live_vite
 ```
 
-This will automatically configure your project with all necessary LiveVue setup.
+This will automatically configure your project with all necessary LiveVite setup.
 
 > #### Important Limitations {: .warning}
 >
 > - **Phoenix 1.8+ required**: The Igniter installer depends on `phoenix_vite` and modern Phoenix features that are only available in Phoenix 1.8+
-> - **Pre-Igniter LiveVue upgrade not supported**: If you have an existing LiveVue installation from before the Igniter installer was introduced, upgrading via `mix igniter.install live_vue` is not supported due to significant changes in the installation process. On the other hand, you should be able to bump version of LiveVue in your `mix.exs` file and everything should still work.
-> - **LiveVue itself works with Phoenix 1.7**: While the automated installer requires Phoenix 1.8+, the LiveVue library itself is compatible with Phoenix 1.7 if installed manually
+> - **Pre-Igniter LiveVite upgrade not supported**: If you have an existing LiveVite installation from before the Igniter installer was introduced, upgrading via `mix igniter.install live_vite` is not supported due to significant changes in the installation process. On the other hand, you should be able to bump version of LiveVite in your `mix.exs` file and everything should still work.
+> - **LiveVite itself works with Phoenix 1.7**: While the automated installer requires Phoenix 1.8+, the LiveVite library itself is compatible with Phoenix 1.7 if installed manually
 
 ## Manual Installation
 
@@ -77,4 +77,4 @@ For the current version, please use the Igniter installation above.
 
 ## Next Steps
 
-Now that you have LiveVue installed, check out our [Getting Started Guide](getting_started.md) to create your first Vue component!
+Now that you have LiveVite installed, check out our [Getting Started Guide](getting_started.md) to create your first Vue component!

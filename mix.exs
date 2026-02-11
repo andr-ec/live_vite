@@ -1,12 +1,12 @@
-defmodule LiveVue.MixProject do
+defmodule LiveVite.MixProject do
   use Mix.Project
 
   @version "1.0.0"
-  @repo_url "https://github.com/Valian/live_vue"
+  @repo_url "https://github.com/Valian/live_vite"
 
   def project do
     [
-      app: :live_vue,
+      app: :live_vite,
       version: @version,
       consolidate_protocols: Mix.env() != :test,
       elixir: "~> 1.15",
@@ -21,16 +21,16 @@ defmodule LiveVue.MixProject do
       package: package(),
 
       # Docs
-      name: "LiveVue",
+      name: "LiveVite",
       docs: [
-        name: "LiveVue",
-        logo: "live_vue_logo_rounded.png",
+        name: "LiveVite",
+        logo: "live_vite_logo_rounded.png",
         source_ref: "v#{@version}",
         source_url: @repo_url,
         homepage_url: @repo_url,
         main: "readme",
         extras: [
-          "README.md": [title: "LiveVue"],
+          "README.md": [title: "LiveVite"],
 
           # Getting Started
           "guides/installation.md": [title: "Installation"],
@@ -46,14 +46,14 @@ defmodule LiveVue.MixProject do
           "guides/client_api.md": [title: "Client-Side API"],
 
           # Advanced Topics
-          "guides/architecture.md": [title: "How LiveVue Works"],
+          "guides/architecture.md": [title: "How LiveVite Works"],
           "guides/testing.md": [title: "Testing"],
           "guides/deployment.md": [title: "Deployment"],
 
           # Help & Troubleshooting
           "guides/faq.md": [title: "FAQ"],
           "guides/troubleshooting.md": [title: "Troubleshooting"],
-          "guides/comparison.md": [title: "LiveVue vs Alternatives"],
+          "guides/comparison.md": [title: "LiveVite vs Alternatives"],
           "CHANGELOG.md": [title: "Changelog"]
         ],
         extra_section: "GUIDES",
@@ -121,9 +121,9 @@ defmodule LiveVue.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     conditionals =
-      case Application.get_env(:live_vue, :ssr_module) do
+      case Application.get_env(:live_vite, :ssr_module) do
         # Needed to use :httpc.request
-        LiveVue.SSR.ViteJS -> [:inets]
+        LiveVite.SSR.ViteJS -> [:inets]
         _ -> []
       end
 

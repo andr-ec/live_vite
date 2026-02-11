@@ -1,19 +1,19 @@
-defmodule LiveVue.Test do
+defmodule LiveVite.Test do
   @moduledoc """
-  Helpers for testing LiveVue components and views.
+  Helpers for testing LiveVite components and views.
 
   ## Overview
 
-  LiveVue testing differs from traditional Phoenix LiveView testing in how components
+  LiveVite testing differs from traditional Phoenix LiveView testing in how components
   are rendered and inspected:
 
   * In Phoenix LiveView testing, you use `Phoenix.LiveViewTest.render_component/2`
     to get the final rendered HTML
-  * In LiveVue testing, `render_component/2` returns an unrendered LiveVue root
+  * In LiveVite testing, `render_component/2` returns an unrendered LiveVite root
     element containing the Vue component's configuration
 
   This module provides helpers to extract and inspect Vue component data from the
-  LiveVue root element, including:
+  LiveVite root element, including:
 
   * Component name and ID
   * Props passed to the component
@@ -24,9 +24,9 @@ defmodule LiveVue.Test do
 
   ## Examples
 
-      # Render a LiveVue component and inspect its properties
+      # Render a LiveVite component and inspect its properties
       {:ok, view, _html} = live(conn, "/")
-      vue = LiveVue.Test.get_vue(view)
+      vue = LiveVite.Test.get_vue(view)
 
       # Basic component info
       assert vue.component == "MyComponent"
@@ -43,13 +43,13 @@ defmodule LiveVue.Test do
 
   ### enable_props_diff
 
-  When set to `false` in your config, LiveVue will always send full props and not send diffs.
+  When set to `false` in your config, LiveVite will always send full props and not send diffs.
   This is useful for testing scenarios where you need to inspect the complete props state
   rather than just the changes.
 
   ```elixir
   # config/test.exs
-  config :live_vue,
+  config :live_vite,
     enable_props_diff: false
   ```
 
@@ -86,13 +86,13 @@ defmodule LiveVue.Test do
 
       # From a LiveView, get first Vue component
       {:ok, view, _html} = live(conn, "/")
-      vue = LiveVue.Test.get_vue(view)
+      vue = LiveVite.Test.get_vue(view)
 
       # Get specific component by name
-      vue = LiveVue.Test.get_vue(view, name: "MyComponent")
+      vue = LiveVite.Test.get_vue(view, name: "MyComponent")
 
       # Get specific component by ID
-      vue = LiveVue.Test.get_vue(view, id: "my-component-1")
+      vue = LiveVite.Test.get_vue(view, id: "my-component-1")
   """
   def get_vue(view, opts \\ [])
 
@@ -123,7 +123,7 @@ defmodule LiveVue.Test do
         doc: vue_tree
       }
     else
-      raise "LazyHTML is not installed. Add {:lazy_html, \">= 0.1.0\", only: :test} to your dependencies to use LiveVue.Test"
+      raise "LazyHTML is not installed. Add {:lazy_html, \">= 0.1.0\", only: :test} to your dependencies to use LiveVite.Test"
     end
   end
 

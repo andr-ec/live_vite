@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { useLiveVue } from "live_vue"
+import { useLiveVite } from "live_vite"
 
 // Props
 const props = defineProps<{
@@ -111,8 +111,8 @@ const props = defineProps<{
   }[]
 }>()
 
-// LiveVue hook
-const live = useLiveVue()
+// LiveVite hook
+const live = useLiveVite()
 
 // Reactive data
 const newItem = ref({

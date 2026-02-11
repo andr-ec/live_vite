@@ -1,20 +1,20 @@
-defmodule LiveVue.SSR.ViteJS do
+defmodule LiveVite.SSR.ViteJS do
   @moduledoc """
   Implements SSR by making a POST request to `http://{:vite_host}/ssr_render`.
 
   `ssr_render` is implemented as a Vite plugin. You have to add it to the `vite.config.js` plugins section.
 
   ```javascript
-  import liveVuePlugin from "live_vue/vitePlugin"
+  import liveVitePlugin from "live_vite/vitePlugin"
 
   {
     publicDir: "static",
-    plugins: [vue(), liveVuePlugin()],
+    plugins: [vue(), liveVitePlugin()],
     // ...
   }
   ```
   """
-  @behaviour LiveVue.SSR
+  @behaviour LiveVite.SSR
 
   def render(name, props, slots) do
     data = Jason.encode!(%{name: name, props: props, slots: slots})
@@ -49,17 +49,17 @@ defmodule LiveVue.SSR.ViteJS do
   A handy utility returning path relative to Vite JS host.
   """
   def vite_path(path) do
-    case Application.get_env(:live_vue, :vite_host) do
+    case Application.get_env(:live_vite, :vite_host) do
       nil ->
         message = """
         Vite.js host is not configured. Please add the following to config/dev.ex
 
-        config :live_vue, vite_host: "http://localhost:5173"
+        config :live_vite, vite_host: "http://localhost:5173"
 
         and ensure vite.js is running
         """
 
-        raise %LiveVue.SSR.NotConfigured{message: message}
+        raise %LiveVite.SSR.NotConfigured{message: message}
 
       host ->
         # we get rid of assets prefix since for vite /assets is root

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 
-test.describe("LiveVue Dead View Tests", () => {
+test.describe("LiveVite Dead View Tests", () => {
   test("renders Vue component inside regular Phoenix controller view (dead view)", async ({
     page,
   }) => {

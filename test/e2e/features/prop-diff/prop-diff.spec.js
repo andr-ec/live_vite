@@ -9,7 +9,7 @@ const getProps = async page => {
   return JSON.parse(propsJson)
 }
 
-test.describe("LiveVue Prop Diff E2E Tests", () => {
+test.describe("LiveVite Prop Diff E2E Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/prop-diff-test")
     await syncLV(page)

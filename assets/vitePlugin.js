@@ -56,13 +56,13 @@ const jsonMiddleware = (req, res, next) => {
 }
 
 /**
- * LiveVue Vite plugin for SSR and hot reload support
+ * LiveVite Vite plugin for SSR and hot reload support
  * @param {PluginOptions} [opts]
  * @returns {import("vite").Plugin}
  */
-function liveVuePlugin(opts = {}) {
+function liveVitePlugin(opts = {}) {
   return {
-    name: "live-vue",
+    name: "live-vite",
     handleHotUpdate({ file, modules, server, timestamp }) {
       if (file.match(/\.(heex|ex)$/)) {
         const invalidatedModules = new Set()
@@ -101,7 +101,7 @@ function liveVuePlugin(opts = {}) {
 
       const path = opts.path || "/ssr_render"
       const entrypoint = opts.entrypoint || "./js/server.js"
-      server.middlewares.use(function liveVueMiddleware(req, res, next) {
+      server.middlewares.use(function liveViteMiddleware(req, res, next) {
         if (req.method == "POST" && req.url?.split("?", 1)[0] === path) {
           jsonMiddleware(req, res, async () => {
             try {
@@ -121,4 +121,4 @@ function liveVuePlugin(opts = {}) {
   }
 }
 
-export default liveVuePlugin
+export default liveVitePlugin

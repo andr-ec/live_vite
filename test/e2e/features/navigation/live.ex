@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.NavigationLive do
+defmodule LiveVite.E2E.NavigationLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -15,7 +15,7 @@ defmodule LiveVue.E2E.NavigationLive do
   def render(assigns) do
     ~H"""
     <div id="navigation-test">
-      <LiveVue.vue params={@params} query_params={@query_params} v-component="navigation" v-socket={@socket} />
+      <LiveVite.vue params={@params} query_params={@query_params} v-component="navigation" v-socket={@socket} />
     </div>
     """
   end

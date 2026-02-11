@@ -1,4 +1,4 @@
-defmodule LiveVue.Components do
+defmodule LiveVite.Components do
   @moduledoc """
   Macros to improve the developer experience of crossing the Liveview/Vue boundary.
   """
@@ -10,7 +10,7 @@ defmodule LiveVue.Components do
   ## Examples
 
   ```elixir
-  use LiveVue.Components, vue_root: ["./assets/vue", "./lib/my_app_web"]
+  use LiveVite.Components, vue_root: ["./assets/vue", "./lib/my_app_web"]
   ```
   """
   defmacro __using__(opts) do
@@ -25,7 +25,7 @@ defmodule LiveVue.Components do
 
           Example:
 
-          use LiveVue.Components, vue_root: ["./assets/vue", "./lib/my_app_web"]
+          use LiveVite.Components, vue_root: ["./assets/vue", "./lib/my_app_web"]
           """)
 
       vue_root
@@ -42,7 +42,7 @@ defmodule LiveVue.Components do
       def unquote(:"#{name}")(assigns) do
         assigns
         |> Map.put(:"v-component", unquote(name))
-        |> LiveVue.vue()
+        |> LiveVite.vue()
       end
     end
   end

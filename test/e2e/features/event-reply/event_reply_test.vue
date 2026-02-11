@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useEventReply } from "live_vue"
+import { useEventReply } from "live_vite"
 
 const props = defineProps<{
   counter: number

@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.SlotTestLive do
+defmodule LiveVite.E2E.SlotTestLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -11,25 +11,25 @@ defmodule LiveVue.E2E.SlotTestLive do
     <div>
       <h1>Non-ASCII Slot Test</h1>
 
-      <LiveVue.vue v-component="slot_test" v-socket={@socket} label="Test 1: Polish">
+      <LiveVite.vue v-component="slot_test" v-socket={@socket} label="Test 1: Polish">
         Zażółć gęślą jaźń
-      </LiveVue.vue>
+      </LiveVite.vue>
 
-      <LiveVue.vue v-component="slot_test" v-socket={@socket} label="Test 2: Japanese">
+      <LiveVite.vue v-component="slot_test" v-socket={@socket} label="Test 2: Japanese">
         こんにちは世界
-      </LiveVue.vue>
+      </LiveVite.vue>
 
-      <LiveVue.vue v-component="slot_test" v-socket={@socket} label="Test 3: Emoji">
+      <LiveVite.vue v-component="slot_test" v-socket={@socket} label="Test 3: Emoji">
         Hello 🌍 World 🎉 Party 🚀
-      </LiveVue.vue>
+      </LiveVite.vue>
 
-      <LiveVue.vue v-component="slot_test" v-socket={@socket} label="Test 4: Mixed">
+      <LiveVite.vue v-component="slot_test" v-socket={@socket} label="Test 4: Mixed">
         Привет мир! 你好世界! مرحبا بالعالم
-      </LiveVue.vue>
+      </LiveVite.vue>
 
-      <LiveVue.vue v-component="slot_test" v-socket={@socket} label="Test 5: Special chars">
+      <LiveVite.vue v-component="slot_test" v-socket={@socket} label="Test 5: Special chars">
         Ñoño café résumé naïve
-      </LiveVue.vue>
+      </LiveVite.vue>
     </div>
     """
   end

@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for LiveVue
+about: Suggest an idea for LiveVite
 title: 'FEATURE: '
 labels: 'enhancement'
 assignees: ''

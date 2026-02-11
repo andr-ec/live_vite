@@ -1,6 +1,6 @@
 import { createApp, createSSRApp, h, reactive, type App } from "vue"
-import { migrateToLiveVueApp } from "./app.js"
-import type { ComponentMap, LiveVueApp, LiveVueOptions, Hook } from "./types.js"
+import { migrateToLiveViteApp } from "./app.js"
+import type { ComponentMap, LiveViteApp, LiveViteOptions, Hook } from "./types.js"
 import { liveInjectKey } from "./use.js"
 import { mapValues, fromUtf8Base64 } from "./utils.js"
 import { applyPatch, type Operation } from "./jsonPatch.js"
@@ -73,7 +73,7 @@ const getProps = (el: HTMLElement, liveSocket: any): Record<string, any> => ({
   ...getHandlers(el, liveSocket),
 })
 
-export const getVueHook = ({ resolve, setup }: LiveVueApp): Hook => ({
+export const getVueHook = ({ resolve, setup }: LiveViteApp): Hook => ({
   async mounted() {
     const componentName = this.el.getAttribute("data-name") as string
     const component = await resolve(componentName)
@@ -125,20 +125,20 @@ export const getVueHook = ({ resolve, setup }: LiveVueApp): Hook => ({
 })
 
 /**
- * Returns the hooks for the LiveVue app.
+ * Returns the hooks for the LiveVite app.
  * @param components - The components to use in the app.
- * @param options - The options for the LiveVue app.
- * @returns The hooks for the LiveVue app.
+ * @param options - The options for the LiveVite app.
+ * @returns The hooks for the LiveVite app.
  */
 type VueHooks = { VueHook: Hook }
-type getHooksAppFn = (app: LiveVueApp) => VueHooks
-type getHooksComponentsOptions = { initializeApp?: LiveVueOptions["setup"] }
+type getHooksAppFn = (app: LiveViteApp) => VueHooks
+type getHooksComponentsOptions = { initializeApp?: LiveViteOptions["setup"] }
 type getHooksComponentsFn = (components: ComponentMap, options?: getHooksComponentsOptions) => VueHooks
 
 export const getHooks: getHooksComponentsFn | getHooksAppFn = (
-  componentsOrApp: ComponentMap | LiveVueApp,
+  componentsOrApp: ComponentMap | LiveViteApp,
   options?: getHooksComponentsOptions
 ) => {
-  const app = migrateToLiveVueApp(componentsOrApp, options ?? {})
+  const app = migrateToLiveViteApp(componentsOrApp, options ?? {})
   return { VueHook: getVueHook(app) }
 }

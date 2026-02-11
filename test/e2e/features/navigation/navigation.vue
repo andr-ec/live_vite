@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { useLiveNavigation } from "live_vue"
+import { useLiveNavigation } from "live_vite"
 
 interface Props {
   params: Record<string, any>

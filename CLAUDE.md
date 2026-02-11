@@ -1,6 +1,8 @@
-# LiveVue Library Development
+# LiveVite Library Development
 
 Vue.js + Phoenix LiveView integration library. Version 1.0.0.
+
+> This is a living document. Claude sessions should update it with brief learnings as they arise. For detailed notes, see [docs/LEARNINGS.md](docs/LEARNINGS.md).
 
 ## Quick Reference
 
@@ -18,11 +20,11 @@ mix setup                         # First-time setup (deps + npm install)
 
 ```
 lib/
-├── live_vue.ex              # Main module, ~VUE sigil
-├── live_vue/components.ex   # <.vue> component, props handling
-├── live_vue/encoder.ex      # JSON encoding for Vue props
-├── live_vue/slots.ex        # Slot interoperability
-└── live_vue/ssr/            # SSR: NodeJS and ViteJS modes
+├── live_vite.ex              # Main module, ~VUE sigil
+├── live_vite/components.ex   # <.vue> component, props handling
+├── live_vite/encoder.ex      # JSON encoding for Vue props
+├── live_vite/slots.ex        # Slot interoperability
+└── live_vite/ssr/            # SSR: NodeJS and ViteJS modes
 assets/
 ├── index.ts                 # Main entry, getHooks()
 ├── hooks.ts                 # Phoenix LiveView hooks
@@ -47,15 +49,15 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 ```
 
 ### Vue Composables (TypeScript)
-- `useLiveVue()` - Access to `$live.pushEvent()`, props
+- `useLiveVite()` - Access to `$live.pushEvent()`, props
 - `useLiveEvent(name, handler)` - LiveView event subscription
 - `useLiveNavigation()` - `patch()` and `navigate()` helpers
 - `useLiveForm(formName)` - Server-side validation with Ecto
 - `useLiveUpload(uploadName)` - File upload integration
 
 ### SSR Modes
-- `LiveVue.SSR.NodeJS` - Node.js subprocess (default)
-- `LiveVue.SSR.ViteJS` - HTTP to Vite dev server (dev mode)
+- `LiveVite.SSR.NodeJS` - Node.js subprocess (default)
+- `LiveVite.SSR.ViteJS` - HTTP to Vite dev server (dev mode)
 
 ## E2E Testing
 
@@ -90,6 +92,10 @@ Commit format: `type: description` (feat/fix/docs/test/refactor/chore)
 No JS build step required. `package.json` exports point directly to TypeScript source files (`assets/*.ts`). Vite handles TS transpilation when consumers bundle their app.
 
 For hex.pm releases, `mix release.{patch,minor,major}` runs easy_publish (bumps version, updates CHANGELOG, commits, tags, pushes, publishes to Hex).
+
+## Reference Projects
+
+- **React examples**: `/home/andre/Documents/scratch/astro` — Use this Astro project as a reference when you need React component examples or patterns (e.g., for comparing React vs Vue approaches, porting features, or understanding equivalent React implementations).
 
 ## Notes
 

@@ -1,11 +1,11 @@
-defmodule LiveVue.E2E.StreamLive do
+defmodule LiveVite.E2E.StreamLive do
   @moduledoc false
   use Phoenix.LiveView
 
   def render(assigns) do
     ~H"""
     <div id="stream-test">
-      <LiveVue.vue items={@streams.items} v-component="stream_test" v-socket={@socket} />
+      <LiveVite.vue items={@streams.items} v-component="stream_test" v-socket={@socket} />
     </div>
     """
   end

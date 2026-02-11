@@ -1,7 +1,7 @@
-defmodule LiveVue.EncoderTest do
+defmodule LiveVite.EncoderTest do
   use ExUnit.Case
 
-  alias LiveVue.Encoder
+  alias LiveVite.Encoder
   alias Phoenix.LiveView.AsyncResult
   alias Phoenix.LiveView.UploadConfig
   alias Phoenix.LiveView.UploadEntry
@@ -312,7 +312,7 @@ defmodule LiveVue.EncoderTest do
     test "non-derived structs raise protocol error" do
       struct = %NotDerivedUser{name: "John", age: 30, email: "john@example.com"}
 
-      assert_raise Protocol.UndefinedError, ~r/LiveVue.Encoder protocol must always be explicitly implemented/, fn ->
+      assert_raise Protocol.UndefinedError, ~r/LiveVite.Encoder protocol must always be explicitly implemented/, fn ->
         Encoder.encode(struct)
       end
     end

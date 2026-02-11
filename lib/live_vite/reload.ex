@@ -1,4 +1,4 @@
-defmodule LiveVue.Reload do
+defmodule LiveVite.Reload do
   @moduledoc """
   Utilities for easier integration with Vite in development
   """
@@ -19,11 +19,11 @@ defmodule LiveVue.Reload do
 
     # TODO - maybe make it configurable in other way than by presence of vite_host config?
     ~H"""
-    <%= if Application.get_env(:live_vue, :vite_host) do %>
-      <script type="module" src={LiveVue.SSR.ViteJS.vite_path("@vite/client")}>
+    <%= if Application.get_env(:live_vite, :vite_host) do %>
+      <script type="module" src={LiveVite.SSR.ViteJS.vite_path("@vite/client")}>
       </script>
-      <link :for={path <- @stylesheets} rel="stylesheet" href={LiveVue.SSR.ViteJS.vite_path(path)} />
-      <script :for={path <- @javascripts} type="module" src={LiveVue.SSR.ViteJS.vite_path(path)}>
+      <link :for={path <- @stylesheets} rel="stylesheet" href={LiveVite.SSR.ViteJS.vite_path(path)} />
+      <script :for={path <- @javascripts} type="module" src={LiveVite.SSR.ViteJS.vite_path(path)}>
       </script>
     <% else %>
       {render_slot(@inner_block)}

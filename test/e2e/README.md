@@ -1,6 +1,6 @@
-# LiveVue End-to-End Tests
+# LiveVite End-to-End Tests
 
-This directory contains end-to-end tests for the LiveVue library using Playwright.
+This directory contains end-to-end tests for the LiveVite library using Playwright.
 
 ## Setup
 
@@ -25,7 +25,7 @@ Tests are organized as colocated features - each feature has its LiveView, Vue c
 test/e2e/
 ├── features/
 │   ├── basic/              # Basic counter test
-│   │   ├── live.ex         # LiveView module (LiveVue.E2E.TestLive)
+│   │   ├── live.ex         # LiveView module (LiveVite.E2E.TestLive)
 │   │   ├── counter.vue     # Vue component
 │   │   └── basic.spec.js   # Playwright test
 │   ├── form/               # Form validation tests
@@ -50,7 +50,7 @@ test/e2e/
 
 2. Add LiveView (`live.ex`):
    ```elixir
-   defmodule LiveVue.E2E.MyFeatureLive do
+   defmodule LiveVite.E2E.MyFeatureLive do
      use Phoenix.LiveView
 
      def mount(_params, _session, socket) do
@@ -59,7 +59,7 @@ test/e2e/
 
      def render(assigns) do
        ~H"""
-       <LiveVue.vue data={@data} v-component="my_component" v-socket={@socket} />
+       <LiveVite.vue data={@data} v-component="my_component" v-socket={@socket} />
        """
      end
    end

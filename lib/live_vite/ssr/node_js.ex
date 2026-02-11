@@ -1,4 +1,4 @@
-defmodule LiveVue.SSR.NodeJS do
+defmodule LiveVite.SSR.NodeJS do
   @moduledoc """
   Implements SSR by using NodeJS package.
 
@@ -7,10 +7,10 @@ defmodule LiveVue.SSR.NodeJS do
   and `package.json` build-server script.
   """
 
-  @behaviour LiveVue.SSR
+  @behaviour LiveVite.SSR
 
   def render(name, props, slots) do
-    filename = Application.get_env(:live_vue, :ssr_filepath, "./static/server.mjs")
+    filename = Application.get_env(:live_vite, :ssr_filepath, "./static/server.mjs")
 
     try do
       NodeJS.call!({filename, "render"}, [name, props, slots],
@@ -21,10 +21,10 @@ defmodule LiveVue.SSR.NodeJS do
       :exit, {:noproc, _} ->
         message = """
         NodeJS is not configured. Please add the following to your application.ex:
-        {NodeJS.Supervisor, [path: LiveVue.SSR.NodeJS.server_path(), pool_size: 4]},
+        {NodeJS.Supervisor, [path: LiveVite.SSR.NodeJS.server_path(), pool_size: 4]},
         """
 
-        raise %LiveVue.SSR.NotConfigured{message: message}
+        raise %LiveVite.SSR.NotConfigured{message: message}
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.UploadTestLive do
+defmodule LiveVite.E2E.UploadTestLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -9,7 +9,7 @@ defmodule LiveVue.E2E.UploadTestLive do
       <div id="upload-mode">Mode: {@upload_mode}</div>
       <div id="uploaded-count">Uploaded files: {length(@uploaded_files)}</div>
 
-      <LiveVue.vue
+      <LiveVite.vue
         id="upload-component"
         upload={@uploads.test_files}
         uploadedFiles={@uploaded_files}

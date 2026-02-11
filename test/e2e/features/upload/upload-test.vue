@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { useLiveUpload, UploadConfig, UploadEntry } from "live_vue"
+import { useLiveUpload, UploadConfig, UploadEntry } from "live_vite"
 
 interface Props {
   upload: UploadConfig

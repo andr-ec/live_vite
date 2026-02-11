@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.TestLive do
+defmodule LiveVite.E2E.TestLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -12,7 +12,7 @@ defmodule LiveVue.E2E.TestLive do
 
   def render(assigns) do
     ~H"""
-    <LiveVue.vue count={@counter} v-component="counter" v-socket={@socket} />
+    <LiveVite.vue count={@counter} v-component="counter" v-socket={@socket} />
     """
   end
 end

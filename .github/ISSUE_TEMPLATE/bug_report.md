@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help improve LiveVue
+about: Create a report to help improve LiveVite
 title: 'BUG: '
 labels: 'bug'
 assignees: ''
@@ -23,13 +23,13 @@ Please try to include reproduction steps, otherwise it might require more time t
 
 ```bash
 echo "
-LiveVue: $(mix hex.info live_vue | grep 'Locked version:' | cut -d ' ' -f3)
+LiveVite: $(mix hex.info live_vite | grep 'Locked version:' | cut -d ' ' -f3)
 Phoenix: $(mix hex.info phoenix | grep 'Locked version:' | cut -d ' ' -f3)
 Phoenix LiveView: $(mix hex.info phoenix_live_view | grep 'Locked version:' | cut -d ' ' -f3)
 Elixir: $(elixir -v | grep 'Elixir' | cut -d ' ' -f2)
 Node: $(node -v)
 Npm: $(npm -v)
-Vue: $(cd assets && npm list vue | grep -A1 'live_vue@' | grep ' vue@' | cut -d '@' -f2 | head)"
+Vue: $(cd assets && npm list vue | grep -A1 'live_vite@' | grep ' vue@' | cut -d '@' -f2 | head)"
 ```
 -->
 

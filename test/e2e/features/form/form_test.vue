@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLiveForm, type Form } from "live_vue"
+import { useLiveForm, type Form } from "live_vite"
 
 // Define a simple form structure for testing
 type TestForm = {

@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.EventReplyTestLive do
+defmodule LiveVite.E2E.EventReplyTestLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -12,7 +12,7 @@ defmodule LiveVue.E2E.EventReplyTestLive do
         <div id="last-message">Last message: {@last_message || "none"}</div>
       </div>
 
-      <LiveVue.vue
+      <LiveVite.vue
         id="event-reply-component"
         counter={@counter}
         v-component="event_reply_test"

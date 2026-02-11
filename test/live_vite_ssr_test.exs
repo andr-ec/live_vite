@@ -1,7 +1,7 @@
-defmodule LiveVue.SSRTest do
+defmodule LiveVite.SSRTest do
   use ExUnit.Case
 
-  alias LiveVue.SSR
+  alias LiveVite.SSR
 
   defmodule MockSSRRenderer do
     @moduledoc false
@@ -33,7 +33,7 @@ defmodule LiveVue.SSRTest do
   setup do
     # Clean up config after each test
     on_exit(fn ->
-      Application.delete_env(:live_vue, :ssr_module)
+      Application.delete_env(:live_vite, :ssr_module)
     end)
 
     :ok
@@ -41,7 +41,7 @@ defmodule LiveVue.SSRTest do
 
   describe "render/3 when ssr_module is not configured" do
     test "returns empty map with empty strings" do
-      Application.delete_env(:live_vue, :ssr_module)
+      Application.delete_env(:live_vite, :ssr_module)
 
       result = SSR.render("AnyComponent", %{}, %{})
 
@@ -49,7 +49,7 @@ defmodule LiveVue.SSRTest do
     end
 
     test "ignores props and slots when not configured" do
-      Application.delete_env(:live_vue, :ssr_module)
+      Application.delete_env(:live_vite, :ssr_module)
 
       result = SSR.render("Component", %{"key" => "value"}, %{"slot" => "content"})
 
@@ -59,7 +59,7 @@ defmodule LiveVue.SSRTest do
 
   describe "render/3 when ssr_module is configured" do
     setup do
-      Application.put_env(:live_vue, :ssr_module, MockSSRRenderer)
+      Application.put_env(:live_vite, :ssr_module, MockSSRRenderer)
       :ok
     end
 
@@ -104,7 +104,7 @@ defmodule LiveVue.SSRTest do
 
   describe "render/3 telemetry" do
     setup do
-      Application.put_env(:live_vue, :ssr_module, MockSSRRenderer)
+      Application.put_env(:live_vite, :ssr_module, MockSSRRenderer)
 
       # Attach telemetry handler
       handler_id = :telemetry_test_handler
@@ -112,7 +112,7 @@ defmodule LiveVue.SSRTest do
 
       :telemetry.attach(
         handler_id,
-        [:live_vue, :ssr, :start],
+        [:live_vite, :ssr, :start],
         fn event, measurements, metadata, _config ->
           send(test_pid, {:telemetry_event, event, measurements, metadata})
         end,
@@ -132,7 +132,7 @@ defmodule LiveVue.SSRTest do
 
       SSR.render("NoPreload", props, slots)
 
-      assert_receive {:telemetry_event, [:live_vue, :ssr, :start], _measurements, metadata}
+      assert_receive {:telemetry_event, [:live_vite, :ssr, :start], _measurements, metadata}
 
       assert metadata.component == "NoPreload"
       assert metadata.props == %{"key" => "value"}
@@ -143,8 +143,8 @@ defmodule LiveVue.SSRTest do
       SSR.render("WithPreload", %{}, %{})
       SSR.render("NoPreload", %{}, %{})
 
-      assert_receive {:telemetry_event, [:live_vue, :ssr, :start], _, %{component: "WithPreload"}}
-      assert_receive {:telemetry_event, [:live_vue, :ssr, :start], _, %{component: "NoPreload"}}
+      assert_receive {:telemetry_event, [:live_vite, :ssr, :start], _, %{component: "WithPreload"}}
+      assert_receive {:telemetry_event, [:live_vite, :ssr, :start], _, %{component: "NoPreload"}}
     end
   end
 
@@ -170,7 +170,7 @@ defmodule LiveVue.SSRTest do
     end
 
     setup do
-      Application.put_env(:live_vue, :ssr_module, EdgeCaseRenderer)
+      Application.put_env(:live_vite, :ssr_module, EdgeCaseRenderer)
       :ok
     end
 
@@ -202,7 +202,7 @@ defmodule LiveVue.SSRTest do
     end
   end
 
-  describe "LiveVue.SSR.NotConfigured exception" do
+  describe "LiveVite.SSR.NotConfigured exception" do
     test "can be raised with a message" do
       assert_raise SSR.NotConfigured, "SSR is not configured", fn ->
         raise SSR.NotConfigured, message: "SSR is not configured"

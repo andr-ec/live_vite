@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Setting up LiveVue workspace..."
+echo "🔧 Setting up LiveVite workspace..."
 
 # Check for required tools
 if ! command -v mix &> /dev/null; then

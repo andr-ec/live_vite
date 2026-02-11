@@ -1,6 +1,6 @@
-# How LiveVue Works
+# How LiveVite Works
 
-This guide explains the architecture and inner workings of LiveVue, helping you understand the design decisions and implementation details.
+This guide explains the architecture and inner workings of LiveVite, helping you understand the design decisions and implementation details.
 
 > #### Practical Usage {: .tip}
 >
@@ -8,17 +8,17 @@ This guide explains the architecture and inner workings of LiveVue, helping you 
 
 ## Overview
 
-LiveVue bridges two different paradigms: **Phoenix LiveView** with its server-side state management and HTML over WebSockets, and **Vue.js** with its client-side reactivity and virtual DOM. The challenge is making these two systems work together seamlessly while maintaining the benefits of both.
+LiveVite bridges two different paradigms: **Phoenix LiveView** with its server-side state management and HTML over WebSockets, and **Vue.js** with its client-side reactivity and virtual DOM. The challenge is making these two systems work together seamlessly while maintaining the benefits of both.
 
 ## Architecture Diagram
 
-![LiveVue flow](./images/lifecycle.png)
+![LiveVite flow](./images/lifecycle.png)
 
 ## Component Lifecycle
 
 ### 1. Server-Side Rendering (SSR)
 
-When a LiveView renders a Vue component, LiveVue generates a special `div` element with component configuration stored in data attributes. Here's what the server generates:
+When a LiveView renders a Vue component, LiveVite generates a special `div` element with component configuration stored in data attributes. Here's what the server generates:
 
 ```elixir
 # In your LiveView template
@@ -48,7 +48,7 @@ The component name, props serialized as JSON, event handlers, and slots are all 
 When the page loads and Phoenix LiveView connects, the `VueHook` activates. Here's the simplified flow from `hooks.ts`:
 
 ```typescript
-export const getVueHook = ({ resolve, setup }: LiveVueApp): LiveHookInternal => ({
+export const getVueHook = ({ resolve, setup }: LiveViteApp): LiveHookInternal => ({
   async mounted() {
     const componentName = this.el.getAttribute("data-name") as string
     const component = await resolve(componentName)
@@ -84,13 +84,13 @@ updated() {
 
 #### Props Diff Construction (Server-Side)
 
-LiveVue implements an efficient diffing system that minimizes data transmission by sending only changed properties as JSON patches. Here's how it works:
+LiveVite implements an efficient diffing system that minimizes data transmission by sending only changed properties as JSON patches. Here's how it works:
 
 **1. Change Detection**
 LiveView's `__changed__` tracking system identifies which assigns have been modified since the last render. For simple value changes, `__changed__` contains `true` for the changed key. For complex data structures (maps, lists, structs), it stores the previous value to enable deep diffing.
 
 **2. Struct Encoding**
-Before diffing can occur, any custom structs are converted to maps using the `LiveVue.Encoder` protocol. This ensures consistent data structures that can be reliably compared and serialized.
+Before diffing can occur, any custom structs are converted to maps using the `LiveVite.Encoder` protocol. This ensures consistent data structures that can be reliably compared and serialized.
 
 **3. Diff Calculation**
 The system processes each changed prop differently based on its complexity:
@@ -127,7 +127,7 @@ This diff-based approach provides several advantages:
 - Reduced memory pressure (existing objects are patched rather than replaced)
 - Faster UI updates (smaller changes mean less work for Vue's virtual DOM)
 
-The combination of server-side diff calculation and client-side patch application ensures that LiveVue can handle complex, nested data structures efficiently while maintaining real-time reactivity.
+The combination of server-side diff calculation and client-side patch application ensures that LiveVite can handle complex, nested data structures efficiently while maintaining real-time reactivity.
 
 **Disabling Diffs**
 For testing scenarios or debugging purposes, diffing can be disabled globally via the `enable_props_diff: false` configuration option, or per-component using the `v-diff={false}` attribute. When disabled, complete props are always sent instead of diffs, which can be useful for comprehensive testing or troubleshooting complex prop updates. See [Configuration](configuration.md#testing-configuration) for details.
@@ -138,7 +138,7 @@ For testing scenarios or debugging purposes, diffing can be disabled globally vi
 
 LiveView manages authoritative state and passes it to Vue components as props. When LiveView assigns are updated, the HEEX template generates new prop data, only changed props are sent over WebSocket, and the Vue component automatically re-renders with new props.
 
-The server-side extraction logic in `live_vue.ex` ensures efficient updates:
+The server-side extraction logic in `live_vite.ex` ensures efficient updates:
 
 ```elixir
 defp extract(assigns, type) do
@@ -152,9 +152,9 @@ defp extract(assigns, type) do
 end
 ```
 
-#### Struct Encoding with LiveVue.Encoder
+#### Struct Encoding with LiveVite.Encoder
 
-Before props are serialized and sent to the client, custom structs must be encoded using the `LiveVue.Encoder` protocol. This protocol:
+Before props are serialized and sent to the client, custom structs must be encoded using the `LiveVite.Encoder` protocol. This protocol:
 
 1. **Converts structs to maps** for JSON serialization
 2. **Enables efficient diffing** by providing a consistent data structure
@@ -164,7 +164,7 @@ Before props are serialized and sent to the client, custom structs must be encod
 ```elixir
 # Example: User struct with encoder protocol
 defmodule User do
-  @derive {LiveVue.Encoder, except: [:password]}
+  @derive {LiveVite.Encoder, except: [:password]}
   defstruct [:name, :email, :password, :created_at]
 end
 
@@ -198,10 +198,10 @@ There are three main approaches for handling events:
 <button phx-click="increment">Click me</button>
 ```
 
-**Programmatic Events** use `useLiveVue().pushEvent()` for complex logic:
+**Programmatic Events** use `useLiveVite().pushEvent()` for complex logic:
 
 ```javascript
-const live = useLiveVue()
+const live = useLiveVite()
 live.pushEvent("custom_event", { data: "value" })
 ```
 
@@ -221,7 +221,7 @@ The event handlers are processed on the client side by invoking `liveSocket.exec
 
 ### Hook-Based Integration
 
-LiveVue uses Phoenix LiveView's hook system rather than a separate JavaScript framework. This provides seamless integration within LiveView's lifecycle, automatic cleanup when elements are removed, and natural compatibility with all Phoenix events.
+LiveVite uses Phoenix LiveView's hook system rather than a separate JavaScript framework. This provides seamless integration within LiveView's lifecycle, automatic cleanup when elements are removed, and natural compatibility with all Phoenix events.
 
 ### Reactive Props and Slots
 
@@ -231,11 +231,11 @@ Props and slots are made reactive using Vue's reactivity system, enabling effici
 
 ### Selective Updates
 
-LiveVue minimizes data transmission by tracking only modified props, slots, and handlers. The JSON encoding is optimized to prevent redundant work, and Phoenix updates only specific data attributes rather than re-rendering entire elements.
+LiveVite minimizes data transmission by tracking only modified props, slots, and handlers. The JSON encoding is optimized to prevent redundant work, and Phoenix updates only specific data attributes rather than re-rendering entire elements.
 
 #### Efficient Struct Diffing
 
-The `LiveVue.Encoder` protocol enables efficient diffing of complex data structures:
+The `LiveVite.Encoder` protocol enables efficient diffing of complex data structures:
 
 ```elixir
 # For complex types, use Jsonpatch to find minimal diff
@@ -246,7 +246,7 @@ old_value ->
   |> update_in([Access.all(), :path], fn path -> "/#{k}#{path}" end)
 ```
 
-By converting structs to consistent map representations, LiveVue can:
+By converting structs to consistent map representations, LiveVite can:
 - Calculate minimal JSON patches for prop updates
 - Avoid sending unchanged nested data
 - Reduce WebSocket payload sizes
@@ -258,7 +258,7 @@ For example, when only a user's email changes:
 # Instead of sending the entire user struct
 %{user: %{name: "John", email: "new@example.com", created_at: ~U[...]}}
 
-# LiveVue sends only the changed field
+# LiveVite sends only the changed field
 [%{op: "replace", path: "/user/email", value: "new@example.com"}]
 ```
 
@@ -268,7 +268,7 @@ Server-side rendering is intelligently applied only during initial page loads (d
 
 ### Automatic Preloading
 
-During server-side rendering, LiveVue automatically uses the Vite-generated manifest file to inject resource preload links (`<link rel="modulepreload">` and others) for all the assets required by a component. This ensures that the browser can download necessary JavaScript and CSS files earlier in the page load process, improving perceived performance and reducing the time to an interactive page.
+During server-side rendering, LiveVite automatically uses the Vite-generated manifest file to inject resource preload links (`<link rel="modulepreload">` and others) for all the assets required by a component. This ensures that the browser can download necessary JavaScript and CSS files earlier in the page load process, improving perceived performance and reducing the time to an interactive page.
 
 ### Memory Management
 
@@ -310,7 +310,7 @@ const getSlots = (el: HTMLElement): Record<string, () => any> => {
 
 ### Development Tools
 
-LiveVue works with standard development tools including Vue DevTools for full component inspection and debugging, Phoenix LiveView Dashboard for server-side state monitoring, and browser DevTools for network and WebSocket inspection.
+LiveVite works with standard development tools including Vue DevTools for full component inspection and debugging, Phoenix LiveView Dashboard for server-side state monitoring, and browser DevTools for network and WebSocket inspection.
 
 ### Debug Features
 
@@ -326,15 +326,15 @@ Vue components can't contain other Vue components, Phoenix hooks don't work insi
 
 The Vue runtime adds approximately 34KB gzipped to your application. There's an additional abstraction layer between Phoenix and the client, and it requires understanding both Phoenix LiveView and Vue.js.
 
-### When to Use LiveVue
+### When to Use LiveVite
 
-LiveVue is a good fit for complex client-side interactions, rich UI components with local state, leveraging the Vue ecosystem (animations, charts, etc.), and teams with Vue.js expertise.
+LiveVite is a good fit for complex client-side interactions, rich UI components with local state, leveraging the Vue ecosystem (animations, charts, etc.), and teams with Vue.js expertise.
 
 Consider alternatives for simple forms and basic interactions, applications prioritizing minimal JavaScript, or teams without Vue.js experience.
 
 ## Next Steps
 
-Now that you understand how LiveVue works:
+Now that you understand how LiveVite works:
 
 - [Configuration](configuration.md) to customize behavior and SSR settings
 - [Basic Usage](basic_usage.md) for practical patterns and examples

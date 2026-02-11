@@ -1,18 +1,18 @@
-defmodule LiveVue.SSR.NotConfigured do
+defmodule LiveVite.SSR.NotConfigured do
   @moduledoc false
 
   defexception [:message]
 end
 
-defmodule LiveVue.SSR do
+defmodule LiveVite.SSR do
   @moduledoc """
   A behaviour for rendering Vue components server-side.
 
   To define a custom renderer, change the application config in `config.exs`:
 
-      config :live_vue, ssr_module: MyCustomSSRModule
+      config :live_vite, ssr_module: MyCustomSSRModule
 
-  Exposes a telemetry span for each render under key `[:live_vue, :ssr]`
+  Exposes a telemetry span for each render under key `[:live_vite, :ssr]`
   """
 
   require Logger
@@ -35,7 +35,7 @@ defmodule LiveVue.SSR do
 
   @spec render(component_name, props, slots) :: render_response | no_return
   def render(name, props, slots) do
-    case Application.get_env(:live_vue, :ssr_module, nil) do
+    case Application.get_env(:live_vite, :ssr_module, nil) do
       nil ->
         %{preloadLinks: "", html: ""}
 
@@ -43,7 +43,7 @@ defmodule LiveVue.SSR do
         meta = %{component: name, props: props, slots: slots}
 
         body =
-          :telemetry.span([:live_vue, :ssr], meta, fn ->
+          :telemetry.span([:live_vite, :ssr], meta, fn ->
             {mod.render(name, props, slots), meta}
           end)
 

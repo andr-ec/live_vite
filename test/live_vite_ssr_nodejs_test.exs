@@ -1,7 +1,7 @@
-defmodule LiveVue.SSR.NodeJSTest do
+defmodule LiveVite.SSR.NodeJSTest do
   use ExUnit.Case
 
-  alias LiveVue.SSR.NodeJS, as: NodeJSRenderer
+  alias LiveVite.SSR.NodeJS, as: NodeJSRenderer
 
   @moduletag :nodejs_ssr
 
@@ -17,10 +17,10 @@ defmodule LiveVue.SSR.NodeJSTest do
       start_supervised!({NodeJS.Supervisor, [path: @test_support_path, pool_size: 1]})
 
       # Configure to use our test server - just the filename since NodeJS resolves relative to path
-      Application.put_env(:live_vue, :ssr_filepath, @test_server_filename)
+      Application.put_env(:live_vite, :ssr_filepath, @test_server_filename)
 
       on_exit(fn ->
-        Application.delete_env(:live_vue, :ssr_filepath)
+        Application.delete_env(:live_vite, :ssr_filepath)
       end)
 
       :ok
@@ -59,13 +59,13 @@ defmodule LiveVue.SSR.NodeJSTest do
     test "raises NotConfigured when NodeJS.Supervisor is not running" do
       # Make sure no supervisor is running
       # Configure to use our test server filename
-      Application.put_env(:live_vue, :ssr_filepath, @test_server_filename)
+      Application.put_env(:live_vite, :ssr_filepath, @test_server_filename)
 
       on_exit(fn ->
-        Application.delete_env(:live_vue, :ssr_filepath)
+        Application.delete_env(:live_vite, :ssr_filepath)
       end)
 
-      assert_raise LiveVue.SSR.NotConfigured,
+      assert_raise LiveVite.SSR.NotConfigured,
                    ~r/NodeJS is not configured/,
                    fn ->
                      NodeJSRenderer.render("TestComponent", %{}, %{})

@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.FormTestLive do
+defmodule LiveVite.E2E.FormTestLive do
   @moduledoc false
   use Phoenix.LiveView
 
@@ -10,7 +10,7 @@ defmodule LiveVue.E2E.FormTestLive do
 
     import Ecto.Changeset
 
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     @primary_key false
     embedded_schema do
       field(:bio, :string)
@@ -54,7 +54,7 @@ defmodule LiveVue.E2E.FormTestLive do
 
     import Ecto.Changeset
 
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     @primary_key false
     embedded_schema do
       field(:title, :string)
@@ -86,7 +86,7 @@ defmodule LiveVue.E2E.FormTestLive do
 
     import Ecto.Changeset
 
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     @primary_key false
     embedded_schema do
       field(:name, :string)
@@ -145,7 +145,7 @@ defmodule LiveVue.E2E.FormTestLive do
       |> Map.put(:action, :validate)
       |> to_form(as: :test_form)
 
-    LiveVue.Encoder.encode(form)
+    LiveVite.Encoder.encode(form)
 
     {:noreply, assign(socket, :form, form)}
   end
@@ -180,7 +180,7 @@ defmodule LiveVue.E2E.FormTestLive do
   def render(assigns) do
     ~H"""
     <div id="form-test">
-      <LiveVue.vue form={@form} v-component="form_test" v-socket={@socket} />
+      <LiveVite.vue form={@form} v-component="form_test" v-socket={@socket} />
     </div>
     """
   end

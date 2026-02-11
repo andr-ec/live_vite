@@ -1,25 +1,25 @@
 # Client-Side API Reference
 
-This guide documents all client-side utilities, composables, and APIs available in LiveVue for Vue components.
+This guide documents all client-side utilities, composables, and APIs available in LiveVite for Vue components.
 
 > #### Getting Started {: .tip}
 >
-> New to LiveVue? Check out [Basic Usage](basic_usage.md) for fundamental patterns before diving into the API details.
+> New to LiveVite? Check out [Basic Usage](basic_usage.md) for fundamental patterns before diving into the API details.
 
 ## Composables
 
-LiveVue provides several Vue Composables to make interacting with the LiveView instance from your components easier and more declarative. These should be your first choice when working inside `.vue` files.
+LiveVite provides several Vue Composables to make interacting with the LiveView instance from your components easier and more declarative. These should be your first choice when working inside `.vue` files.
 
-### `useLiveVue()`
+### `useLiveVite()`
 
-The `useLiveVue()` composable is the standard way to get access to the LiveView hook instance within your component's `<script setup>` block. This is the method you should use when you need to call hook methods from your script logic (e.g., in watchers, lifecycle hooks, or other functions).
+The `useLiveVite()` composable is the standard way to get access to the LiveView hook instance within your component's `<script setup>` block. This is the method you should use when you need to call hook methods from your script logic (e.g., in watchers, lifecycle hooks, or other functions).
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
 // Must be called inside setup
-const live = useLiveVue()
+const live = useLiveVite()
 
 // Now you can use `live` anywhere in your script
 live.pushEvent("some_event")
@@ -30,7 +30,7 @@ live.pushEvent("some_event")
 
 The `useLiveEvent` composable is the recommended way to listen for server-pushed events within a component. It automatically registers an event handler when the component is mounted and cleans it up when the component is unmounted.
 
-It is a wrapper around `useLiveVue().handleEvent()` that saves you the boilerplate of using `onMounted` and `onUnmounted`.
+It is a wrapper around `useLiveVite().handleEvent()` that saves you the boilerplate of using `onMounted` and `onUnmounted`.
 
 **Parameters:**
 - `event` (string): Event name to listen for
@@ -40,7 +40,7 @@ It is a wrapper around `useLiveVue().handleEvent()` that saves you the boilerpla
 
 ```html
 <script setup>
-import { useLiveEvent } from 'live_vue'
+import { useLiveEvent } from 'live_vite'
 import { useToast } from 'primevue/usetoast'; // example toast library
 
 const toast = useToast();
@@ -71,8 +71,8 @@ This is useful for scenarios where you need to trigger navigation from your scri
 </template>
 
 <script setup>
-import { useLiveNavigation } from 'live_vue';
-import { useLiveEvent } from 'live_vue';
+import { useLiveNavigation } from 'live_vite';
+import { useLiveEvent } from 'live_vite';
 
 const { patch, navigate } = useLiveNavigation();
 
@@ -114,7 +114,7 @@ The `useLiveUpload()` composable provides a Vue-friendly API for handling Phoeni
 
 ```html
 <script setup>
-import { useLiveUpload } from 'live_vue'
+import { useLiveUpload } from 'live_vite'
 
 interface Props {
   upload: UploadConfig
@@ -157,7 +157,7 @@ const { entries, showFilePicker, submit, cancel, progress, valid } = useLiveUplo
 
 ```html
 <script setup>
-import { useLiveUpload } from 'live_vue'
+import { useLiveUpload } from 'live_vite'
 
 const props = defineProps<{ upload: UploadConfig }>()
 const { addFiles, entries, showFilePicker } = useLiveUpload(() => props.upload, { submitEvent: "save" })
@@ -209,7 +209,7 @@ The `useLiveForm()` composable provides comprehensive form handling with server-
 
 ```html
 <script setup>
-import { useLiveForm } from 'live_vue'
+import { useLiveForm } from 'live_vite'
 
 type UserForm = {
   name: string
@@ -265,7 +265,7 @@ The `useLiveConnection` composable provides reactive monitoring of the LiveView 
 
 ```html
 <script setup>
-import { useLiveConnection } from 'live_vue'
+import { useLiveConnection } from 'live_vite'
 import { watch } from 'vue'
 
 const { connectionState, isConnected } = useLiveConnection()
@@ -312,11 +312,11 @@ watch(connectionState, (state) => {
 
 ```html
 <script setup>
-import { useLiveConnection, useLiveVue } from 'live_vue'
+import { useLiveConnection, useLiveVite } from 'live_vite'
 import { ref, computed, watch } from 'vue'
 
 const { connectionState, isConnected } = useLiveConnection()
-const live = useLiveVue()
+const live = useLiveVite()
 
 const showOfflineBanner = ref(false)
 
@@ -422,7 +422,7 @@ This is perfect for scenarios like data fetching, API calls, form submissions, o
 
 ```html
 <script setup lang="ts">
-import { useEventReply } from 'live_vue'
+import { useEventReply } from 'live_vite'
 
 // Simple data fetching
 const { data, isLoading, execute } = useEventReply<User>('fetch_user')
@@ -456,7 +456,7 @@ const fetchUser = async (userId: number) => {
 
 ```html
 <script setup lang="ts">
-import { useEventReply } from 'live_vue'
+import { useEventReply } from 'live_vite'
 
 interface ChatMessage {
   id: number
@@ -554,13 +554,13 @@ While composables are recommended for most component-based use cases, you can al
 
 There are two primary ways to interact with the LiveView instance from your Vue component:
 
-#### 1. `useLiveVue()` Composable
+#### 1. `useLiveVite()` Composable
 
-As seen above, `useLiveVue()` returns the raw hook instance.
+As seen above, `useLiveVite()` returns the raw hook instance.
 
 #### 2. `$live` Global Property
 
-For convenience, the LiveView hook instance is also exposed directly to your Vue templates as a global property named `$live`. This is ideal for simple, one-off calls directly from an element's event handler, as it saves you from importing and calling `useLiveVue()` when you don't need the instance in your script.
+For convenience, the LiveView hook instance is also exposed directly to your Vue templates as a global property named `$live`. This is ideal for simple, one-off calls directly from an element's event handler, as it saves you from importing and calling `useLiveVite()` when you don't need the instance in your script.
 
 ```html
 <template>
@@ -571,11 +571,11 @@ For convenience, the LiveView hook instance is also exposed directly to your Vue
 </template>
 ```
 
-Both `useLiveVue()` and `$live` return the same hook instance, which is fully typed and provides access to the methods below.
+Both `useLiveVite()` and `$live` return the same hook instance, which is fully typed and provides access to the methods below.
 
 ## Hook Methods
 
-The hook instance (returned by `useLiveVue()` or accessed via `$live`) provides the following methods:
+The hook instance (returned by `useLiveVite()` or accessed via `$live`) provides the following methods:
 
 ##### pushEvent(event, payload?, callback?)
 
@@ -583,8 +583,8 @@ Push an event to the LiveView server.
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
-const live = useLiveVue()
+import { useLiveVite } from 'live_vite'
+const live = useLiveVite()
 
 // Basic usage - increment a counter
 live.pushEvent("increment", { amount: 1 })
@@ -610,9 +610,9 @@ live.pushEvent("refresh")
 ```html
 <script setup>
 import { watch, debounce } from 'vue'
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
-const live = useLiveVue()
+const live = useLiveVite()
 const content = ref('')
 
 // Auto-save draft every 2 seconds after user stops typing
@@ -640,9 +640,9 @@ Listen for events pushed from the LiveView server.
 ```html
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
-const live = useLiveVue()
+const live = useLiveVite()
 
 // Listen for server-sent notifications
 const callbackRef = live.handleEvent("notification", (payload) => {
@@ -680,8 +680,8 @@ Push an event to a specific LiveView component.
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
-const live = useLiveVue()
+import { useLiveVite } from 'live_vite'
+const live = useLiveVite()
 
 // Push to specific form component
 live.pushEventTo("#user-form", "validate", formData)
@@ -702,8 +702,8 @@ Low-level method for handling file uploads to LiveView. This is part of the Phoe
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
-const live = useLiveVue()
+import { useLiveVite } from 'live_vite'
+const live = useLiveVite()
 
 // Handle file upload
 const fileInput = ref<HTMLInputElement>()
@@ -720,9 +720,9 @@ const handleUpload = () => {
 ```html
 <script setup>
 import { ref } from 'vue'
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
-const live = useLiveVue()
+const live = useLiveVite()
 const isDragging = ref(false)
 
 const handleDrop = (event) => {
@@ -768,8 +768,8 @@ Upload files to a specific LiveView component. This is part of the Phoenix LiveV
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
-const live = useLiveVue()
+import { useLiveVite } from 'live_vite'
+const live = useLiveVite()
 
 live.uploadTo("#profile-form", "avatar", files)
 </script>
@@ -783,7 +783,7 @@ The `Link` component provides a convenient wrapper around Phoenix LiveView's nav
 
 ```html
 <script setup>
-import { Link } from 'live_vue'
+import { Link } from 'live_vite'
 </script>
 
 <template>
@@ -812,9 +812,9 @@ import { Link } from 'live_vue'
 
 ## Utility Functions
 
-### createLiveVue(config)
+### createLiveVite(config)
 
-Creates a LiveVue application instance. For complete configuration options, see [Configuration](configuration.md#vue-application-setup).
+Creates a LiveVite application instance. For complete configuration options, see [Configuration](configuration.md#vue-application-setup).
 
 ### findComponent(components, name)
 
@@ -823,7 +823,7 @@ A flexible helper function to resolve a component from a map of available compon
 This is particularly useful when using Vite's `import.meta.glob` to import all components, as it allows for a simple and conventional way to organize and resolve them.
 
 ```typescript
-import { findComponent } from 'live_vue'
+import { findComponent } from 'live_vite'
 
 // Given a components map from Vite:
 const components = import.meta.glob(["./**/*.vue", "../../lib/**/*.vue"]);
@@ -847,15 +847,15 @@ If the component is not found, it throws an error listing all available componen
 
 **Returns:** The resolved Vue component, or throws an error if not found.
 
-### getHooks(liveVueApp)
+### getHooks(liveViteApp)
 
-Generates Phoenix LiveView hooks for LiveVue integration.
+Generates Phoenix LiveView hooks for LiveVite integration.
 
 ```typescript
-import { getHooks } from 'live_vue'
-import liveVueApp from '../vue'
+import { getHooks } from 'live_vite'
+import liveViteApp from '../vue'
 
-const hooks = getHooks(liveVueApp)
+const hooks = getHooks(liveViteApp)
 
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: hooks
@@ -864,7 +864,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
 
 ## AsyncResult Type
 
-LiveVue provides full TypeScript support for Phoenix LiveView's `AsyncResult` struct, allowing type-safe handling of async operations in your Vue components.
+LiveVite provides full TypeScript support for Phoenix LiveView's `AsyncResult` struct, allowing type-safe handling of async operations in your Vue components.
 
 ### Overview
 
@@ -878,7 +878,7 @@ LiveVue provides full TypeScript support for Phoenix LiveView's `AsyncResult` st
 ### Usage Examples
 
 ```typescript
-import type { AsyncResult } from 'live_vue'
+import type { AsyncResult } from 'live_vite'
 
 // Basic async result for a single value
 interface Props {
@@ -947,7 +947,7 @@ The `AsyncResult` will automatically be encoded and passed to your Vue component
 
 ### Type Definitions
 
-LiveVue provides comprehensive TypeScript support:
+LiveVite provides comprehensive TypeScript support:
 
 ```typescript
 // Component props typing
@@ -968,12 +968,12 @@ const emit = defineEmits<{
   'settings-changed': [{ key: string, value: any }]
 }>()
 
-// useLiveVue typing
-const live = useLiveVue()
+// useLiveVite typing
+const live = useLiveVite()
 // live is fully typed with all available methods
 
-// Upload and AsyncResult types (imported from 'live_vue')
-import type { UploadConfig, UploadEntry, AsyncResult } from 'live_vue'
+// Upload and AsyncResult types (imported from 'live_vite')
+import type { UploadConfig, UploadEntry, AsyncResult } from 'live_vite'
 
 interface UploadProps {
   upload: UploadConfig
@@ -1023,7 +1023,7 @@ if (props.userAsyncResult.failed) {
 ```typescript
 // Composable for real-time data sync with {:reply, data, socket} tuple
 export const useRealtimeData = (dataType: string) => {
-  const live = useLiveVue()
+  const live = useLiveVite()
   const data = ref(null)
   const loading = ref(true)
   const error = ref(null)
@@ -1046,7 +1046,7 @@ For file uploads, use the built-in [`useLiveUpload()`](#useliveuploaduploadconfi
 
 ```html
 <script setup>
-import { useLiveUpload } from 'live_vue'
+import { useLiveUpload } from 'live_vite'
 
 const props = defineProps<{ upload: UploadConfig }>()
 
@@ -1087,10 +1087,10 @@ const {
 
 ```html
 <script setup>
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 import { debounce } from 'lodash-es'
 
-const live = useLiveVue()
+const live = useLiveVite()
 
 // Debounce search input
 const debouncedSearch = debounce((query: string) => {

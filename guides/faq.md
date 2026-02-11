@@ -2,11 +2,11 @@
 
 ## General Questions
 
-### Why LiveVue?
+### Why LiveVite?
 
 Phoenix LiveView makes it possible to create rich, interactive web apps without writing JS. However, when you need complex client-side functionality, you might end up writing lots of imperative, hard-to-maintain hooks.
 
-LiveVue allows you to create hybrid apps where:
+LiveVite allows you to create hybrid apps where:
 - Server maintains the session state
 - Vue handles complex client-side interactions
 - Both sides communicate seamlessly
@@ -20,26 +20,26 @@ Common use cases:
 
 ### What's with the Name?
 
-Yes, "LiveVue" sounds exactly like "LiveView" - we noticed slightly too late to change! Some helpful Reddit users pointed it out 😉
+Yes, "LiveVite" sounds exactly like "LiveView" - we noticed slightly too late to change! Some helpful Reddit users pointed it out 😉
 
-We suggest referring to it as "LiveVuejs" in speech to avoid confusion.
+We suggest referring to it as "LiveVitejs" in speech to avoid confusion.
 
 ## Technical Details
 
-### How Does LiveVue Work?
+### How Does LiveVite Work?
 
 The implementation is straightforward:
 
-1. **Rendering**: Phoenix [renders](https://github.com/Valian/live_vue/blob/main/lib/live_vue.ex) a `div` with:
+1. **Rendering**: Phoenix [renders](https://github.com/Valian/live_vite/blob/main/lib/live_vite.ex) a `div` with:
    - Props as data attributes
    - Slots as child elements
    - Event handlers configured
    - SSR content (when enabled)
 
-2. **Initialization**: The [LiveVue hook](https://github.com/Valian/live_vue/blob/main/assets/hooks.ts):
+2. **Initialization**: The [LiveVite hook](https://github.com/Valian/live_vite/blob/main/assets/hooks.ts):
    - Mounts on element creation
    - Sets up event handlers
-   - Injects the hook for `useLiveVue`
+   - Injects the hook for `useLiveVite`
    - Mounts the Vue component
 
 3. **Updates**:
@@ -54,9 +54,9 @@ Note: Hooks fire only after `app.js` loads, which may cause slight delays in ini
 
 For a deeper dive into the architecture, see [Architecture](architecture.md).
 
-### What Optimizations Does LiveVue Use?
+### What Optimizations Does LiveVite Use?
 
-LiveVue implements several performance optimizations:
+LiveVite implements several performance optimizations:
 
 1. **Selective Updates**:
    - Only changed props/handlers/slots are sent to client
@@ -69,7 +69,7 @@ LiveVue implements several performance optimizations:
    String interpolation prevents sending `data-props=` on each update
 
 3. **Struct Encoding and Diffing**:
-   - Uses `LiveVue.Encoder` protocol to convert structs to maps
+   - Uses `LiveVite.Encoder` protocol to convert structs to maps
    - Enables efficient JSON patch calculations (using [Jsonpatch](https://github.com/corka149/jsonpatch) library)
    - Reduces payload sizes by sending only changed fields
 
@@ -77,9 +77,9 @@ LiveVue implements several performance optimizations:
    - Only changed props are sent over the WebSocket
    - Uses JSON Patch format for minimal payloads
 
-### What is the LiveVue.Encoder Protocol?
+### What is the LiveVite.Encoder Protocol?
 
-The `LiveVue.Encoder` protocol is a crucial part of LiveVue's architecture that safely converts Elixir structs to maps before JSON serialization. It serves several important purposes:
+The `LiveVite.Encoder` protocol is a crucial part of LiveVite's architecture that safely converts Elixir structs to maps before JSON serialization. It serves several important purposes:
 
 **Why it's needed:**
 - **Security**: Prevents accidental exposure of sensitive struct fields
@@ -89,7 +89,7 @@ The `LiveVue.Encoder` protocol is a crucial part of LiveVue's architecture that 
 **How to use it:**
 ```elixir
 defmodule User do
-  @derive LiveVue.Encoder
+  @derive LiveVite.Encoder
   defstruct [:name, :email, :age]
 end
 ```
@@ -98,7 +98,7 @@ For complete implementation details including field selection, custom implementa
 
 Without implementing this protocol, you'll get a `Protocol.UndefinedError` when trying to pass custom structs as props. This is by design - it's a safety feature to prevent accidental data exposure.
 
-The protocol is similar to `Jason.Encoder` but converts structs to maps instead of JSON strings, which allows LiveVue to calculate minimal diffs and send only changed data over WebSocket connections.
+The protocol is similar to `Jason.Encoder` but converts structs to maps instead of JSON strings, which allows LiveVite to calculate minimal diffs and send only changed data over WebSocket connections.
 
 ### Why is SSR Useful?
 
@@ -115,7 +115,7 @@ Important notes:
 
 For complete SSR configuration, see [Configuration](configuration.md#server-side-rendering-ssr).
 
-### Can I nest LiveVue components inside each other?
+### Can I nest LiveVite components inside each other?
 
 No, it is not possible to nest a `<.vue>` component rendered by LiveView inside another `<.vue>` component's slot.
 
@@ -123,7 +123,7 @@ No, it is not possible to nest a `<.vue>` component rendered by LiveView inside 
 
 This limitation exists because of how slots are handled. The content you place inside a component's slot in your `.heex` template is rendered into raw HTML on the server *before* being sent to the client. When the parent Vue component is mounted on the client, it receives this HTML as a simple string.
 
-Since the nested component's HTML is just inert markup at that point, Phoenix LiveView's hooks (including the `VueHook` that powers LiveVue) cannot be attached to it, and the nested Vue component will never be initialized.
+Since the nested component's HTML is just inert markup at that point, Phoenix LiveView's hooks (including the `VueHook` that powers LiveVite) cannot be attached to it, and the nested Vue component will never be initialized.
 
 **Workarounds:**
 
@@ -140,10 +140,10 @@ Since the nested component's HTML is just inert markup at that point, Phoenix Li
     <.UserProfile user={@user} v-socket={@socket} />
     ```
 
-2.  **Standard Vue Components:** You can nest standard (non-LiveVue) Vue components inside a LiveVue component. These child components are defined entirely within the parent's Vue template and do not have a corresponding `<.vue>` tag in LiveView. They can receive props from their LiveVue parent and manage their own state as usual.
+2.  **Standard Vue Components:** You can nest standard (non-LiveVite) Vue components inside a LiveVite component. These child components are defined entirely within the parent's Vue template and do not have a corresponding `<.vue>` tag in LiveView. They can receive props from their LiveVite parent and manage their own state as usual.
 
     ```html
-    <!-- Parent: MyLiveVueComponent.vue -->
+    <!-- Parent: MyLiveViteComponent.vue -->
     <script setup>
     import StandardChild from './StandardChild.vue';
     defineProps(['someData']);
@@ -160,10 +160,10 @@ Since the nested component's HTML is just inert markup at that point, Phoenix Li
 
 ### How Do I Use TypeScript?
 
-LiveVue provides full TypeScript support out of the box. The Igniter installer sets up TypeScript automatically with proper configuration for:
+LiveVite provides full TypeScript support out of the box. The Igniter installer sets up TypeScript automatically with proper configuration for:
 - Vue single-file components with `<script setup lang="ts">`
 - Type-safe props with `defineProps<T>()`
-- LiveVue composables with full type inference
+- LiveVite composables with full type inference
 
 For `app.js`, since it's harder to convert directly:
 ```javascript
@@ -180,7 +180,7 @@ For complete TypeScript setup, see [Configuration](configuration.md#typescript-s
 
 ### Where Should I Put Vue Files?
 
-Vue files in LiveVue are similar to HEEX templates. You have two main options:
+Vue files in LiveVite are similar to HEEX templates. You have two main options:
 
 1. **Default Location**: `assets/vue` directory
 2. **Colocated**: Next to your LiveViews in `lib/my_app_web`
@@ -196,7 +196,7 @@ For advanced component organization, see [Configuration](configuration.md#compon
 
 ## Comparison with Other Solutions
 
-### How Does LiveVue Compare to LiveSvelte?
+### How Does LiveVite Compare to LiveSvelte?
 
 Both serve similar purposes with similar implementations, but have key differences:
 
@@ -228,7 +228,7 @@ For a detailed comparison with other solutions, see [Comparison](comparison.md).
 
 ## Additional Resources
 
-- [LiveVue Examples](https://livevue.skalecki.dev) - Live demo website with interactive examples
-- [GitHub Discussions](https://github.com/Valian/live_vue/discussions)
+- [LiveVite Examples](https://livevue.skalecki.dev) - Live demo website with interactive examples
+- [GitHub Discussions](https://github.com/Valian/live_vite/discussions)
 - [Vue Documentation](https://vuejs.org/)
 - [Phoenix LiveView Documentation](https://hexdocs.pm/phoenix_live_view)

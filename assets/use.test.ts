@@ -10,7 +10,7 @@ vi.mock("vue", () => ({
 }))
 
 // Import after mocking
-import { useLiveVue, useLiveEvent, useLiveNavigation, useEventReply, liveInjectKey } from "./use"
+import { useLiveVite, useLiveEvent, useLiveNavigation, useEventReply, liveInjectKey } from "./use"
 import { inject } from "vue"
 
 const mockInject = inject as any
@@ -29,7 +29,7 @@ const createMockLiveHook = (): LiveHook => ({
   el: document.createElement("div"),
 } as unknown as LiveHook)
 
-describe("useLiveVue", () => {
+describe("useLiveVite", () => {
   let mockLive: LiveHook
 
   beforeEach(() => {
@@ -40,22 +40,22 @@ describe("useLiveVue", () => {
   it("should return LiveHook when properly provided", () => {
     mockInject.mockReturnValue(mockLive)
 
-    const result = useLiveVue()
+    const result = useLiveVite()
 
     expect(mockInject).toHaveBeenCalledWith(liveInjectKey)
     expect(result).toBe(mockLive)
   })
 
-  it("should throw error when LiveVue is not provided", () => {
+  it("should throw error when LiveVite is not provided", () => {
     mockInject.mockReturnValue(undefined)
 
-    expect(() => useLiveVue()).toThrow("LiveVue not provided. Are you using this inside a LiveVue component?")
+    expect(() => useLiveVite()).toThrow("LiveVite not provided. Are you using this inside a LiveVite component?")
   })
 
-  it("should throw error when LiveVue is null", () => {
+  it("should throw error when LiveVite is null", () => {
     mockInject.mockReturnValue(null)
 
-    expect(() => useLiveVue()).toThrow("LiveVue not provided. Are you using this inside a LiveVue component?")
+    expect(() => useLiveVite()).toThrow("LiveVite not provided. Are you using this inside a LiveVite component?")
   })
 })
 
@@ -337,11 +337,11 @@ describe("integration tests", () => {
     mockInject.mockReturnValue(mockLive)
   })
 
-  it("should work together - useLiveVue and useLiveEvent", () => {
+  it("should work together - useLiveVite and useLiveEvent", () => {
     const callback = vi.fn()
     
     // First get the live instance
-    const live = useLiveVue()
+    const live = useLiveVite()
     expect(live).toBe(mockLive)
     
     // Then use it for event handling
@@ -350,9 +350,9 @@ describe("integration tests", () => {
     expect(mockLive.handleEvent).toHaveBeenCalledWith("test-event", callback)
   })
 
-  it("should work together - useLiveVue and useLiveNavigation", () => {
+  it("should work together - useLiveVite and useLiveNavigation", () => {
     // First get the live instance
-    const live = useLiveVue()
+    const live = useLiveVite()
     expect(live).toBe(mockLive)
     
     // Then use it for navigation

@@ -1,8 +1,8 @@
 import Config
 
-config :live_vue,
-  # for dev LiveVue.SSR.ViteJS
-  # for prod LiveVue.SSR.NodeJS
+config :live_vite,
+  # for dev LiveVite.SSR.ViteJS
+  # for prod LiveVite.SSR.NodeJS
   ssr_module: nil,
 
   # if we should by default use ssr or not.
@@ -12,12 +12,12 @@ config :live_vue,
   # in dev most likely http://localhost:5173
   vite_host: nil,
 
-  # it's relative to LiveVue.SSR.NodeJS.server_path, so "priv" directory
+  # it's relative to LiveVite.SSR.NodeJS.server_path, so "priv" directory
   # that file is created by Vite "build-server" command
   ssr_filepath: "./static/server.mjs",
 
   # it's a name of gettext module that will be used for translations
-  # it's used in LiveVue.Form protocol implementation
+  # it's used in LiveVite.Form protocol implementation
   # by default it's not-enabled
   gettext_backend: nil,
 

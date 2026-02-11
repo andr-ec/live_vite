@@ -13,8 +13,8 @@ describe("findComponent", () => {
 
   it("should find exact component match for 'workspace'", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/workspace.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
     }
 
     const result = findComponent(components, "workspace")
@@ -24,8 +24,8 @@ describe("findComponent", () => {
 
   it("should NOT match 'workspace' to 'create-workspace'", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
-      "../../lib/live_vue/web/pages/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockWorkspaceComponent,
     }
 
     const result = findComponent(components, "workspace")
@@ -35,8 +35,8 @@ describe("findComponent", () => {
 
   it("should find 'create-workspace' component when requested", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/workspace.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
     }
 
     const result = findComponent(components, "create-workspace")
@@ -54,7 +54,7 @@ describe("findComponent", () => {
 
   it("should handle index.vue files", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/workspace/index.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace/index.vue": MockWorkspaceComponent,
     }
 
     const result = findComponent(components, "workspace")
@@ -64,8 +64,8 @@ describe("findComponent", () => {
 
   it("should handle index.vue files with multiple nested paths", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/admin/workspace/index.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/pages/public/dashboard/index.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/admin/workspace/index.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/public/dashboard/index.vue": MockCreateWorkspaceComponent,
     }
 
     const result1 = findComponent(components, "workspace")
@@ -77,8 +77,8 @@ describe("findComponent", () => {
 
   it("should avoid false matches due to substring matching", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
-      "../../lib/live_vue/web/pages/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/create-workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockWorkspaceComponent,
     }
 
     const result = findComponent(components, "workspace")
@@ -88,8 +88,8 @@ describe("findComponent", () => {
 
   it("should find component by path suffix", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/components/admin/workspace.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/components/public/workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/components/admin/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/components/public/workspace.vue": MockCreateWorkspaceComponent,
     }
 
     const result1 = findComponent(components, "admin/workspace")
@@ -101,8 +101,8 @@ describe("findComponent", () => {
 
   it("should throw ambiguous error when filename matches multiple components", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/components/workspace/index.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/components/create/workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/components/workspace/index.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/components/create/workspace.vue": MockCreateWorkspaceComponent,
     }
 
     expect(() => findComponent(components, "workspace")).toThrow("Component 'workspace' is ambiguous")
@@ -110,8 +110,8 @@ describe("findComponent", () => {
 
   it("should throw ambiguous error for multiple index.vue matches", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/admin/workspace/index.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/pages/user/workspace/index.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/admin/workspace/index.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/user/workspace/index.vue": MockCreateWorkspaceComponent,
     }
 
     expect(() => findComponent(components, "workspace")).toThrow("Component 'workspace' is ambiguous")
@@ -119,8 +119,8 @@ describe("findComponent", () => {
 
   it("should handle mix of index.vue and regular .vue files", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/workspace/index.vue": MockWorkspaceComponent,
-      "../../lib/live_vue/web/pages/workspace.vue": MockCreateWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace/index.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockCreateWorkspaceComponent,
     }
 
     expect(() => findComponent(components, "workspace")).toThrow("Component 'workspace' is ambiguous")
@@ -128,7 +128,7 @@ describe("findComponent", () => {
 
   it("should handle empty component name gracefully", () => {
     const components: ComponentMap = {
-      "../../lib/live_vue/web/pages/workspace.vue": MockWorkspaceComponent,
+      "../../lib/live_vite/web/pages/workspace.vue": MockWorkspaceComponent,
     }
 
     expect(() => findComponent(components, "")).toThrow("Component '' not found!")

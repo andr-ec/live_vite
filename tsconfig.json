@@ -12,7 +12,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "live_vue": ["./assets/index"]
+      "live_vite": ["./assets/index"]
     }
   },
   "include": ["assets/**/*.ts"],

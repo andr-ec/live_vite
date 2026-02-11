@@ -1,5 +1,5 @@
 {
-  "name": "live_vue",
+  "name": "live_vite",
   "version": "1.0.0",
   "description": "E2E reactivity for Vue and LiveView",
   "license": "MIT",
@@ -49,7 +49,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Valian/live_vue.git"
+    "url": "git://github.com/Valian/live_vite.git"
   },
   "files": [
     "README.md",

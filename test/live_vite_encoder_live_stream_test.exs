@@ -1,7 +1,7 @@
-defmodule LiveVue.Encoder.LiveStreamTest do
+defmodule LiveVite.Encoder.LiveStreamTest do
   use ExUnit.Case
 
-  alias LiveVue.Encoder
+  alias LiveVite.Encoder
 
   defmodule TestUser do
     @moduledoc false

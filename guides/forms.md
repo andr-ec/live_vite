@@ -1,10 +1,10 @@
 # Forms and Validation
 
-This guide covers the `useLiveForm` composable for building complex forms with server-side validation, nested objects, and dynamic arrays in LiveVue.
+This guide covers the `useLiveForm` composable for building complex forms with server-side validation, nested objects, and dynamic arrays in LiveVite.
 
 > #### Getting Started {: .tip}
 >
-> New to LiveVue? Check out [Basic Usage](basic_usage.md) for fundamental patterns before diving into forms.
+> New to LiveVite? Check out [Basic Usage](basic_usage.md) for fundamental patterns before diving into forms.
 
 ## Quick Example
 
@@ -13,7 +13,7 @@ Here's how a typical form setup looks with `useLiveForm`:
 **Vue Component:**
 ```html
 <script setup lang="ts">
-import { useLiveForm, type Form } from 'live_vue'
+import { useLiveForm, type Form } from 'live_vite'
 
 type UserForm = {
   name: string
@@ -158,7 +158,7 @@ Create a Vue component that uses `useLiveForm`:
 
 ```html
 <script setup lang="ts">
-import { useLiveForm, type Form } from 'live_vue'
+import { useLiveForm, type Form } from 'live_vite'
 
 type ContactForm = {
   name: string
@@ -514,7 +514,7 @@ Usage:
 
 ### Checkbox Fields
 
-LiveVue supports three checkbox patterns that automatically handle different use cases:
+LiveVite supports three checkbox patterns that automatically handle different use cases:
 
 #### 1. Boolean Checkbox
 
@@ -553,7 +553,7 @@ const plan = form.field('plan', { type: 'checkbox', value: 'premium' })
 
 #### 3. Multiple Checkboxes (Array)
 
-When you create multiple checkboxes for the same field path with different values, LiveVue automatically detects this as a multi-checkbox scenario and manages an array:
+When you create multiple checkboxes for the same field path with different values, LiveVite automatically detects this as a multi-checkbox scenario and manages an array:
 
 ```html
 <script setup>
@@ -1181,7 +1181,7 @@ watch(needsShippingAddress, (needsShipping) => {
 
 ## Provide/Inject API (Advanced)
 
-For building reusable form components, LiveVue provides `useField()` and `useArrayField()` hooks that work with Vue's provide/inject system.
+For building reusable form components, LiveVite provides `useField()` and `useArrayField()` hooks that work with Vue's provide/inject system.
 
 > #### Advanced API {: .warning}
 >
@@ -1215,7 +1215,7 @@ Create reusable field components that access the parent form:
 ```html
 <!-- UserNameInput.vue -->
 <script setup lang="ts">
-import { useField } from 'live_vue'
+import { useField } from 'live_vite'
 
 interface Props {
   path?: string
@@ -1251,7 +1251,7 @@ Create reusable array field managers:
 ```html
 <!-- SkillsManager.vue -->
 <script setup lang="ts">
-import { useArrayField } from 'live_vue'
+import { useArrayField } from 'live_vite'
 
 interface Props {
   path?: string
@@ -1292,7 +1292,7 @@ Build sophisticated reusable form sections:
 ```html
 <!-- AddressInput.vue -->
 <script setup lang="ts">
-import { useField } from 'live_vue'
+import { useField } from 'live_vite'
 
 interface Props {
   basePath: string      // e.g., 'billing_address' or 'shipping_address'
@@ -1347,7 +1347,7 @@ Usage:
 ```html
 <!-- Component using injection -->
 <script setup>
-import { useField, useArrayField } from 'live_vue'
+import { useField, useArrayField } from 'live_vite'
 
 // These composables require a parent component that called useLiveForm()
 const nameField = useField('name')
@@ -1370,7 +1370,7 @@ This error indicates you need to either:
 
 ### Ecto Changeset Integration
 
-LiveVue forms work seamlessly with Ecto changesets:
+LiveVite forms work seamlessly with Ecto changesets:
 
 ```elixir
 defmodule MyApp.User do
@@ -1683,7 +1683,7 @@ A basic form demonstrating core concepts:
 ```html
 <!-- ContactForm.vue -->
 <script setup lang="ts">
-import { useLiveForm, type Form } from 'live_vue'
+import { useLiveForm, type Form } from 'live_vite'
 
 type ContactForm = {
   name: string
@@ -1917,9 +1917,9 @@ See the patterns earlier in this guide for implementing each of these features, 
 
 ## Next Steps
 
-Now that you understand LiveVue forms, you might want to explore:
+Now that you understand LiveVite forms, you might want to explore:
 
 - [Client-Side API](client_api.md) for detailed API reference and advanced patterns
 - [Testing](testing.md) for testing form components and validation logic
 - [Component Reference](component_reference.md) for LiveView-side form integration
-- [Basic Usage](basic_usage.md) for other LiveVue patterns and features
+- [Basic Usage](basic_usage.md) for other LiveVite patterns and features

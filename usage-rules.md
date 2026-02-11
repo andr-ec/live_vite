@@ -1,6 +1,6 @@
-# LiveVue Usage Rules
+# LiveVite Usage Rules
 
-This document outlines best practices, conventions, and usage patterns for the LiveVue library. Following these guidelines will help you build maintainable, performant applications that leverage Vue.js components within Phoenix LiveView.
+This document outlines best practices, conventions, and usage patterns for the LiveVite library. Following these guidelines will help you build maintainable, performant applications that leverage Vue.js components within Phoenix LiveView.
 
 **Key Principle**: The LiveView holds the source of truth. Vue components are reactive views of server state with their own client-side state.
 
@@ -83,16 +83,16 @@ onMounted(async () => {
 
 ### Custom Struct Encoding
 
-**DO** implement the `LiveVue.Encoder` protocol for custom structs:
+**DO** implement the `LiveVite.Encoder` protocol for custom structs:
 
 ```elixir
 defmodule MyApp.User do
   # You can derive the protocol if it doesn't need any customization
-  @derive {LiveVue.Encoder, only: [:id, :name, :email]}
+  @derive {LiveVite.Encoder, only: [:id, :name, :email]}
   defstruct [:id, :name, :email, :private_field]
 end
 
-defimpl LiveVue.Encoder, for: MyApp.User do
+defimpl LiveVite.Encoder, for: MyApp.User do
   def encode(user) do
     %{
       id: user.id,
@@ -119,7 +119,7 @@ end
 
 ```elixir
 defmodule MyApp.Live.ContactForm do
-  use LiveVue, :live_view
+  use LiveVite, :live_view
 
   def handle_event("like_post", %{"post_id" => post_id}, socket) do
     # handle the event here
@@ -130,13 +130,13 @@ end
 
 ### Client-side events
 
-**Use** `useLiveVue().pushEvent()` or in the template `$live.pushEvent()` API for dynamic events. `useLiveVue()` and `$live` are the same thing - Vue phoenix hook instance.
+**Use** `useLiveVite().pushEvent()` or in the template `$live.pushEvent()` API for dynamic events. `useLiveVite()` and `$live` are the same thing - Vue phoenix hook instance.
 
 ```vue
 <script setup>
-import { useLiveVue } from 'live_vue'
+import { useLiveVite } from 'live_vite'
 
-const live = useLiveVue()
+const live = useLiveVite()
 
 const handleCustomAction = (data) => {
   live.pushEvent('custom_action', data)
@@ -155,7 +155,7 @@ const handleCustomAction = (data) => {
 
 ```vue
 <script setup>
-import { useLiveEvent } from 'live_vue'
+import { useLiveEvent } from 'live_vite'
 
 useLiveEvent('notification', (data) => {
   // Handle server-sent notification
@@ -166,7 +166,7 @@ useLiveEvent('notification', (data) => {
 
 ## Server-Side Rendering (SSR)
 
-By default, live_vue uses SSR.**DO** disable SSR for components with client-only dependencies:
+By default, live_vite uses SSR.**DO** disable SSR for components with client-only dependencies:
 
 ```elixir
 <.vue
@@ -182,7 +182,7 @@ By default, live_vue uses SSR.**DO** disable SSR for components with client-only
 
 ```vue
 <script setup>
-import { Link } from 'live_vue'
+import { Link } from 'live_vite'
 </script>
 
 <template>
@@ -203,7 +203,7 @@ import { Link } from 'live_vue'
 
 ```vue
 <script setup>
-import { useLiveNavigation } from 'live_vue'
+import { useLiveNavigation } from 'live_vite'
 
 const { patch, navigate } = useLiveNavigation()
 
@@ -228,7 +228,7 @@ const goToPage = (path) => navigate(path)
 
 ```vue
 <script setup>
-import { useLiveUpload } from 'live_vue'
+import { useLiveUpload } from 'live_vite'
 
 const {
   entries,
@@ -285,9 +285,9 @@ test "renders user profile component", %{conn: conn} do
   {:ok, view, _html} = live(conn, "/users/1")
 
   # Get Vue component by name or id. Optional if there is only one component on the page.
-  vue_config = LiveVue.Test.get_vue(view, name: "UserProfile")
-  # or by ID: vue_config = LiveVue.Test.get_vue(view, id: "user-profile-1")
-  # or without any arguments: vue_config = LiveVue.Test.get_vue(view)
+  vue_config = LiveVite.Test.get_vue(view, name: "UserProfile")
+  # or by ID: vue_config = LiveVite.Test.get_vue(view, id: "user-profile-1")
+  # or without any arguments: vue_config = LiveVite.Test.get_vue(view)
 
   assert vue_config.props["name"] == "John Doe"
   assert vue_config.props["email"] == "john@example.com"
@@ -296,7 +296,7 @@ test "renders user profile component", %{conn: conn} do
   render_hook(view, "toggle_details", %{"details" => true})
 
   # Details should now be true.
-  %{props: props} = LiveVue.Test.get_vue(view)
+  %{props: props} = LiveVite.Test.get_vue(view)
   assert props["details"] == true
 end
 ```
@@ -319,7 +319,7 @@ Solution:
 
 ```vue
 <script setup>
-import { Form, useLiveForm } from 'live_vue'
+import { Form, useLiveForm } from 'live_vite'
 
 type UserForm = {
   name: string
@@ -448,7 +448,7 @@ interface UseLiveFormReturn<T extends object> {
 
 ```elixir
 defmodule MyApp.Live.FormTest do
-  use LiveVue, :live_view
+  use LiveVite, :live_view
 
   def render(assigns) do
     ~H"""

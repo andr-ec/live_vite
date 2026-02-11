@@ -1,6 +1,6 @@
 # Getting Started
 
-Now that you have LiveVue installed, let's create your first Vue component and integrate it with LiveView.
+Now that you have LiveVite installed, let's create your first Vue component and integrate it with LiveView.
 
 ## Creating Your First Component
 
@@ -145,7 +145,7 @@ Now your counter will smoothly animate when the value changes! This showcases ho
 
 ## Key Concepts
 
-This example demonstrates several key LiveVue features:
+This example demonstrates several key LiveVite features:
 
 - **Props Flow**: LiveView sends the `count` value to Vue as a prop
 - **Event Handling**: Vue emits an `inc` event with `phx-click` and `phx-value-diff` attributes
@@ -155,18 +155,18 @@ This example demonstrates several key LiveVue features:
 
 Basic diagram of the flow:
 
-![LiveVue flow](./images/lifecycle.png)
+![LiveVite flow](./images/lifecycle.png)
 
 If you want to understand how it works in depth, see [Architecture](architecture.md).
 
 ### Working with Custom Structs
 
-When you start passing more complex data structures as props, you'll need to implement the `LiveVue.Encoder` protocol:
+When you start passing more complex data structures as props, you'll need to implement the `LiveVite.Encoder` protocol:
 
 ```elixir
 # For any custom structs you want to pass as props
 defmodule User do
-  @derive LiveVue.Encoder
+  @derive LiveVite.Encoder
   defstruct [:name, :email, :age]
 end
 
@@ -189,14 +189,14 @@ For more details, see [Component Reference](component_reference.md#custom-struct
 > #### Good to know {: .info}
 >
 > - Install the [Vue DevTools browser extension](https://devtools.vuejs.org/getting-started/installation) for debugging
-> - In development, LiveVue enables Hot Module Replacement for instant component updates
+> - In development, LiveVite enables Hot Module Replacement for instant component updates
 > - Structure your app with LiveView managing application state and Vue handling UI interactions
 > - For complex UIs with lots of local state, prefer Vue components over LiveView hooks
 
 ## Next Steps
 
 Now that you have your first component working, explore:
-- [Live Examples](https://livevue.skalecki.dev) - Interactive demos to see LiveVue in action
+- [Live Examples](https://livevue.skalecki.dev) - Interactive demos to see LiveVite in action
 - [Basic Usage](basic_usage.md) for more patterns and the ~VUE sigil
 - [Component Reference](component_reference.md) for complete syntax documentation
 - [FAQ](faq.md) for common questions and troubleshooting

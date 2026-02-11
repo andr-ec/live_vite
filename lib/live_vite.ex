@@ -1,6 +1,6 @@
-defmodule LiveVue do
+defmodule LiveVite do
   @moduledoc """
-  LiveVue provides seamless integration between Phoenix LiveView and Vue.js components.
+  LiveVite provides seamless integration between Phoenix LiveView and Vue.js components.
 
   ## Installation and Configuration
 
@@ -15,7 +15,7 @@ defmodule LiveVue do
 
   > #### Tip {: .tip}
   >
-  > Value of `v-component` will be directly passed to `resolve` function of the `createLiveVue` instance.
+  > Value of `v-component` will be directly passed to `resolve` function of the `createLiveVite` instance.
   > It should return Vue component or a promise that resolves to a Vue component.
   > In a standard setup, you can find it in `assets/vue/index.js`.
 
@@ -41,20 +41,20 @@ defmodule LiveVue do
 
   import Phoenix.HTML
 
-  alias LiveVue.Encoder
-  alias LiveVue.Slots
-  alias LiveVue.SSR
+  alias LiveVite.Encoder
+  alias LiveVite.Slots
+  alias LiveVite.SSR
   alias Phoenix.LiveView
   alias Phoenix.LiveView.LiveStream
 
   require Logger
 
-  @ssr_default Application.compile_env(:live_vue, :ssr, true)
-  @diff_default Application.compile_env(:live_vue, :enable_props_diff, true)
+  @ssr_default Application.compile_env(:live_vite, :ssr, true)
+  @diff_default Application.compile_env(:live_vite, :enable_props_diff, true)
 
   defmacro __using__(_opts) do
     quote do
-      import LiveVue
+      import LiveVite
     end
   end
 
@@ -161,7 +161,7 @@ defmodule LiveVue do
   # Uses Phoenix LiveView's __changed__ tracking to identify what props have changed.
   # For simple values, generates direct replace operations.
   # For complex values (maps, lists), uses Jsonpatch.diff to find minimal changes.
-  # Uses LiveVue.Encoder to safely encode structs before diffing.
+  # Uses LiveVite.Encoder to safely encode structs before diffing.
   defp calculate_props_diff(props, %{__changed__: changed}) do
     # For simple types: changed[k] == true
     # For complex types: changed[k] is the old value
@@ -299,8 +299,8 @@ defmodule LiveVue do
   defp id(name) do
     # a small trick to avoid collisions of IDs but keep them consistent across dead and live render
     # id(name) is called only once during the whole LiveView lifecycle because it's not using any assigns
-    number = Process.get(:live_vue_counter, 1)
-    Process.put(:live_vue_counter, number + 1)
+    number = Process.get(:live_vite_counter, 1)
+    Process.put(:live_vite_counter, number + 1)
     "#{name}-#{number}"
   end
 
@@ -334,7 +334,7 @@ defmodule LiveVue do
 
     quote do
       ~H"""
-      <LiveVue.vue
+      <LiveVite.vue
         class={get_in(assigns, [:vue_opts, :class])}
         v-component={"_build/#{__MODULE__}"}
         v-socket={get_socket(assigns)}

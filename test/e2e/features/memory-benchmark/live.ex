@@ -1,4 +1,4 @@
-defmodule LiveVue.E2E.MemoryBenchmarkLive do
+defmodule LiveVite.E2E.MemoryBenchmarkLive do
   @moduledoc """
   LiveView for benchmarking memory usage with Vue components.
   Allows dynamically adjusting the number of items in props.
@@ -14,7 +14,7 @@ defmodule LiveVue.E2E.MemoryBenchmarkLive do
     ~H"""
     <div class="memory-benchmark">
       <h1>Memory Benchmark</h1>
-      <LiveVue.vue
+      <LiveVite.vue
         items={@items}
         memory={@memory}
         v-component="memory-benchmark/item-list"

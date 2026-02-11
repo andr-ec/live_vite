@@ -14,7 +14,7 @@ import {
   readonly,
   type ComputedRef,
 } from "vue"
-import { useLiveVue } from "./use"
+import { useLiveVite } from "./use"
 import {
   parsePath,
   getValueByPath,
@@ -279,7 +279,7 @@ export function useLiveForm<T extends object>(
   })
 
   // LiveView integration
-  const live = useLiveVue()
+  const live = useLiveVite()
 
   // Immediate change handler
   const sendChanges = async (): Promise<any> => {

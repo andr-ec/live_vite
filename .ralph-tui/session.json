@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "sessionId": "60b15e9d-b95b-4b21-a7d5-ddbd1d21a9dd",
+  "status": "running",
+  "startedAt": "2026-02-11T03:08:40.787Z",
+  "updatedAt": "2026-02-11T03:26:43.089Z",
+  "currentIteration": 0,
+  "maxIterations": 0,
+  "tasksCompleted": 0,
+  "isPaused": false,
+  "agentPlugin": "claude",
+  "trackerState": {
+    "plugin": "beads",
+    "epicId": "live-vite-8gy",
+    "totalTasks": 18,
+    "tasks": [
+      {
+        "id": "live-vite-8gy.6",
+        "title": "US-006: Update Elixir components module for multi-framework support",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.5",
+        "title": "US-005: Refactor Vite plugin for multi-framework support",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.4",
+        "title": "US-004: Refactor hooks.ts to be framework-agnostic",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.3",
+        "title": "US-003: Extract Vue code into a Vue renderer",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.2",
+        "title": "US-002: Define the framework renderer interface",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.1",
+        "title": "US-001: Rename library from live_vue to live_vite",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.14",
+        "title": "US-014: Implement React useLiveUpload hook",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.13",
+        "title": "US-013: Implement React useLiveForm hook",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.12",
+        "title": "US-012: Implement React useLiveNavigation hook",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.11",
+        "title": "US-011: Implement React useLiveEvent hook",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.10",
+        "title": "US-010: Implement React useLive hook",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.9",
+        "title": "US-009: Implement React server renderer (SSR)",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.8",
+        "title": "US-008: Implement React client renderer",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.7",
+        "title": "US-007: Implement ~VUE and ~REACT sigils",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.17",
+        "title": "US-017: Add React E2E tests for streams and advanced features",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.16",
+        "title": "US-016: Add React E2E tests for forms",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.15",
+        "title": "US-015: Add React E2E tests for basic features",
+        "status": "open",
+        "completedInSession": false
+      },
+      {
+        "id": "live-vite-8gy.18",
+        "title": "US-018: Update documentation and package metadata",
+        "status": "open",
+        "completedInSession": false
+      }
+    ]
+  },
+  "iterations": [],
+  "skippedTaskIds": [],
+  "cwd": "/home/andre/Documents/scratch/live_vue",
+  "activeTaskIds": [],
+  "subagentPanelVisible": true
+}

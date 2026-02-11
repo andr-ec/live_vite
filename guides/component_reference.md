@@ -64,7 +64,7 @@ All other attributes are passed as props to the Vue component. They are JSON-enc
 
 ## Component Shortcuts
 
-When using `LiveVue.Components`, you can use shortcut syntax instead of the full `v-component` attribute.
+When using `LiveVite.Components`, you can use shortcut syntax instead of the full `v-component` attribute.
 
 ### Setup
 
@@ -72,7 +72,7 @@ When using `LiveVue.Components`, you can use shortcut syntax instead of the full
 # In lib/my_app_web.ex
 defp html_helpers do
   quote do
-    use LiveVue.Components, vue_root: [
+    use LiveVite.Components, vue_root: [
       "./assets/vue",
       "./lib/my_app_web"
     ]
@@ -252,7 +252,7 @@ For complete SSR configuration options, see [Configuration](configuration.md#ser
 
 ## Props Diffing
 
-LiveVue optimizes performance by sending only prop changes (diffs) instead of complete props on every update. This behavior can be controlled both globally and per-component.
+LiveVite optimizes performance by sending only prop changes (diffs) instead of complete props on every update. This behavior can be controlled both globally and per-component.
 
 ### Global Configuration
 
@@ -260,7 +260,7 @@ For complete diffing configuration, see [Configuration - Testing Configuration](
 
 ```elixir
 # config/config.exs
-config :live_vue,
+config :live_vite,
   enable_props_diff: true  # Default: true
 ```
 
@@ -326,11 +326,11 @@ Phoenix LiveView upload configurations are automatically encoded for use with th
 | `%Phoenix.LiveView.UploadConfig{}` | `UploadConfig` | `upload={@uploads.documents}` |
 | `%Phoenix.LiveView.UploadEntry{}` | `UploadEntry` | Automatically included in config |
 
-These types are pre-configured with the `LiveVue.Encoder` protocol and work seamlessly with file upload functionality.
+These types are pre-configured with the `LiveVite.Encoder` protocol and work seamlessly with file upload functionality.
 
-### Custom Structs with LiveVue.Encoder
+### Custom Structs with LiveVite.Encoder
 
-When passing custom structs as props, you must implement the `LiveVue.Encoder` protocol to ensure they are properly serialized and can be diffed efficiently. This protocol is similar to `Jason.Encoder` but converts structs to maps instead of JSON strings.
+When passing custom structs as props, you must implement the `LiveVite.Encoder` protocol to ensure they are properly serialized and can be diffed efficiently. This protocol is similar to `Jason.Encoder` but converts structs to maps instead of JSON strings.
 
 #### Deriving the Protocol
 
@@ -339,26 +339,26 @@ The simplest way to implement the protocol is by deriving it:
 ```elixir
 # Encode all fields except :__struct__
 defmodule User do
-  @derive LiveVue.Encoder
+  @derive LiveVite.Encoder
   defstruct [:name, :email, :age]
 end
 
 # Encode only specific fields
 defmodule User do
-  @derive {LiveVue.Encoder, only: [:name, :email]}
+  @derive {LiveVite.Encoder, only: [:name, :email]}
   defstruct [:name, :email, :password, :admin_notes]
 end
 
 # Encode all fields except sensitive ones
 defmodule User do
-  @derive {LiveVue.Encoder, except: [:password, :secret_key]}
+  @derive {LiveVite.Encoder, except: [:password, :secret_key]}
   defstruct [:name, :email, :password, :secret_key]
 end
 
 # For Ecto schemas with associations that may not be loaded
 defmodule Post do
   use Ecto.Schema
-  @derive {LiveVue.Encoder, except: [:__meta__], nilify_not_loaded: true}
+  @derive {LiveVite.Encoder, except: [:__meta__], nilify_not_loaded: true}
 
   schema "posts" do
     field :title, :string
@@ -378,7 +378,7 @@ defmodule User do
   defstruct [:name, :email, :password, :profile]
 end
 
-defimpl LiveVue.Encoder, for: User do
+defimpl LiveVite.Encoder, for: User do
   def encode(user, opts) do
     %{
       name: user.name,
@@ -386,7 +386,7 @@ defimpl LiveVue.Encoder, for: User do
       # Transform nested data as needed
       profile: Map.take(user.profile, [:avatar, :bio])
     }
-    |> LiveVue.Encoder.encode(opts)
+    |> LiveVite.Encoder.encode(opts)
   end
 end
 ```
@@ -397,17 +397,17 @@ If you don't own the struct, use `Protocol.derive/3`:
 
 ```elixir
 # In your application startup or module
-Protocol.derive(LiveVue.Encoder, SomeLibrary.User, only: [:id, :name])
+Protocol.derive(LiveVite.Encoder, SomeLibrary.User, only: [:id, :name])
 ```
 
-#### Why LiveVue.Encoder is Required
+#### Why LiveVite.Encoder is Required
 
 The encoder protocol serves several important purposes:
 
 1. **Security**: Prevents accidental exposure of sensitive fields
 2. **Performance**: Enables efficient JSON patch diffing by converting structs to maps
 3. **Explicit Control**: Forces developers to be intentional about what data is sent to the client
-4. **Optimization**: Allows LiveVue to calculate minimal diffs for prop updates
+4. **Optimization**: Allows LiveVite to calculate minimal diffs for prop updates
 
 Without implementing this protocol, you'll get a `Protocol.UndefinedError` when trying to pass custom structs as props.
 

@@ -1,9 +1,9 @@
-defmodule LiveVue.E2E.DeadViewHTML do
+defmodule LiveVite.E2E.DeadViewHTML do
   @moduledoc """
   HTML view module for dead view tests.
   """
   use Phoenix.Component
-  use LiveVue
+  use LiveVite
 
   def show(assigns) do
     ~H"""
@@ -15,7 +15,7 @@ defmodule LiveVue.E2E.DeadViewHTML do
   end
 end
 
-defmodule LiveVue.E2E.DeadViewController do
+defmodule LiveVite.E2E.DeadViewController do
   @moduledoc """
   A regular Phoenix controller (not LiveView) to test Vue components in dead views.
   """
@@ -23,7 +23,7 @@ defmodule LiveVue.E2E.DeadViewController do
 
   def show(conn, _params) do
     conn
-    |> put_layout(html: {LiveVue.E2E.Layout, :live})
+    |> put_layout(html: {LiveVite.E2E.Layout, :live})
     |> Plug.Conn.assign(:message, "Hello from dead view!")
     |> render(:show)
   end

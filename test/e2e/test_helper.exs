@@ -2,7 +2,7 @@
 Application.put_env(:phoenix, :json_library, Jason)
 
 # Configure the test endpoint
-Application.put_env(:live_vue, LiveVue.E2E.Endpoint,
+Application.put_env(:live_vite, LiveVite.E2E.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4004],
   adapter: Bandit.PhoenixAdapter,
   server: true,
@@ -10,26 +10,26 @@ Application.put_env(:live_vue, LiveVue.E2E.Endpoint,
   secret_key_base: String.duplicate("a", 64),
   debug_errors: true,
   code_reloader: true,
-  pubsub_server: LiveVue.E2E.PubSub,
-  reloadable_apps: [:live_vue],
+  pubsub_server: LiveVite.E2E.PubSub,
+  reloadable_apps: [:live_vite],
   live_reload: [
     patterns: [
-      ~r"lib/live_vue/.*(ex|exs)$",
+      ~r"lib/live_vite/.*(ex|exs)$",
       ~r"test/e2e/features/.*\.(ex|exs|vue|js|ts)$"
     ]
   ]
 )
 
-Application.put_env(:live_vue, :enable_props_diff, true)
-Application.put_env(:live_vue, :ssr_default, false)
+Application.put_env(:live_vite, :enable_props_diff, true)
+Application.put_env(:live_vite, :ssr_default, false)
 
 Process.register(self(), :e2e_helper)
 
-defmodule LiveVue.E2E.ErrorHTML do
+defmodule LiveVite.E2E.ErrorHTML do
   def render(template, _), do: Phoenix.Controller.status_message_from_template(template)
 end
 
-defmodule LiveVue.E2E.Layout do
+defmodule LiveVite.E2E.Layout do
   @moduledoc false
   use Phoenix.Component
 
@@ -41,7 +41,7 @@ defmodule LiveVue.E2E.Layout do
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
-        <title>LiveVue E2E</title>
+        <title>LiveVite E2E</title>
       </head>
       <body>
         {@inner_content}
@@ -60,7 +60,7 @@ defmodule LiveVue.E2E.Layout do
   end
 end
 
-defmodule LiveVue.E2E.Hooks do
+defmodule LiveVite.E2E.Hooks do
   @moduledoc false
   import Phoenix.LiveView
 
@@ -88,7 +88,7 @@ defmodule LiveVue.E2E.Hooks do
   defp handle_eval_event(_, _, socket), do: {:cont, socket}
 end
 
-defmodule LiveVue.E2E.HealthController do
+defmodule LiveVite.E2E.HealthController do
   import Plug.Conn
 
   def init(opts), do: opts
@@ -98,12 +98,12 @@ defmodule LiveVue.E2E.HealthController do
   end
 end
 
-defmodule LiveVue.E2E.Router do
+defmodule LiveVite.E2E.Router do
   use Phoenix.Router
 
   import Phoenix.LiveView.Router
 
-  alias LiveVue.E2E.Layout
+  alias LiveVite.E2E.Layout
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -115,8 +115,8 @@ defmodule LiveVue.E2E.Router do
 
   live_session :default,
     layout: {Layout, :live},
-    on_mount: {LiveVue.E2E.Hooks, :default} do
-    scope "/", LiveVue.E2E do
+    on_mount: {LiveVite.E2E.Hooks, :default} do
+    scope "/", LiveVite.E2E do
       pipe_through(:browser)
 
       live "/test", TestLive
@@ -133,7 +133,7 @@ defmodule LiveVue.E2E.Router do
     end
   end
 
-  scope "/", LiveVue.E2E do
+  scope "/", LiveVite.E2E do
     pipe_through(:browser)
 
     get "/health", HealthController, :index
@@ -141,8 +141,8 @@ defmodule LiveVue.E2E.Router do
   end
 end
 
-defmodule LiveVue.E2E.Endpoint do
-  use Phoenix.Endpoint, otp_app: :live_vue
+defmodule LiveVite.E2E.Endpoint do
+  use Phoenix.Endpoint, otp_app: :live_vite
 
   @session_options [
     store: :cookie,
@@ -173,7 +173,7 @@ defmodule LiveVue.E2E.Endpoint do
     json_decoder: Phoenix.json_library()
 
   plug Plug.Session, @session_options
-  plug LiveVue.E2E.Router
+  plug LiveVite.E2E.Router
 
   defp health_check(%{request_path: "/health"} = conn, _opts) do
     conn
@@ -196,13 +196,13 @@ end
 {:ok, _} =
   Supervisor.start_link(
     [
-      LiveVue.E2E.Endpoint,
-      {Phoenix.PubSub, name: LiveVue.E2E.PubSub}
+      LiveVite.E2E.Endpoint,
+      {Phoenix.PubSub, name: LiveVite.E2E.PubSub}
     ],
     strategy: :one_for_one
   )
 
-IO.puts("Starting e2e server on port #{LiveVue.E2E.Endpoint.config(:http)[:port]}")
+IO.puts("Starting e2e server on port #{LiveVite.E2E.Endpoint.config(:http)[:port]}")
 
 if not IEx.started?() do
   spawn(fn ->

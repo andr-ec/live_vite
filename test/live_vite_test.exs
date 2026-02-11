@@ -1,14 +1,14 @@
-defmodule LiveVueTest do
+defmodule LiveViteTest do
   use ExUnit.Case
 
-  import LiveVue
+  import LiveVite
   import Phoenix.Component
   import Phoenix.LiveViewTest
 
-  alias LiveVue.Test
+  alias LiveVite.Test
   alias Phoenix.LiveView.JS
 
-  doctest LiveVue
+  doctest LiveVite
 
   describe "basic component rendering" do
     def simple_component(assigns) do

@@ -3,32 +3,32 @@ defmodule LiveViewDiffTest do
 
   import Phoenix.Component
 
-  alias LiveVue.Test
+  alias LiveVite.Test
   alias Phoenix.LiveView.JS
   alias Phoenix.LiveView.LiveStream
 
   defmodule Company do
     @moduledoc false
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     defstruct [:name, :owner]
   end
 
   defmodule Team do
     @moduledoc false
-    @derive LiveVue.Encoder
+    @derive LiveVite.Encoder
     defstruct [:name, :members, :lead]
   end
 
   # Test struct with sensitive fields that should be excluded
   defmodule SecureUser do
     @moduledoc false
-    @derive {LiveVue.Encoder, except: [:password, :secret_key]}
+    @derive {LiveVite.Encoder, except: [:password, :secret_key]}
     defstruct [:name, :age, :email, :password, :secret_key]
   end
 
   # Utility function to render Vue assigns and get parsed Vue properties
   defp render_vue_assigns(assigns) do
-    rendered = LiveVue.vue(assigns)
+    rendered = LiveVite.vue(assigns)
     html = rendered |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Test.get_vue(html)
   end
@@ -324,13 +324,13 @@ defmodule LiveViewDiffTest do
 
     defmodule User do
       @moduledoc false
-      @derive LiveVue.Encoder
+      @derive LiveVite.Encoder
       defstruct [:name, :age]
     end
 
     defmodule UserWithPassword do
       @moduledoc false
-      @derive LiveVue.Encoder
+      @derive LiveVite.Encoder
       defstruct [:name, :age, :password]
     end
 
@@ -626,7 +626,7 @@ defmodule LiveViewDiffTest do
   describe "LiveStream diff functionality" do
     defmodule StreamUser do
       @moduledoc false
-      @derive LiveVue.Encoder
+      @derive LiveVite.Encoder
       defstruct [:id, :name, :age]
     end
 

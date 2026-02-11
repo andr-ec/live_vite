@@ -1,6 +1,6 @@
 # Deployment
 
-Deploying a LiveVue app is similar to deploying a regular Phoenix app, with one key requirement: **Node.js version 19 or later must be installed** in your production environment.
+Deploying a LiveVite app is similar to deploying a regular Phoenix app, with one key requirement: **Node.js version 19 or later must be installed** in your production environment.
 
 > #### SSR Configuration {: .tip}
 >
@@ -151,5 +151,5 @@ apt-get install -y nodejs
 ## Next Steps
 
 - Review [FAQ](faq.md) for common questions
-- Join our [GitHub Discussions](https://github.com/Valian/live_vue/discussions) for help
-- Consider contributing to [LiveVue](https://github.com/Valian/live_vue)
+- Join our [GitHub Discussions](https://github.com/Valian/live_vite/discussions) for help
+- Consider contributing to [LiveVite](https://github.com/Valian/live_vite)
