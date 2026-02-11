@@ -8,6 +8,7 @@ Application.put_env(:live_vite, LiveVite.E2E.Endpoint,
   server: true,
   live_view: [signing_salt: "aaaaaaaa"],
   secret_key_base: String.duplicate("a", 64),
+  check_origin: false,
   debug_errors: true,
   code_reloader: true,
   pubsub_server: LiveVite.E2E.PubSub,
@@ -15,7 +16,7 @@ Application.put_env(:live_vite, LiveVite.E2E.Endpoint,
   live_reload: [
     patterns: [
       ~r"lib/live_vite/.*(ex|exs)$",
-      ~r"test/e2e/features/.*\.(ex|exs|vue|js|ts)$"
+      ~r"test/e2e/features/.*\.(ex|exs|vue|js|ts|tsx|jsx)$"
     ]
   ]
 )
@@ -52,7 +53,7 @@ defmodule LiveVite.E2E.Layout do
 
   def render("live.html", assigns) do
     ~H"""
-    <script src="/assets/app.js">
+    <script type="module" src="/assets/app.js">
     </script>
     <link rel="stylesheet" href="/assets/app.css" />
     {@inner_content}
@@ -130,6 +131,15 @@ defmodule LiveVite.E2E.Router do
       live "/event-reply-test", EventReplyTestLive
       live "/slot-test", SlotTestLive
       live "/memory-benchmark", MemoryBenchmarkLive
+
+      # React E2E test routes
+      live "/react-test", ReactTestLive
+      live "/react-prop-diff-test", ReactPropDiffTestLive
+      live "/react-navigation/:page", ReactNavigationLive
+      live "/react-navigation/alt/:page", ReactNavigationLive
+      live "/react-events", ReactEventLive
+      live "/react-streams", ReactStreamLive
+      live "/react-slot-test", ReactSlotTestLive
     end
   end
 

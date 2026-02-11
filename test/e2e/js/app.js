@@ -3,22 +3,15 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 
 // live_vite related imports
-import { getHooks, createLiveVite, findComponent } from "live_vite"
+import { getMultiRendererHook, createVueRenderer, createReactRenderer, findComponent } from "live_vite"
 import { h } from "vue"
 
 // polyfill recommended by Vite https://vitejs.dev/config/build-options#build-modulepreload
 import "vite/modulepreload-polyfill"
 
-// Create the liveVite app directly here
-const liveViteApp = createLiveVite({
-  resolve: name => {
-    const components = {
-      ...import.meta.glob("../features/**/*.vue", { eager: true }),
-    }
-
-    return findComponent(components, name)
-  },
-  setup: ({ createApp, component, props, slots, plugin, el }) => {
+// Vue renderer setup
+const vueRenderer = createVueRenderer({
+  setup: (createApp, component, props, slots, plugin, el) => {
     const app = createApp({ render: () => h(component, props, slots) })
     app.use(plugin)
     app.mount(el)
@@ -26,10 +19,35 @@ const liveViteApp = createLiveVite({
   },
 })
 
+const vueComponents = import.meta.glob("../features/**/*.vue", { eager: true })
+
+// React renderer setup
+const reactRenderer = createReactRenderer()
+
+const reactComponents = import.meta.glob("../features/**/*.tsx", { eager: true })
+
+// Multi-renderer hook
+const VueHook = getMultiRendererHook({
+  vue: {
+    renderer: vueRenderer,
+    resolve: name => {
+      const mod = findComponent(vueComponents, name)
+      return mod && mod.default ? mod.default : mod
+    },
+  },
+  react: {
+    renderer: reactRenderer,
+    resolve: name => {
+      const mod = findComponent(reactComponents, name)
+      return mod && mod.default ? mod.default : mod
+    },
+  },
+})
+
 let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: getHooks(liveViteApp),
+  hooks: { VueHook },
 })
 
 // connect if there are any LiveViews on the page

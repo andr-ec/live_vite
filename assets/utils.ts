@@ -32,19 +32,22 @@ export const flatMapKeys = <T>(
  * Finds a component by name or path suffix.
  * @returns The component if found, otherwise throws an error with a list of available components.
  */
+const componentExtRe = /\.(vue|tsx|jsx|ts|js)$/
+
 export const findComponent = (components: ComponentMap, name: string): ComponentOrComponentPromise => {
-  const nameParts = name.replace(/\.vue$/, '').split('/').filter(part => part !== 'index')
+  const nameParts = name.replace(componentExtRe, '').split('/').filter(part => part !== 'index')
   const matches: [string, ComponentOrComponentPromise][] = []
 
   for (const [key, value] of Object.entries(components)) {
     let keyParts = key.split('/')
-    
-    if (keyParts[keyParts.length - 1] === 'index.vue') {
+    const last = keyParts[keyParts.length - 1]
+
+    if (last === 'index.vue' || last === 'index.tsx' || last === 'index.jsx' || last === 'index.ts' || last === 'index.js') {
       keyParts = keyParts.slice(0, -1)
     } else {
-      keyParts[keyParts.length - 1] = keyParts[keyParts.length - 1].replace(/\.vue$/, '')
+      keyParts[keyParts.length - 1] = last.replace(componentExtRe, '')
     }
-    
+
     if (nameParts.length <= keyParts.length) {
       let isMatch = true
       for (let i = 0; i < nameParts.length; i++) {
@@ -54,7 +57,7 @@ export const findComponent = (components: ComponentMap, name: string): Component
           break
         }
       }
-      
+
       if (isMatch) {
         matches.push([key, value])
       }
@@ -71,7 +74,7 @@ export const findComponent = (components: ComponentMap, name: string): Component
   // a helpful message for the user
 
   const availableComponents = Object.keys(components)
-    .map(key => key.replace("../../lib/", "").replace("/index.vue", "").replace(".vue", "").replace("./", ""))
+    .map(key => key.replace("../../lib/", "").replace(/\/index\.(vue|tsx|jsx|ts|js)$/, "").replace(componentExtRe, "").replace("./", ""))
     .filter(key => !key.startsWith("_build"))
     .join("\n")
 

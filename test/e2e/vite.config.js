@@ -2,6 +2,7 @@ import path from "path"
 import { defineConfig } from "vite"
 
 import vue from "@vitejs/plugin-vue"
+import react from "@vitejs/plugin-react"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -9,10 +10,12 @@ export default defineConfig(({ command }) => {
 
   return {
     base: "/assets",
-    plugins: [vue()],
+    plugins: [vue(), react({ include: /\.(tsx|jsx)$/ })],
     resolve: {
       alias: {
         vue: path.resolve(__dirname, "../../node_modules/vue"),
+        react: path.resolve(__dirname, "../../node_modules/react"),
+        "react-dom": path.resolve(__dirname, "../../node_modules/react-dom"),
         "@": path.resolve(__dirname, "."),
         live_vite: path.resolve(__dirname, "../../assets/index.ts"),
       },
@@ -20,7 +23,7 @@ export default defineConfig(({ command }) => {
     build: {
       commonjsOptions: { transformMixedEsModules: true },
       target: "es2020",
-      outDir: "./test/e2e/priv/static/assets",
+      outDir: path.resolve(__dirname, "./priv/static/assets"),
       emptyOutDir: true,
       sourcemap: isDev,
       manifest: false,
