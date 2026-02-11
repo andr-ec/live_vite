@@ -59,6 +59,35 @@ defmodule LiveVite do
   end
 
   @doc """
+  Renders a React component within Phoenix LiveView.
+
+  Sets `v-framework` to `"react"` and delegates to the shared rendering pipeline.
+
+  ## Examples
+
+      <.react
+        v-component="MyComponent"
+        message="Hello"
+        v-on:click="handleClick"
+        class="my-component"
+      />
+
+      <.react
+        v-component="nested/Component"
+        v-ssr={false}
+        items={@items}
+      >
+        <:default>Default slot content</:default>
+        <:named>Named slot content</:named>
+      </.react>
+  """
+  def react(assigns) do
+    assigns
+    |> Map.put(:"v-framework", "react")
+    |> vue()
+  end
+
+  @doc """
   Renders a Vue component within Phoenix LiveView.
 
   ## Examples

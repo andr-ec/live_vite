@@ -112,6 +112,7 @@ defmodule LiveVite.Test do
       %{
         props: Jason.decode!(attr_from_tree(vue_tree, "data-props")),
         component: attr_from_tree(vue_tree, "data-name"),
+        framework: attr_from_tree(vue_tree, "data-framework"),
         id: attr_from_tree(vue_tree, "id"),
         handlers: extract_handlers(attr_from_tree(vue_tree, "data-handlers")),
         slots: extract_base64_slots(attr_from_tree(vue_tree, "data-slots")),

@@ -231,6 +231,117 @@ defmodule LiveViteTest do
     end
   end
 
+  describe "framework attribute" do
+    def vue_component(assigns) do
+      ~H"""
+      <.vue name="John" v-component="MyComponent" />
+      """
+    end
+
+    def react_component(assigns) do
+      ~H"""
+      <.react name="John" v-component="MyComponent" />
+      """
+    end
+
+    def explicit_framework_component(assigns) do
+      ~H"""
+      <.vue name="John" v-component="MyComponent" v-framework="react" />
+      """
+    end
+
+    test "vue component renders with data-framework=vue" do
+      html = render_component(&vue_component/1)
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "vue"
+    end
+
+    test "react component renders with data-framework=react" do
+      html = render_component(&react_component/1)
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+      assert vue.component == "MyComponent"
+      assert vue.props == %{"name" => "John"}
+    end
+
+    test "react component passes all props correctly" do
+      html =
+        render_component(fn assigns ->
+          ~H"""
+          <.react name="Alice" age={30} v-component="Profile" />
+          """
+        end)
+
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+      assert vue.props == %{"name" => "Alice", "age" => 30}
+    end
+
+    test "explicit v-framework overrides default" do
+      html = render_component(&explicit_framework_component/1)
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+    end
+
+    test "react component with slots" do
+      html =
+        render_component(fn assigns ->
+          ~H"""
+          <.react v-component="WithSlots">
+            Default content
+            <:header>Header content</:header>
+          </.react>
+          """
+        end)
+
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+      assert vue.slots == %{"default" => "Default content", "header" => "Header content"}
+    end
+
+    test "react component with event handlers" do
+      html =
+        render_component(fn assigns ->
+          ~H"""
+          <.react
+            v-component="MyComponent"
+            v-on:click={JS.push("click")}
+          />
+          """
+        end)
+
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+      assert vue.handlers == %{"click" => JS.push("click")}
+    end
+
+    test "mixed vue and react components" do
+      html =
+        render_component(fn assigns ->
+          ~H"""
+          <div>
+            <.vue id="vue-1" name="John" v-component="VueComponent" />
+            <.react id="react-1" name="Jane" v-component="ReactComponent" />
+          </div>
+          """
+        end)
+
+      vue_comp = Test.get_vue(html, id: "vue-1")
+      react_comp = Test.get_vue(html, id: "react-1")
+
+      assert vue_comp.framework == "vue"
+      assert react_comp.framework == "react"
+      assert vue_comp.props == %{"name" => "John"}
+      assert react_comp.props == %{"name" => "Jane"}
+    end
+  end
+
   describe "edge cases" do
     def edge_case_component(assigns) do
       ~H"""
