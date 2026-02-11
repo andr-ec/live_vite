@@ -342,6 +342,73 @@ defmodule LiveViteTest do
     end
   end
 
+  describe "~VUE sigil" do
+    def vue_sigil_component(assigns) do
+      ~VUE"""
+      <template>
+        <div>{{ message }}</div>
+      </template>
+
+      <script setup>
+        defineProps({ message: String })
+      </script>
+      """
+    end
+
+    test "renders with data-framework=vue" do
+      html = render_component(&vue_sigil_component/1, %{message: "Hello"})
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "vue"
+    end
+
+    test "passes assigns as props" do
+      html = render_component(&vue_sigil_component/1, %{message: "Hello"})
+      vue = Test.get_vue(html)
+
+      assert vue.props["message"] == "Hello"
+    end
+
+    test "writes .vue file to _build directory" do
+      path = "./assets/vue/_build/Elixir.LiveViteTest.vue"
+      assert File.exists?(path)
+      content = File.read!(path)
+      assert content =~ "<template>"
+      assert content =~ "defineProps"
+    end
+  end
+
+  describe "~REACT sigil" do
+    def react_sigil_component(assigns) do
+      ~REACT"""
+      export default function({ message }: { message: string }) {
+        return <div>{message}</div>
+      }
+      """
+    end
+
+    test "renders with data-framework=react" do
+      html = render_component(&react_sigil_component/1, %{message: "Hello"})
+      vue = Test.get_vue(html)
+
+      assert vue.framework == "react"
+    end
+
+    test "passes assigns as props" do
+      html = render_component(&react_sigil_component/1, %{message: "Hello"})
+      vue = Test.get_vue(html)
+
+      assert vue.props["message"] == "Hello"
+    end
+
+    test "writes .tsx file to _build directory" do
+      path = "./assets/vue/_build/Elixir.LiveViteTest.tsx"
+      assert File.exists?(path)
+      content = File.read!(path)
+      assert content =~ "export default function"
+    end
+  end
+
   describe "edge cases" do
     def edge_case_component(assigns) do
       ~H"""

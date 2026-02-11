@@ -8,7 +8,7 @@ defmodule LiveVite do
 
   ## Component Options
 
-  When using the `vue/1` component or `~V` sigil, the following options are supported:
+  When using the `vue/1`/`react/1` components or `~VUE`/`~REACT` sigils, the following options are supported:
 
   ### Required Attributes
     * `v-component` (string) - Name of the Vue component (e.g., "YourComponent", "directory/Example")
@@ -348,26 +348,87 @@ defmodule LiveVite do
   @doc false
   @deprecated "~V sigil is deprecated, please use ~VUE instead."
   defmacro sigil_V(term, modifiers) do
-    do_sigil(term, modifiers, __CALLER__)
+    do_sigil(term, modifiers, :vue, __CALLER__)
   end
 
   @doc """
-  Inlines a Vue single-file component inside a LiveView. This is the new recommended way over the `~V` sigil.
+  Inlines a Vue single-file component inside a LiveView.
+
+  Writes the template to `./assets/vue/_build/{module}.vue` at compile time
+  and renders it using `LiveVite.vue/1`.
+
+  ## Example
+
+      def render(assigns) do
+        ~VUE\"\"\"
+        <template>
+          <div>{{ message }}</div>
+        </template>
+
+        <script setup>
+          defineProps({ message: String })
+        </script>
+        \"\"\"
+      end
   """
   defmacro sigil_VUE(term, modifiers) do
-    do_sigil(term, modifiers, __CALLER__)
+    do_sigil(term, modifiers, :vue, __CALLER__)
   end
 
-  defp do_sigil({:<<>>, _meta, [string]}, [], caller) do
-    path = "./assets/vue/_build/#{caller.module}.vue"
+  @doc """
+  Inlines a React component (TSX) inside a LiveView.
+
+  Writes the template to `./assets/vue/_build/{module}.tsx` at compile time
+  and renders it using `LiveVite.react/1`.
+
+  ## Example
+
+      def render(assigns) do
+        ~REACT\"\"\"
+        export default function({ message }: { message: string }) {
+          return <div>{message}</div>
+        }
+        \"\"\"
+      end
+  """
+  defmacro sigil_REACT(term, modifiers) do
+    do_sigil(term, modifiers, :react, __CALLER__)
+  end
+
+  @framework_sigil_config %{
+    vue: %{extension: ".vue"},
+    react: %{extension: ".tsx"}
+  }
+
+  defp do_sigil({:<<>>, _meta, [string]}, [], framework, caller) do
+    config = @framework_sigil_config[framework]
+    path = "./assets/vue/_build/#{caller.module}#{config.extension}"
 
     with :ok <- File.mkdir_p(Path.dirname(path)) do
       File.write!(path, string)
     end
 
+    do_sigil_template(framework)
+  end
+
+  defp do_sigil_template(:vue) do
     quote do
       ~H"""
       <LiveVite.vue
+        class={get_in(assigns, [:vue_opts, :class])}
+        v-component={"_build/#{__MODULE__}"}
+        v-socket={get_socket(assigns)}
+        v-ssr={get_in(assigns, [:vue_opts, :ssr]) != false}
+        {Map.drop(assigns, [:vue_opts, :socket, :flash, :live_action])}
+      />
+      """
+    end
+  end
+
+  defp do_sigil_template(:react) do
+    quote do
+      ~H"""
+      <LiveVite.react
         class={get_in(assigns, [:vue_opts, :class])}
         v-component={"_build/#{__MODULE__}"}
         v-socket={get_socket(assigns)}
