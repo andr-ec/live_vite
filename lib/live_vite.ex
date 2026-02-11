@@ -142,6 +142,7 @@ defmodule LiveVite do
     <div
       id={assigns[:id] || id(@__component_name)}
       data-name={@__component_name}
+      data-framework="vue"
       data-props={"#{json(Encoder.encode(@props))}"}
       data-props-diff={"#{json(@props_diff)}"}
       data-streams-diff={"#{json(@streams_diff)}"}

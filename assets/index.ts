@@ -11,7 +11,8 @@ export type {
   AsyncResult,
 } from "./types.js"
 export { createLiveVite } from "./app.js"
-export { getHooks, getRendererHook } from "./hooks.js"
+export { getHooks, getRendererHook, getMultiRendererHook } from "./hooks.js"
+export type { RendererEntry } from "./hooks.js"
 export { useLiveVite, useLiveEvent, useLiveNavigation, useLiveUpload, useEventReply, useLiveConnection } from "./use.js"
 export {
   useLiveForm,

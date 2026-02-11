@@ -73,52 +73,104 @@ const getProps = (el: HTMLElement, liveSocket: any): Record<string, any> => ({
 })
 
 /**
+ * A registered renderer entry: a framework renderer paired with its component resolver.
+ */
+export interface RendererEntry {
+  renderer: FrameworkRenderer
+  resolve: (name: string) => Promise<unknown> | unknown
+}
+
+/**
  * Creates a framework-agnostic LiveView hook using the given renderer.
  *
- * This is the primary way to integrate any framework with LiveView.
- * The hook handles DOM attribute parsing, prop diffing, and stream patches,
- * while delegating all framework-specific operations to the renderer.
+ * This is a convenience for single-renderer setups. For multi-framework support,
+ * use `getMultiRendererHook` instead.
  */
 export const getRendererHook = (
   renderer: FrameworkRenderer,
   resolve: (name: string) => Promise<unknown> | unknown,
-): Hook => ({
-  async mounted() {
-    const componentName = this.el.getAttribute("data-name") as string
-    const component = await resolve(componentName)
-    const ssr = this.el.getAttribute("data-ssr") === "true"
+): Hook => getMultiRendererHook({ [renderer.name]: { renderer, resolve } })
 
-    const props = getProps(this.el, this.liveSocket)
-    const slots = getRawSlots(this.el)
+/**
+ * Creates a LiveView hook that dispatches to the correct renderer
+ * based on the `data-framework` attribute on the component element.
+ *
+ * This is the primary way to support multiple frameworks in the same project.
+ * The hook handles DOM attribute parsing, prop diffing, and stream patches
+ * (all framework-agnostic), while delegating framework-specific operations
+ * to the resolved renderer.
+ *
+ * If only one renderer is registered, the `data-framework` attribute is optional
+ * and the single renderer is used as a fallback.
+ */
+export const getMultiRendererHook = (
+  renderers: Record<string, RendererEntry>,
+): Hook => {
+  const rendererNames = Object.keys(renderers)
 
-    const state = await renderer.mount({
-      component,
-      props,
-      slots,
-      el: this.el,
-      ssr,
-      hook: this,
-    })
+  const resolveRenderer = (el: HTMLElement): RendererEntry => {
+    const framework = el.getAttribute("data-framework")
 
-    // apply initial stream diff after mount, since all stream changes are sent in that attribute
-    renderer.patchProps(state, getDiff(this.el, "data-streams-diff"))
-
-    this.vue = state
-  },
-  updated() {
-    if (this.el.getAttribute("data-use-diff") === "true") {
-      renderer.patchProps(this.vue, getDiff(this.el, "data-props-diff"))
-    } else {
-      renderer.updateProps(this.vue, getProps(this.el, this.liveSocket))
+    if (framework && renderers[framework]) {
+      return renderers[framework]
     }
-    // we're always applying streams diff, since all stream changes are sent in that attribute
-    renderer.patchProps(this.vue, getDiff(this.el, "data-streams-diff"))
-    renderer.updateSlots(this.vue, getRawSlots(this.el))
-  },
-  destroyed() {
-    renderer.unmount(this.vue)
-  },
-})
+
+    // Fallback: if only one renderer is registered, use it regardless of attribute
+    if (!framework && rendererNames.length === 1) {
+      return renderers[rendererNames[0]]
+    }
+
+    const available = rendererNames.join(", ")
+    throw new Error(
+      framework
+        ? `Unknown framework "${framework}". Registered renderers: ${available}`
+        : `Missing data-framework attribute. Registered renderers: ${available}`
+    )
+  }
+
+  return {
+    async mounted() {
+      const { renderer, resolve } = resolveRenderer(this.el)
+      const componentName = this.el.getAttribute("data-name") as string
+      const component = await resolve(componentName)
+      const ssr = this.el.getAttribute("data-ssr") === "true"
+
+      const props = getProps(this.el, this.liveSocket)
+      const slots = getRawSlots(this.el)
+
+      const state = await renderer.mount({
+        component,
+        props,
+        slots,
+        el: this.el,
+        ssr,
+        hook: this,
+      })
+
+      // apply initial stream diff after mount, since all stream changes are sent in that attribute
+      renderer.patchProps(state, getDiff(this.el, "data-streams-diff"))
+
+      this.vue = state
+      // Store the renderer name for use in updated/destroyed
+      this.__renderer = renderer
+    },
+    updated() {
+      const renderer = this.__renderer as FrameworkRenderer
+      if (this.el.getAttribute("data-use-diff") === "true") {
+        renderer.patchProps(this.vue, getDiff(this.el, "data-props-diff"))
+      } else {
+        renderer.updateProps(this.vue, getProps(this.el, this.liveSocket))
+      }
+      // we're always applying streams diff, since all stream changes are sent in that attribute
+      renderer.patchProps(this.vue, getDiff(this.el, "data-streams-diff"))
+      renderer.updateSlots(this.vue, getRawSlots(this.el))
+    },
+    destroyed() {
+      const renderer = this.__renderer as FrameworkRenderer
+      renderer.unmount(this.vue)
+    },
+  }
+}
 
 export const getVueHook = ({ resolve, setup }: LiveViteApp): Hook => {
   // Adapt the LiveViteApp setup (object arg) to the VueSetupFn (positional args)

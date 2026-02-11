@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { reactive, type App } from "vue"
-import { getRendererHook } from "./hooks"
+import { getRendererHook, getMultiRendererHook } from "./hooks"
 import type { FrameworkRenderer, RendererState, MountContext } from "./renderer"
 import type { Hook } from "./types"
 import { toUtf8Base64 } from "./utils"
@@ -9,7 +9,7 @@ import { toUtf8Base64 } from "./utils"
  * Creates a mock FrameworkRenderer for testing the hook integration.
  * All methods are vi.fn() so we can assert on calls.
  */
-const createMockRenderer = (): FrameworkRenderer => {
+const createMockRenderer = (name = "mock"): FrameworkRenderer => {
   const mockState: RendererState = {
     props: { message: "hello" },
     slots: { default: () => "slot" },
@@ -17,7 +17,7 @@ const createMockRenderer = (): FrameworkRenderer => {
   }
 
   return {
-    name: "mock",
+    name,
     mount: vi.fn().mockResolvedValue(mockState),
     updateProps: vi.fn(),
     patchProps: vi.fn(),
@@ -226,6 +226,143 @@ describe("getRendererHook", () => {
       hook.destroyed!.call(hookContext)
 
       expect(renderer.unmount).toHaveBeenCalledWith(hookContext.vue)
+    })
+  })
+})
+
+describe("getMultiRendererHook", () => {
+  let vueRenderer: FrameworkRenderer
+  let reactRenderer: FrameworkRenderer
+  let vueResolve: ReturnType<typeof vi.fn>
+  let reactResolve: ReturnType<typeof vi.fn>
+  let hook: Hook
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vueRenderer = createMockRenderer("vue")
+    reactRenderer = createMockRenderer("react")
+    vueResolve = vi.fn().mockResolvedValue({ template: "<div/>" })
+    reactResolve = vi.fn().mockResolvedValue({ default: () => "react component" })
+  })
+
+  describe("with multiple renderers", () => {
+    beforeEach(() => {
+      hook = getMultiRendererHook({
+        vue: { renderer: vueRenderer, resolve: vueResolve },
+        react: { renderer: reactRenderer, resolve: reactResolve },
+      })
+    })
+
+    it("should dispatch to vue renderer when data-framework is vue", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Counter",
+        "data-framework": "vue",
+      })
+
+      await hook.mounted!.call(hookContext)
+
+      expect(vueRenderer.mount).toHaveBeenCalled()
+      expect(reactRenderer.mount).not.toHaveBeenCalled()
+      expect(vueResolve).toHaveBeenCalledWith("Counter")
+    })
+
+    it("should dispatch to react renderer when data-framework is react", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Button",
+        "data-framework": "react",
+      })
+
+      await hook.mounted!.call(hookContext)
+
+      expect(reactRenderer.mount).toHaveBeenCalled()
+      expect(vueRenderer.mount).not.toHaveBeenCalled()
+      expect(reactResolve).toHaveBeenCalledWith("Button")
+    })
+
+    it("should throw on unknown framework", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Widget",
+        "data-framework": "svelte",
+      })
+
+      await expect(hook.mounted!.call(hookContext)).rejects.toThrow(
+        'Unknown framework "svelte". Registered renderers: vue, react'
+      )
+    })
+
+    it("should throw when data-framework is missing with multiple renderers", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Widget",
+      })
+
+      await expect(hook.mounted!.call(hookContext)).rejects.toThrow(
+        "Missing data-framework attribute. Registered renderers: vue, react"
+      )
+    })
+
+    it("should use correct renderer for updated lifecycle", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Counter",
+        "data-framework": "react",
+      })
+
+      await hook.mounted!.call(hookContext)
+      vi.clearAllMocks()
+
+      hookContext.el.getAttribute.mockImplementation((name: string) => {
+        if (name === "data-use-diff") return "false"
+        if (name === "data-props") return JSON.stringify({ count: 5 })
+        return null
+      })
+
+      hook.updated!.call(hookContext)
+
+      expect(reactRenderer.updateProps).toHaveBeenCalled()
+      expect(vueRenderer.updateProps).not.toHaveBeenCalled()
+    })
+
+    it("should use correct renderer for destroyed lifecycle", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Counter",
+        "data-framework": "vue",
+      })
+
+      await hook.mounted!.call(hookContext)
+
+      hook.destroyed!.call(hookContext)
+
+      expect(vueRenderer.unmount).toHaveBeenCalled()
+      expect(reactRenderer.unmount).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("with single renderer", () => {
+    beforeEach(() => {
+      hook = getMultiRendererHook({
+        vue: { renderer: vueRenderer, resolve: vueResolve },
+      })
+    })
+
+    it("should fallback to single renderer when data-framework is missing", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Counter",
+      })
+
+      await hook.mounted!.call(hookContext)
+
+      expect(vueRenderer.mount).toHaveBeenCalled()
+      expect(vueResolve).toHaveBeenCalledWith("Counter")
+    })
+
+    it("should still respect data-framework when present", async () => {
+      const hookContext = createMockHookContext({
+        "data-name": "Counter",
+        "data-framework": "vue",
+      })
+
+      await hook.mounted!.call(hookContext)
+
+      expect(vueRenderer.mount).toHaveBeenCalled()
     })
   })
 })
