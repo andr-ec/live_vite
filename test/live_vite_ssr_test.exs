@@ -102,6 +102,10 @@ defmodule LiveVite.SSRTest do
     end
   end
 
+  def handle_telemetry_event(event, measurements, metadata, config) do
+    send(config.test_pid, {:telemetry_event, event, measurements, metadata})
+  end
+
   describe "render/3 telemetry" do
     setup do
       Application.put_env(:live_vite, :ssr_module, MockSSRRenderer)
@@ -113,10 +117,8 @@ defmodule LiveVite.SSRTest do
       :telemetry.attach(
         handler_id,
         [:live_vite, :ssr, :start],
-        fn event, measurements, metadata, _config ->
-          send(test_pid, {:telemetry_event, event, measurements, metadata})
-        end,
-        nil
+        &__MODULE__.handle_telemetry_event/4,
+        %{test_pid: test_pid}
       )
 
       on_exit(fn ->

@@ -120,7 +120,7 @@ export function createVueRenderer(options: VueRendererOptions = {}): FrameworkRe
       const component = ctx.component
       const slotComponents = htmlSlotsToVue(ctx.slots)
 
-      const ssrSetup = options.setup ?? ((makeApp, component, props, slots, plugin, el) => {
+      const ssrSetup = options.setup ?? ((makeApp, component, props, slots, plugin, _el) => {
         const app = makeApp({ render: () => h(component, props, slots) })
         app.use(plugin)
         // Don't mount in SSR - no real DOM
@@ -129,7 +129,7 @@ export function createVueRenderer(options: VueRendererOptions = {}): FrameworkRe
 
       const plugin: Plugin<[]> = {
         install: (app: App) => {
-          app.mount = (...args: unknown[]): any => undefined
+          app.mount = (..._args: unknown[]): any => undefined
           app.provide("_live_vite", Object.assign({}, mockHook))
         },
       }

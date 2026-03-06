@@ -1,9 +1,9 @@
 <div align="center">
-    <img src="https://github.com/Valian/live_vite/blob/main/live_vite_logo_rounded.png?raw=true" alt="Description" height="256px">
+    <img src="https://github.com/andr-ec/live_vite/blob/main/live_vite_logo_rounded.png?raw=true" alt="Description" height="256px">
 <br>
 <a href="https://hex.pm/packages/live_vite"><img src="https://img.shields.io/hexpm/v/live_vite.svg" alt="Hex.pm"></a>
 <a href="https://hexdocs.pm/live_vite"><img src="https://img.shields.io/badge/docs-hexdocs.pm-purple" alt="Hexdocs.pm"></a>
-<a href="https://github.com/Valian/live_vite"><img src="https://img.shields.io/github/stars/Valian/live_vite?style=social" alt="GitHub"></a>
+<a href="https://github.com/andr-ec/live_vite"><img src="https://img.shields.io/github/stars/andr-ec/live_vite?style=social" alt="GitHub"></a>
 <br><br>
 Vue and React inside Phoenix LiveView with seamless end-to-end reactivity.
 </div>
@@ -154,12 +154,6 @@ mix igniter.install live_vite --react --vue
 
 Igniter installer works only for Phoenix 1.8+ projects. For detailed installation instructions, see the [Installation Guide](guides/installation.md).
 
-## VS Code Extension
-
-For syntax highlighting of the `~VUE` and `~REACT` sigils:
-- **VS Code Marketplace**: Install [LiveVite](https://marketplace.visualstudio.com/items?itemName=guilhermepsf23.livevite-sigil-highlighting) extension
-- **Manual Installation**: Download VSIX from [releases](https://github.com/GuilhermePSF/live-vite-sigil-highlighting/releases) and install via `Extensions > Install from VSIX...`
-
 ## Guides
 
 ### Getting Started
@@ -282,4 +276,4 @@ mix expublish.minor --allow-untracked --branch=main
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Valian/live_vite&type=Date)](https://star-history.com/#Valian/live_vite&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=andr-ec/live_vite&type=Date)](https://star-history.com/#andr-ec/live_vite&Date)
