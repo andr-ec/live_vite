@@ -52,7 +52,7 @@ export const findComponent = (components: ComponentMap, name: string): Component
       let isMatch = true
       for (let i = 0; i < nameParts.length; i++) {
         const keyPart = keyParts[keyParts.length - nameParts.length + i]
-        if (nameParts[i] !== keyPart) {
+        if (nameParts[i].toLowerCase() !== keyPart.toLowerCase()) {
           isMatch = false
           break
         }

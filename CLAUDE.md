@@ -20,10 +20,15 @@ mix setup                         # First-time setup (deps + npm install)
 
 ```
 lib/
-├── live_vite.ex              # Main module, ~VUE/~REACT sigils, vue/1 + react/1 components
-├── live_vite/components.ex   # <.vue>/<.react> component helpers, auto-discovery
+├── live_vite.ex              # Main module, ~VUE/~REACT sigils, vue/1 + react/1 + component/1
+├── live_vite/components.ex   # <.vue>/<.react> component helpers, auto-discovery via plugin registry
 ├── live_vite/encoder.ex      # JSON encoding for props
 ├── live_vite/slots.ex        # Slot interoperability
+├── live_vite/plugin.ex       # Plugin behaviour (name, file_extensions, render_fn)
+├── live_vite/plugin/
+│   ├── vue.ex                # Vue plugin (.vue files)
+│   ├── react.ex              # React plugin (.tsx/.jsx files)
+│   └── registry.ex           # Plugin registry, framework detection
 └── live_vite/ssr/            # SSR: NodeJS and ViteJS modes
 assets/
 ├── index.ts                 # Main entry, exports all Vue + React APIs
@@ -51,6 +56,9 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 
 # React component
 <.react count={@count} v-component="Counter" v-socket={@socket} />
+
+# Auto-detect framework from file extension
+<.component count={@count} v-component="Counter" v-socket={@socket} />
 
 # Or with sigils
 ~VUE"""<Counter :count="count" />"""

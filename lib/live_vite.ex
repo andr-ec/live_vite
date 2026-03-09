@@ -42,6 +42,7 @@ defmodule LiveVite do
   import Phoenix.HTML
 
   alias LiveVite.Encoder
+  alias LiveVite.Plugin.Registry
   alias LiveVite.Slots
   alias LiveVite.SSR
   alias Phoenix.LiveView
@@ -56,6 +57,30 @@ defmodule LiveVite do
     quote do
       import LiveVite
     end
+  end
+
+  @doc """
+  Renders a component, auto-detecting the framework from the file extension.
+
+  Uses the plugin registry to determine whether the component is Vue, React,
+  or another registered framework.
+
+  ## Examples
+
+      <.component v-component="Counter" count={@count} v-socket={@socket} />
+  """
+  def component(assigns) do
+    component_name = assigns[:"v-component"]
+
+    roots =
+      Application.get_env(:live_vite, :component_roots, ["./assets/vue"])
+
+    framework = Registry.detect_framework(component_name, roots)
+    render_fn = Registry.render_fn(framework) || :vue
+
+    assigns
+    |> Map.put(:"v-framework", to_string(framework))
+    |> then(&apply(__MODULE__, render_fn, [&1]))
   end
 
   @doc """

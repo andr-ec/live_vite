@@ -217,6 +217,22 @@ The event handlers are processed on the client side by invoking `liveSocket.exec
 >
 > Use `phx-click` for simple, direct event handling. Use `live.pushEvent()` when you need programmatic control or complex logic. Use `v-on:` syntax when creating reusable Vue components that should be decoupled from specific LiveView implementations.
 
+## Plugin System
+
+LiveVite uses a plugin system to decouple framework-specific concerns from core logic. Each framework (Vue, React) is registered as a plugin that declares:
+
+- **`name/0`** — Framework identifier atom (e.g., `:vue`, `:react`)
+- **`file_extensions/0`** — File extensions to scan for (e.g., `[".vue"]`, `[".tsx", ".jsx"]`)
+- **`render_fn/0`** — Which render function to call (e.g., `:vue`, `:react`)
+
+The `LiveVite.Plugin.Registry` aggregates all plugins and provides framework detection by scanning component directories for matching file extensions. This powers:
+
+- **`LiveVite.component/1`** — Resolves the framework at render time and delegates to the correct renderer
+- **`LiveVite.Components`** — Generates shortcut functions (`<.Counter />`) with correct framework dispatch
+- **Component auto-discovery** — Maps file extensions to frameworks without hardcoded knowledge
+
+Plugins are configured via application config and default to `[LiveVite.Plugin.Vue, LiveVite.Plugin.React]`. See [Configuration](configuration.md#plugin-configuration) for details on writing custom plugins.
+
 ## Key Design Decisions
 
 ### Hook-Based Integration

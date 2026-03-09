@@ -14,7 +14,7 @@ For advanced component organization and custom resolution patterns, see [Configu
 
 ### Basic Syntax
 
-To render a Vue component from HEEX, use the `<.vue>` function. For React, use `<.react>`:
+To render a Vue component from HEEX, use the `<.vue>` function. For React, use `<.react>`. Or use `<.component>` to auto-detect the framework from the file extension:
 
 ```elixir
 <%!-- Vue component --%>
@@ -27,6 +27,13 @@ To render a Vue component from HEEX, use the `<.vue>` function. For React, use `
 
 <%!-- React component --%>
 <.react
+  count={@count}
+  v-component="Counter"
+  v-socket={@socket}
+/>
+
+<%!-- Auto-detect framework from file extension --%>
+<.component
   count={@count}
   v-component="Counter"
   v-socket={@socket}
@@ -56,7 +63,7 @@ Instead of writing `<.vue v-component="Counter">`, you can use the shortcut synt
 <.Counter count={@count} v-socket={@socket} />
 ```
 
-Function names are generated based on component file names (`.vue`, `.tsx`, `.jsx`). The framework is detected from the file extension. For files with identical names, use the full path:
+Function names are generated based on component file names. The framework is detected from the file extension via the [plugin registry](configuration.md#plugin-configuration) (`.vue` → Vue, `.tsx`/`.jsx` → React). For files with identical names, use the full path:
 
 ```elixir
 <.vue v-component="helpers/nested/Modal" />

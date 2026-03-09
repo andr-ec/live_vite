@@ -6,6 +6,20 @@ This guide provides a complete reference for using Vue components in Phoenix Liv
 >
 > For practical usage examples and patterns, see [Basic Usage](basic_usage.md). This reference focuses on complete syntax documentation.
 
+## The `.component` Function
+
+The `.component` function auto-detects the framework from the component's file extension using the [plugin registry](configuration.md#plugin-configuration). It scans your configured component roots for a matching file and delegates to `.vue` or `.react` accordingly.
+
+```elixir
+<%!-- Auto-detects: Counter.vue → vue, Dashboard.tsx → react --%>
+<.component v-component="Counter" count={@count} v-socket={@socket} />
+<.component v-component="Dashboard" data={@data} v-socket={@socket} />
+```
+
+This is useful in multi-framework projects where you don't want to think about which renderer to use at the template level. If the framework cannot be detected, it falls back to Vue.
+
+All attributes (props, events, slots, SSR control) work identically to `.vue` and `.react`.
+
 ## The `.vue` Component
 
 The `.vue` component is the primary way to render Vue components in LiveView templates.

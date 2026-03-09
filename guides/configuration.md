@@ -64,6 +64,56 @@ config :live_vite,
   ssr: false
 ```
 
+## Plugin Configuration
+
+LiveVite uses a plugin system for framework detection and component discovery. By default, Vue and React plugins are registered:
+
+```elixir
+# config/config.exs (default — no configuration needed)
+config :live_vite, :plugins, [
+  LiveVite.Plugin.Vue,
+  LiveVite.Plugin.React
+]
+```
+
+Each plugin declares the file extensions it handles. The plugin registry uses this to auto-detect which framework a component belongs to based on its file extension (`.vue` → Vue, `.tsx`/`.jsx` → React).
+
+This powers:
+- **`LiveVite.component/1`** — auto-detects framework and delegates to `vue/1` or `react/1`
+- **`LiveVite.Components`** — generates shortcut functions with correct framework dispatch
+- **`LiveVite.Plugin.Registry.detect_framework/3`** — scans component directories to resolve framework
+
+### Writing Custom Plugins
+
+To add support for another framework, implement the `LiveVite.Plugin` behaviour:
+
+```elixir
+defmodule MyApp.Plugin.Svelte do
+  @behaviour LiveVite.Plugin
+
+  @impl true
+  def name, do: :svelte
+
+  @impl true
+  def file_extensions, do: [".svelte"]
+
+  @impl true
+  def render_fn, do: :svelte
+end
+```
+
+Then register it:
+
+```elixir
+config :live_vite, :plugins, [
+  LiveVite.Plugin.Vue,
+  LiveVite.Plugin.React,
+  MyApp.Plugin.Svelte
+]
+```
+
+You would also need to implement a `svelte/1` function in your app that renders the appropriate data attributes, and register a corresponding client-side renderer.
+
 ## Vue Application Setup
 
 Configure your Vue application in `assets/vue/index.js`. You should use createLiveVite to provide two required functions:

@@ -22,6 +22,7 @@ Vue and React inside Phoenix LiveView with seamless end-to-end reactivity.
 -   📁 **File Upload Hooks** - `useLiveUpload()` (Vue) and `useLiveUploadReact()` (React)
 -   📝 **Comprehensive Form Handling** - `useLiveForm()` (Vue) and `useLiveFormReact()` (React) with server-side validation via Ecto changesets
 -   🔌 **Multi-Framework** - Use Vue and React components in the same project
+-   🧩 **Plugin System** - Extensible framework detection via plugins
 -   🚀 **Amazing DX** with Vite
 
 
@@ -230,11 +231,14 @@ const hooks = {
 }
 ```
 
-On the server side, use `<.vue>` for Vue components and `<.react>` for React components:
+On the server side, use `<.vue>` for Vue components, `<.react>` for React, or `<.component>` to auto-detect the framework from the file extension:
 
 ```elixir
 <.vue v-component="Counter" count={@count} v-socket={@socket} />
 <.react v-component="Dashboard" data={@data} v-socket={@socket} />
+
+<%!-- Auto-detects framework from file extension --%>
+<.component v-component="Counter" count={@count} v-socket={@socket} />
 ```
 
 ### Releasing
@@ -269,6 +273,7 @@ mix expublish.minor --allow-untracked --branch=main
 - [x] **React support** - `createReactRenderer`, `useLive`, `useLiveFormReact`, `useLiveUploadReact`
 - [x] **Multi-framework** - use Vue and React in the same project via `getMultiRendererHook`
 - [x] `~REACT` sigil - inline React (TSX) components in LiveView
+- [x] **Plugin system** - extensible framework detection with `LiveVite.Plugin` behaviour
 
 ## Credits
 
