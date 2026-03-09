@@ -47,6 +47,18 @@
       "import": "./assets/server.ts",
       "types": "./assets/server.ts"
     },
+    "./renderers/vue": {
+      "import": "./assets/renderers/vue.ts",
+      "types": "./assets/renderers/vue.ts"
+    },
+    "./renderers/react": {
+      "import": "./assets/renderers/react.ts",
+      "types": "./assets/renderers/react.ts"
+    },
+    "./renderer": {
+      "import": "./assets/renderer.ts",
+      "types": "./assets/renderer.ts"
+    },
     ".": {
       "import": "./assets/index.ts",
       "types": "./assets/index.ts"
