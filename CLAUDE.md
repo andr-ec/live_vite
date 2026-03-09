@@ -50,6 +50,7 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 ## Key Patterns
 
 ### Component Usage (Elixir)
+
 ```elixir
 # Vue component
 <.vue count={@count} v-component="Counter" v-socket={@socket} />
@@ -66,6 +67,7 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 ```
 
 ### Vue Composables (TypeScript)
+
 - `useLiveVite()` - Access to `$live.pushEvent()`, props
 - `useLiveEvent(name, handler)` - LiveView event subscription
 - `useLiveNavigation()` - `patch()` and `navigate()` helpers
@@ -73,6 +75,7 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 - `useLiveUpload(uploadName)` - File upload integration
 
 ### React Hooks (TypeScript)
+
 - `useLive()` - Access to hook instance (mirrors `useLiveVite()`)
 - `useLiveEventReact(name, handler)` - LiveView event subscription
 - `useLiveNavigationReact()` - `patch()` and `navigate()` helpers
@@ -80,6 +83,7 @@ test/e2e/                    # Playwright E2E tests with Phoenix server
 - `useLiveUploadReact(uploadName)` - File upload integration
 
 ### SSR Modes
+
 - `LiveVite.SSR.NodeJS` - Node.js subprocess (default)
 - `LiveVite.SSR.ViteJS` - HTTP to Vite dev server (dev mode)
 
@@ -99,17 +103,36 @@ test/e2e/features/
 ```
 
 To add a new E2E test:
+
 1. Create `test/e2e/features/my-feature/`
 2. Add `live.ex` (LiveView), `*.vue`/`*.tsx` (components), `*.spec.js` (test)
 3. Add route to `test/e2e/test_helper.exs` router
 
 Key utilities in `test/e2e/utils.js`:
+
 - `syncLV(page)` - Wait for LiveView connection
 - `evalLV(page, code)` - Execute Elixir in LiveView process
 
 ## Conventions
 
 Commit format: `type: description` (feat/fix/docs/test/refactor/chore)
+
+## Package Exports (Subpath Imports)
+
+The npm package provides subpath exports for tree-shaking. This is critical for multi-framework setups to avoid loading React on Vue-only pages and vice versa:
+
+| Import path                 | Purpose                                     |
+| --------------------------- | ------------------------------------------- |
+| `live_vite`                 | Barrel — everything (loads both frameworks) |
+| `live_vite/renderers/vue`   | Vue renderer only (no React dependency)     |
+| `live_vite/renderers/react` | React renderer only (no Vue dependency)     |
+| `live_vite/hooks`           | `getMultiRendererHook`, `getRendererHook`   |
+| `live_vite/utils`           | `findComponent` and utilities               |
+| `live_vite/renderer`        | `FrameworkRenderer` interface and types     |
+| `live_vite/server`          | SSR render functions                        |
+| `live_vite/vitePlugin`      | Vite plugin for SSR and HMR                 |
+
+For multi-framework projects, consumers must exclude `live_vite` from Vite's `optimizeDeps` so subpath imports resolve independently, and include React packages in `ssr.optimizeDeps.include` for SSR to work.
 
 ## Release Process
 

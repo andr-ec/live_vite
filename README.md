@@ -10,28 +10,27 @@ Vue and React inside Phoenix LiveView with seamless end-to-end reactivity.
 
 ## Features
 
--   ⚡ **End-To-End Reactivity** with LiveView
--   🧙‍♂️ **One-line Install** - Automated setup via Igniter installer
--   🔋 **Server-Side Rendered** (SSR) Vue and React
--   🐌 **Lazy-loading** Components
--   📦 **Efficient Props Diffing** - Only changed data is sent over WebSocket
--   🪄 **~VUE and ~REACT Sigils** as alternative LiveView DSLs
--   🎯 **Phoenix Streams** Support with efficient patches
--   🦄 **Tailwind** Support
--   🦥 **Slot Interoperability**
--   📁 **File Upload Hooks** - `useLiveUpload()` (Vue) and `useLiveUploadReact()` (React)
--   📝 **Comprehensive Form Handling** - `useLiveForm()` (Vue) and `useLiveFormReact()` (React) with server-side validation via Ecto changesets
--   🔌 **Multi-Framework** - Use Vue and React components in the same project
--   🧩 **Plugin System** - Extensible framework detection via plugins
--   🚀 **Amazing DX** with Vite
-
+- ⚡ **End-To-End Reactivity** with LiveView
+- 🧙‍♂️ **One-line Install** - Automated setup via Igniter installer
+- 🔋 **Server-Side Rendered** (SSR) Vue and React
+- 🐌 **Lazy-loading** Components
+- 📦 **Efficient Props Diffing** - Only changed data is sent over WebSocket
+- 🪄 **~VUE and ~REACT Sigils** as alternative LiveView DSLs
+- 🎯 **Phoenix Streams** Support with efficient patches
+- 🦄 **Tailwind** Support
+- 🦥 **Slot Interoperability**
+- 📁 **File Upload Hooks** - `useLiveUpload()` (Vue) and `useLiveUploadReact()` (React)
+- 📝 **Comprehensive Form Handling** - `useLiveForm()` (Vue) and `useLiveFormReact()` (React) with server-side validation via Ecto changesets
+- 🔌 **Multi-Framework** - Use Vue and React components in the same project
+- 🧩 **Plugin System** - Extensible framework detection via plugins
+- 🚀 **Amazing DX** with Vite
 
 ## Resources
 
--   [Live Examples](https://livevue.skalecki.dev) - Interactive demos
--   [HexDocs](https://hexdocs.pm/live_vite)
--   [HexPackage](https://hex.pm/packages/live_vite)
--   [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view)
+- [Live Examples](https://livevue.skalecki.dev) - Interactive demos
+- [HexDocs](https://hexdocs.pm/live_vite)
+- [HexPackage](https://hex.pm/packages/live_vite)
+- [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view)
 
 ## Example
 
@@ -41,18 +40,16 @@ After installation, you can use Vue or React components in the same way as funct
 
 ```html
 <script setup lang="ts">
-import {ref} from "vue"
+  import { ref } from "vue"
 
-const props = defineProps<{count: number}>()
-const diff = ref(1)
+  const props = defineProps<{ count: number }>()
+  const diff = ref(1)
 </script>
 
 <template>
   Current count: {{ props.count }}
   <input v-model.number="diff" type="range" min="1" max="10" />
-  <button phx-click="inc" :phx-value-diff="diff">
-    Increase counter by {{ diff }}
-  </button>
+  <button phx-click="inc" :phx-value-diff="diff">Increase counter by {{ diff }}</button>
 </template>
 ```
 
@@ -87,8 +84,7 @@ export default function Counter({ count }: { count: number }) {
   return (
     <div>
       Current count: {count}
-      <input type="range" min="1" max="10" value={diff}
-        onChange={e => setDiff(Number(e.target.value))} />
+      <input type="range" min="1" max="10" value={diff} onChange={e => setDiff(Number(e.target.value))} />
       <button phx-click="inc" phx-value-diff={diff}>
         Increase counter by {diff}
       </button>
@@ -127,21 +123,23 @@ LiveVite lets you create hybrid apps where part of the session state is on the s
 
 ### Reasons why you'd like to use LiveVite
 
--   Your hooks are starting to look like jQuery
--   You have complex local state
--   You'd like to use the massive Vue or React ecosystem
--   You want transitions, graphs, rich components etc.
--   You can use Vue, React, or both in the same project
+- Your hooks are starting to look like jQuery
+- You have complex local state
+- You'd like to use the massive Vue or React ecosystem
+- You want transitions, graphs, rich components etc.
+- You can use Vue, React, or both in the same project
 
 ## Installation
 
 **New project:**
+
 ```bash
 mix archive.install hex igniter_new
 mix igniter.new my_app --with phx.new --install live_vite
 ```
 
 **Existing project (Phoenix 1.8+ only):**
+
 ```bash
 # Vue (default)
 mix igniter.install live_vite
@@ -158,26 +156,31 @@ Igniter installer works only for Phoenix 1.8+ projects. For detailed installatio
 ## Guides
 
 ### Getting Started
- - [Getting Started](guides/getting_started.md) - Create your first component with transitions
+
+- [Getting Started](guides/getting_started.md) - Create your first component with transitions
 
 ### Core Usage
- - [Basic Usage](guides/basic_usage.md) - Fundamental patterns, ~VUE/~REACT sigils, and common examples
- - [Forms and Validation](guides/forms.md) - Complex forms with server-side validation using useLiveForm
- - [Configuration](guides/configuration.md) - Advanced setup, SSR, and customization options
+
+- [Basic Usage](guides/basic_usage.md) - Fundamental patterns, ~VUE/~REACT sigils, and common examples
+- [Forms and Validation](guides/forms.md) - Complex forms with server-side validation using useLiveForm
+- [Configuration](guides/configuration.md) - Advanced setup, SSR, and customization options
 
 ### Reference
- - [Component Reference](guides/component_reference.md) - Complete syntax documentation
- - [Client-Side API](guides/client_api.md) - Vue composables, React hooks, and utilities
+
+- [Component Reference](guides/component_reference.md) - Complete syntax documentation
+- [Client-Side API](guides/client_api.md) - Vue composables, React hooks, and utilities
 
 ### Advanced Topics
- - [Architecture](guides/architecture.md) - How LiveVite works under the hood
- - [Testing](guides/testing.md) - Testing Vue components in LiveView
- - [Deployment](guides/deployment.md) - Production deployment guide
+
+- [Architecture](guides/architecture.md) - How LiveVite works under the hood
+- [Testing](guides/testing.md) - Testing Vue components in LiveView
+- [Deployment](guides/deployment.md) - Production deployment guide
 
 ### Help & Troubleshooting
- - [FAQ](guides/faq.md) - Common questions and comparisons
- - [Troubleshooting](guides/troubleshooting.md) - Debug common issues
- - [Comparison](guides/comparison.md) - LiveVite vs other solutions
+
+- [FAQ](guides/faq.md) - Common questions and comparisons
+- [Troubleshooting](guides/troubleshooting.md) - Debug common issues
+- [Comparison](guides/comparison.md) - LiveVite vs other solutions
 
 ## Relation to LiveSvelte
 
@@ -209,13 +212,15 @@ Elixir changes are reflected immediately. For TypeScript changes, run `npm insta
 
 ### Multi-Framework Setup
 
-LiveVite supports Vue, React, or both in the same project. On the client side, register renderers for each framework:
+LiveVite supports Vue, React, or both in the same project. Use subpath imports to avoid loading one framework's dependencies on pages that only use the other:
 
 ```typescript
-import { getMultiRendererHook, createVueRenderer, createReactRenderer, findComponent } from "live_vite"
+import { createVueRenderer } from "live_vite/renderers/vue"
+import { getMultiRendererHook } from "live_vite/hooks"
+import { findComponent } from "live_vite/utils"
 
-const vueComponents = import.meta.glob("./**/*.vue")
-const reactComponents = import.meta.glob("./**/*.{tsx,jsx}")
+const vueComponents = import.meta.glob("./**/*.vue", { eager: true })
+const reactComponents = import.meta.glob("./**/*.{tsx,jsx}") // lazy — React loads on demand
 
 const hooks = {
   VueHook: getMultiRendererHook({
@@ -224,12 +229,33 @@ const hooks = {
       resolve: name => findComponent(vueComponents, name),
     },
     react: {
-      renderer: createReactRenderer(),
-      resolve: name => findComponent(reactComponents, name),
+      renderer: createReactRenderer(), // lazy-load this — see installer output for full pattern
+      resolve: async name => {
+        const loader = findComponent(reactComponents, name)
+        const mod = typeof loader === "function" ? await loader() : loader
+        return mod?.default ?? mod
+      },
     },
   }),
 }
 ```
+
+### Package Exports
+
+The `live_vite` npm package provides subpath exports for tree-shaking and to avoid loading unnecessary framework dependencies:
+
+| Import path                 | Purpose                                                            |
+| --------------------------- | ------------------------------------------------------------------ |
+| `live_vite`                 | Barrel export — everything (loads both Vue and React deps)         |
+| `live_vite/renderers/vue`   | Vue renderer only (no React dependency)                            |
+| `live_vite/renderers/react` | React renderer only (no Vue dependency)                            |
+| `live_vite/hooks`           | `getMultiRendererHook`, `getRendererHook` (no React dependency)    |
+| `live_vite/utils`           | `findComponent` and other utilities                                |
+| `live_vite/renderer`        | `FrameworkRenderer` interface and types                            |
+| `live_vite/server`          | SSR render functions (`getMultiRendererRender`, `getRender`, etc.) |
+| `live_vite/vitePlugin`      | Vite plugin for SSR and HMR support                                |
+
+For single-framework projects, importing from `live_vite` is fine. For multi-framework projects, use the subpath imports to keep Vue-only pages from loading React and vice versa.
 
 On the server side, use `<.vue>` for Vue components, `<.react>` for React, or `<.component>` to auto-detect the framework from the file extension:
 
@@ -245,8 +271,8 @@ On the server side, use `<.vue>` for Vue components, `<.react>` for React, or `<
 
 Release is done with `expublish` package.
 
--   Write version changelog in untracked `RELEASE.md` file
--   Update version in `INSTALLATION.md`
+- Write version changelog in untracked `RELEASE.md` file
+- Update version in `INSTALLATION.md`
 
 Run
 

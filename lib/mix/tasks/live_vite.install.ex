@@ -82,8 +82,18 @@ defmodule Mix.Tasks.LiveVite.Install do
       igniter
       |> Config.configure("config.exs", :live_vite, [:ssr], true)
       |> Config.configure("dev.exs", :live_vite, [:vite_host], "http://localhost:5173")
-      |> Config.configure("dev.exs", :live_vite, [:ssr_module], {:code, Sourceror.parse_string!("LiveVite.SSR.ViteJS")})
-      |> Config.configure("prod.exs", :live_vite, [:ssr_module], {:code, Sourceror.parse_string!("LiveVite.SSR.NodeJS")})
+      |> Config.configure(
+        "dev.exs",
+        :live_vite,
+        [:ssr_module],
+        {:code, Sourceror.parse_string!("LiveVite.SSR.ViteJS")}
+      )
+      |> Config.configure(
+        "prod.exs",
+        :live_vite,
+        [:ssr_module],
+        {:code, Sourceror.parse_string!("LiveVite.SSR.NodeJS")}
+      )
       |> Config.configure("prod.exs", :live_vite, [:ssr], true)
     end
 
@@ -127,9 +137,14 @@ defmodule Mix.Tasks.LiveVite.Install do
 
       comment =
         case frameworks do
-          [:vue] -> "# Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">"
-          [:react] -> "# Generate component for each React file, so you can use <.ComponentName> syntax\n      # instead of <.react v-component=\"ComponentName\">"
-          [:vue, :react] -> "# Generate component for each Vue/React file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\"> or <.react v-component=\"ComponentName\">"
+          [:vue] ->
+            "# Generate component for each vue file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\">"
+
+          [:react] ->
+            "# Generate component for each React file, so you can use <.ComponentName> syntax\n      # instead of <.react v-component=\"ComponentName\">"
+
+          [:vue, :react] ->
+            "# Generate component for each Vue/React file, so you can use <.ComponentName> syntax\n      # instead of <.vue v-component=\"ComponentName\"> or <.react v-component=\"ComponentName\">"
         end
 
       opt_name =
@@ -208,7 +223,7 @@ defmodule Mix.Tasks.LiveVite.Install do
           content
           |> add_vite_imports(frameworks)
           |> update_vite_server_config()
-          |> update_vite_optimized_deps()
+          |> update_vite_optimized_deps(frameworks)
           |> update_vite_plugins(frameworks)
           |> update_vite_manifest()
           |> add_ssr_vite_entry()
@@ -252,20 +267,37 @@ defmodule Mix.Tasks.LiveVite.Install do
       end
     end
 
-    defp update_vite_optimized_deps(content) do
-      String.replace(
-        content,
-        ~s(include: ["phoenix", "phoenix_html", "phoenix_live_view"],),
-        ~s(include: ["live_vite", "phoenix", "phoenix_html", "phoenix_live_view"],)
-      )
+    defp update_vite_optimized_deps(content, frameworks \\ [:vue]) do
+      case frameworks do
+        [:vue, :react] ->
+          # Multi-framework: exclude live_vite from pre-bundling so each subpath
+          # import resolves independently (avoids loading React on Vue-only pages)
+          String.replace(
+            content,
+            ~s(include: ["phoenix", "phoenix_html", "phoenix_live_view"],),
+            ~s(exclude: ["live_vite"],\n      include: ["phoenix", "phoenix_html", "phoenix_live_view"],)
+          )
+
+        _ ->
+          String.replace(
+            content,
+            ~s(include: ["phoenix", "phoenix_html", "phoenix_live_view"],),
+            ~s(include: ["live_vite", "phoenix", "phoenix_html", "phoenix_live_view"],)
+          )
+      end
     end
 
     defp update_vite_plugins(content, frameworks) do
       plugin_lines =
         case frameworks do
-          [:vue] -> "vue(),\n    liveVitePlugin()"
-          [:react] -> "react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
-          [:vue, :react] -> "vue(),\n    react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
+          [:vue] ->
+            "vue(),\n    liveVitePlugin()"
+
+          [:react] ->
+            "react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
+
+          [:vue, :react] ->
+            "vue(),\n    react({ include: /\\.(tsx|jsx)$/ }),\n    liveVitePlugin()"
         end
 
       # Replace the phoenixVitePlugin call with the framework plugins
@@ -340,8 +372,7 @@ defmodule Mix.Tasks.LiveVite.Install do
           vue? && {~s("vue"), ~s("^3.4.21")}
         ]
         |> Enum.filter(& &1)
-        |> Enum.map(fn {k, v} -> "    #{k}: #{v}" end)
-        |> Enum.join(",\n")
+        |> Enum.map_join(",\n", fn {k, v} -> "    #{k}: #{v}" end)
 
       dev_deps =
         [
@@ -358,8 +389,7 @@ defmodule Mix.Tasks.LiveVite.Install do
           vue? && {~s("vue-tsc"), ~s("^2.0.13")}
         ]
         |> Enum.filter(& &1)
-        |> Enum.map(fn {k, v} -> "    #{k}: #{v}" end)
-        |> Enum.join(",\n")
+        |> Enum.map_join(",\n", fn {k, v} -> "    #{k}: #{v}" end)
 
       igniter
       |> Igniter.move_file("assets/package.json", "package.json")
@@ -398,7 +428,10 @@ defmodule Mix.Tasks.LiveVite.Install do
             "assets/vue/.gitignore",
             "# Ignore automatically generated Vue files by the ~V sigil\n_build/"
           )
-          |> Igniter.create_new_file("lib/#{web_folder}/live/vue_demo_live.ex", vue_demo_live_view_content(igniter))
+          |> Igniter.create_new_file(
+            "lib/#{web_folder}/live/vue_demo_live.ex",
+            vue_demo_live_view_content(igniter)
+          )
         else
           igniter
         end
@@ -408,7 +441,10 @@ defmodule Mix.Tasks.LiveVite.Install do
           igniter
           |> Igniter.mkdir("assets/react")
           |> Igniter.create_new_file("assets/react/ReactDemo.tsx", demo_react_content())
-          |> Igniter.create_new_file("lib/#{web_folder}/live/react_demo_live.ex", react_demo_live_view_content(igniter))
+          |> Igniter.create_new_file(
+            "lib/#{web_folder}/live/react_demo_live.ex",
+            react_demo_live_view_content(igniter)
+          )
         else
           igniter
         end
@@ -494,7 +530,8 @@ defmodule Mix.Tasks.LiveVite.Install do
       Igniter.update_file(igniter, app_file, fn source ->
         Rewrite.Source.update(source, :content, fn content ->
           # Look for the children list and add NodeJS.Supervisor right after the opening bracket
-          if String.contains?(content, "children = [") and not String.contains?(content, "NodeJS.Supervisor") do
+          if String.contains?(content, "children = [") and
+               not String.contains?(content, "NodeJS.Supervisor") do
             String.replace(
               content,
               ~r/(children = \[\s*\n)/,
@@ -577,7 +614,11 @@ defmodule Mix.Tasks.LiveVite.Install do
     defp multi_vue_index_content do
       """
       import { h, type Component } from "vue"
-      import { createVueRenderer, createReactRenderer, getMultiRendererHook, findComponent, type LiveHook, type ComponentMap } from "live_vite"
+      import { createVueRenderer } from "live_vite/renderers/vue"
+      import { getMultiRendererHook } from "live_vite/hooks"
+      import { findComponent } from "live_vite/utils"
+      import type { FrameworkRenderer } from "live_vite/renderer"
+      import type { LiveHook, ComponentMap } from "live_vite"
 
       // needed to make $live available in the Vue component
       declare module "vue" {
@@ -601,30 +642,46 @@ defmodule Mix.Tasks.LiveVite.Install do
         ...import.meta.glob("../../lib/**/*.vue", { eager: true }),
       } as ComponentMap
 
-      // React renderer
-      const reactRenderer = createReactRenderer()
+      const vueResolve = (name: string) => {
+        const mod = findComponent(vueComponents, name)
+        return mod && (mod as any).default ? (mod as any).default : mod
+      }
 
+      // React renderer — lazy-loaded so React isn't pulled in on Vue-only pages
       const reactComponents = {
-        ...import.meta.glob("../react/**/*.tsx", { eager: true }),
-        ...import.meta.glob("../../lib/**/*.tsx", { eager: true }),
+        ...import.meta.glob("../react/**/*.tsx"),
+        ...import.meta.glob("../../lib/**/*.tsx"),
       } as ComponentMap
+
+      let reactRendererInstance: FrameworkRenderer | null = null
+
+      const lazyReactRenderer: FrameworkRenderer = {
+        name: "react",
+        async mount(ctx) {
+          if (!reactRendererInstance) {
+            const { createReactRenderer } = await import("live_vite/renderers/react")
+            reactRendererInstance = createReactRenderer()
+          }
+          return reactRendererInstance.mount(ctx)
+        },
+        updateProps(state, props) { reactRendererInstance!.updateProps(state, props) },
+        patchProps(state, ops) { reactRendererInstance!.patchProps(state, ops) },
+        updateSlots(state, slots) { reactRendererInstance!.updateSlots(state, slots) },
+        unmount(state) { reactRendererInstance!.unmount(state) },
+      }
+
+      const reactResolve = async (name: string) => {
+        const loader = findComponent(reactComponents, name)
+        const mod = typeof loader === "function"
+          ? await (loader as () => Promise<any>)()
+          : loader
+        return mod && mod.default ? mod.default : mod
+      }
 
       // Multi-renderer hook dispatches based on data-framework attribute
       export default getMultiRendererHook({
-        vue: {
-          renderer: vueRenderer,
-          resolve: name => {
-            const mod = findComponent(vueComponents, name)
-            return mod && (mod as any).default ? (mod as any).default : mod
-          },
-        },
-        react: {
-          renderer: reactRenderer,
-          resolve: name => {
-            const mod = findComponent(reactComponents, name)
-            return mod && (mod as any).default ? (mod as any).default : mod
-          },
-        },
+        vue: { renderer: vueRenderer, resolve: vueResolve },
+        react: { renderer: lazyReactRenderer, resolve: reactResolve },
       })
       """
     end
@@ -1160,7 +1217,9 @@ defmodule Mix.Tasks.LiveVite.Install do
 
     defp react_server_js_content do
       """
-      import { createReactRenderer, getRendererRender, findComponent, loadManifest } from "live_vite/server"
+      import { getRendererRender } from "live_vite/server"
+      import { createReactRenderer } from "live_vite/renderers/react"
+      import { findComponent } from "live_vite/utils"
 
       const renderer = createReactRenderer()
 
@@ -1171,22 +1230,22 @@ defmodule Mix.Tasks.LiveVite.Install do
         return mod && mod.default ? mod.default : mod
       }
 
-      const manifest = loadManifest("../priv/static/.vite/ssr-manifest.json")
-      export const render = getRendererRender(renderer, resolve, manifest)
+      export const render = getRendererRender(renderer, resolve)
       """
     end
 
     defp multi_server_js_content do
       """
-      import { createVueRenderer, createReactRenderer, getMultiRendererRender, findComponent, loadManifest } from "live_vite/server"
+      import { getMultiRendererRender } from "live_vite/server"
+      import { createVueRenderer } from "live_vite/renderers/vue"
+      import { createReactRenderer } from "live_vite/renderers/react"
+      import { findComponent } from "live_vite/utils"
 
       const vueRenderer = createVueRenderer()
       const reactRenderer = createReactRenderer()
 
       const vueComponents = import.meta.glob("../vue/**/*.vue", { eager: true })
       const reactComponents = import.meta.glob("../react/**/*.tsx", { eager: true })
-
-      const manifest = loadManifest("../priv/static/.vite/ssr-manifest.json")
 
       export const render = getMultiRendererRender({
         vue: {
@@ -1203,7 +1262,7 @@ defmodule Mix.Tasks.LiveVite.Install do
             return mod && mod.default ? mod.default : mod
           },
         },
-      }, manifest)
+      })
       """
     end
 
@@ -1224,14 +1283,20 @@ defmodule Mix.Tasks.LiveVite.Install do
     end
 
     defp maybe_add_route(content, frameworks, framework, web_module_name) do
-      if framework not in frameworks, do: content, else: add_framework_route(content, framework, web_module_name)
+      if framework in frameworks,
+        do: add_framework_route(content, framework, web_module_name),
+        else: content
     end
 
     defp add_framework_route(content, :vue, web_module_name) do
       if String.contains?(content, "live \"/vue_demo\"") do
         content
       else
-        add_route_after_dashboard(content, "live \"/vue_demo\", #{web_module_name}.VueDemoLive", "/dev/vue_demo")
+        add_route_after_dashboard(
+          content,
+          "live \"/vue_demo\", #{web_module_name}.VueDemoLive",
+          "/dev/vue_demo"
+        )
       end
     end
 
@@ -1239,7 +1304,11 @@ defmodule Mix.Tasks.LiveVite.Install do
       if String.contains?(content, "live \"/react_demo\"") do
         content
       else
-        add_route_after_dashboard(content, "live \"/react_demo\", #{web_module_name}.ReactDemoLive", "/dev/react_demo")
+        add_route_after_dashboard(
+          content,
+          "live \"/react_demo\", #{web_module_name}.ReactDemoLive",
+          "/dev/react_demo"
+        )
       end
     end
 
@@ -1349,7 +1418,10 @@ defmodule Mix.Tasks.LiveVite.Install do
             if String.contains?(content, "<!-- live_vite-start -->") do
               content
             else
-              rules = "\n\n<!-- live_vite-start -->\n" <> @usage_rules_content <> "\n<!-- live_vite-end -->\n"
+              rules =
+                "\n\n<!-- live_vite-start -->\n" <>
+                  @usage_rules_content <> "\n<!-- live_vite-end -->\n"
+
               # Append just before the end of the file
               if String.contains?(content, "<!-- usage-rules-end -->") do
                 String.replace(content, ~r/(<!-- usage-rules-end -->)/, rules <> "\\1")
