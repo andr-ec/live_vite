@@ -168,7 +168,16 @@ defmodule Mix.Tasks.LiveVite.Install do
     end
 
     defp add_live_vite_imports(content, frameworks) do
-      if String.contains?(content, "live_vite") do
+      # Check for actual live_vite imports, not just "live_vite" substring
+      # (the app name itself may contain "live_vite", e.g. phoenix-colocated/my_live_vite_app)
+      already_imported? =
+        case frameworks do
+          [:vue] -> String.contains?(content, ~s(from "live_vite"))
+          [:react] -> String.contains?(content, ~s(from "../react"))
+          [:vue, :react] -> String.contains?(content, ~s(from "../vue"))
+        end
+
+      if already_imported? do
         content
       else
         import_lines =
@@ -267,7 +276,7 @@ defmodule Mix.Tasks.LiveVite.Install do
       end
     end
 
-    defp update_vite_optimized_deps(content, frameworks \\ [:vue]) do
+    defp update_vite_optimized_deps(content, frameworks) do
       case frameworks do
         [:vue, :react] ->
           # Multi-framework: exclude live_vite from pre-bundling so each subpath
