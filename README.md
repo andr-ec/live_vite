@@ -254,6 +254,7 @@ The `live_vite` npm package provides subpath exports for tree-shaking and to avo
 | `live_vite/renderer`        | `FrameworkRenderer` interface and types                            |
 | `live_vite/server`          | SSR render functions (`getMultiRendererRender`, `getRender`, etc.) |
 | `live_vite/vitePlugin`      | Vite plugin for SSR and HMR support                                |
+| `live_vite/stubNodeBuiltins`| Vite plugin to stub Node.js builtins for QuickJS SSR               |
 
 For single-framework projects, importing from `live_vite` is fine. For multi-framework projects, use the subpath imports to keep Vue-only pages from loading React and vice versa.
 

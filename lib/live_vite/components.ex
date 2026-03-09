@@ -52,7 +52,8 @@ defmodule LiveVite.Components do
     roots = List.wrap(roots)
     extension_map = Registry.extension_to_framework_map()
 
-    Enum.flat_map(roots, fn root ->
+    roots
+    |> Enum.flat_map(fn root ->
       if String.contains?(root, "*"),
         do:
           raise("""
@@ -72,8 +73,7 @@ defmodule LiveVite.Components do
   # Discovers component files in the given root directory.
   # Returns a list of `{component_name, framework}` tuples.
   defp discover_components(root, extension_map) do
-    extension_map
-    |> Enum.flat_map(fn {ext, framework} ->
+    Enum.flat_map(extension_map, fn {ext, framework} ->
       root
       |> Path.join("**/*#{ext}")
       |> Path.wildcard()

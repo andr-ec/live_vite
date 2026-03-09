@@ -1,6 +1,8 @@
 # Deployment
 
-Deploying a LiveVite app is similar to deploying a regular Phoenix app, with one key requirement: **Node.js version 19 or later must be installed** in your production environment.
+Deploying a LiveVite app is similar to deploying a regular Phoenix app.
+
+If you use `LiveVite.SSR.NodeJS` for server-side rendering, **Node.js version 19 or later must be installed** in your production environment. Alternatively, use `LiveVite.SSR.QuickJS` to run SSR without Node.js (see [QuickJS SSR Setup](configuration.md#quickjs-ssr-setup)).
 
 > #### SSR Configuration {: .tip}
 >
@@ -8,7 +10,7 @@ Deploying a LiveVite app is similar to deploying a regular Phoenix app, with one
 
 ## General Requirements
 
-1. Node.js 19+ installed in production
+1. Node.js 19+ installed in production (not required with QuickJS SSR)
 2. Standard Phoenix deployment requirements
 3. Build assets before deployment
 

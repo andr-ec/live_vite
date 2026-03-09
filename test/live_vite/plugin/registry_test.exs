@@ -1,21 +1,23 @@
 defmodule LiveVite.Plugin.RegistryTest do
   use ExUnit.Case, async: true
 
+  alias LiveVite.Plugin.React
   alias LiveVite.Plugin.Registry
+  alias LiveVite.Plugin.Vue
 
   describe "plugins/0" do
     test "returns default plugins" do
       plugins = Registry.plugins()
-      assert LiveVite.Plugin.Vue in plugins
-      assert LiveVite.Plugin.React in plugins
+      assert Vue in plugins
+      assert React in plugins
     end
   end
 
   describe "renderer_plugins/0" do
     test "returns only plugins with file_extensions" do
       renderers = Registry.renderer_plugins()
-      assert LiveVite.Plugin.Vue in renderers
-      assert LiveVite.Plugin.React in renderers
+      assert Vue in renderers
+      assert React in renderers
     end
   end
 

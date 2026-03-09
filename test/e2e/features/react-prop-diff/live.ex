@@ -112,8 +112,8 @@ defmodule LiveVite.E2E.ReactPropDiffTestLive do
     <div>
       <h1>React Prop Diff Test LiveView</h1>
       <LiveVite.react data={@data} v-component="prop-display" v-socket={@socket} />
-
-      <!-- Test Controls -->
+      
+    <!-- Test Controls -->
       <div class="mt-8 space-y-4">
         <h2>Test Controls</h2>
 

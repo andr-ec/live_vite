@@ -1,1 +1,1 @@
-ExUnit.start()
+ExUnit.start(exclude: [:quickjs_ssr])

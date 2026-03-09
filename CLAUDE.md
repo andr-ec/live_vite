@@ -29,7 +29,7 @@ lib/
 │   ├── vue.ex                # Vue plugin (.vue files)
 │   ├── react.ex              # React plugin (.tsx/.jsx files)
 │   └── registry.ex           # Plugin registry, framework detection
-└── live_vite/ssr/            # SSR: NodeJS and ViteJS modes
+└── live_vite/ssr/            # SSR: NodeJS, ViteJS, and QuickJS modes
 assets/
 ├── index.ts                 # Main entry, exports all Vue + React APIs
 ├── hooks.ts                 # Phoenix LiveView hooks (getMultiRendererHook, getRendererHook)
@@ -43,6 +43,7 @@ assets/
 ├── useLiveUploadReact.ts    # React file upload hook
 ├── jsonPatch.ts             # Efficient prop diffing (framework-agnostic)
 ├── server.ts                # SSR: getRendererRender, getMultiRendererRender
+├── stubNodeBuiltins.js      # Vite plugin to stub Node.js builtins for QuickJS SSR
 └── vitePlugin.js            # Vite plugin for component discovery
 test/e2e/                    # Playwright E2E tests with Phoenix server
 ```

@@ -328,6 +328,18 @@ config :live_vite,
 
 Uses elixir-nodejs with a pre-built server bundle for optimal performance.
 
+#### QuickJS (Production — No Node.js Required)
+Embedded JavaScript engine via NIF — no external Node.js installation needed:
+
+```elixir
+# config/prod.exs
+config :live_vite,
+  ssr_module: LiveVite.SSR.QuickJS,
+  ssr: true
+```
+
+Uses [quickjs_ex](https://hex.pm/packages/quickjs_ex) to run the SSR bundle inside the BEAM process. Requires the `stubNodeBuiltins` Vite plugin to produce a self-contained bundle (see [QuickJS SSR Setup](#quickjs-ssr-setup)).
+
 ### SSR Configuration
 
 Control SSR behavior globally or per-component:
@@ -398,9 +410,9 @@ Vue SSR is compiled into optimized string concatenation for maximum performance.
 - Skips during live navigation for better UX
 - Can be disabled per-component when not needed
 
-### Production SSR Setup
+### Production SSR Setup (NodeJS)
 
-For production deployments, you'll need Node.js 19+ and proper configuration:
+For production deployments with `LiveVite.SSR.NodeJS`, you'll need Node.js 19+ and proper configuration:
 
 1. **Install Node.js 19+** in your production environment
 2. **Configure NodeJS supervisor** in your `application.ex`:
@@ -420,6 +432,54 @@ cd assets && npm run build-server
 ```
 
 The server bundle will be created at `priv/static/server.mjs` and used by the NodeJS supervisor.
+
+### QuickJS SSR Setup
+
+For production deployments without Node.js, use `LiveVite.SSR.QuickJS`:
+
+1. **Add `quickjs_ex`** to your dependencies:
+
+```elixir
+{:quickjs_ex, "~> 0.2"}
+```
+
+2. **Add the `stubNodeBuiltins` Vite plugin** to your `vite.config.js`:
+
+```javascript
+import stubNodeBuiltins from "live_vite/stubNodeBuiltins"
+
+export default defineConfig({
+  plugins: [vue(), liveVitePlugin(), stubNodeBuiltins()],
+})
+```
+
+This replaces Node.js built-in imports (`fs`, `path`, `node:stream`) with stubs at build time, producing a self-contained SSR bundle that can run in QuickJS.
+
+3. **Configure production SSR**:
+
+```elixir
+# config/prod.exs
+config :live_vite,
+  ssr_module: LiveVite.SSR.QuickJS,
+  ssr: true
+```
+
+4. **Add to your supervision tree** in `application.ex`:
+
+```elixir
+children = [
+  LiveVite.SSR.QuickJS,
+  # ... other children
+]
+```
+
+5. **Build server bundle** as part of your deployment:
+
+```bash
+cd assets && npm run build-server
+```
+
+The QuickJS module loads the same `priv/static/server.mjs` bundle as the NodeJS module.
 
 ### SSR Troubleshooting
 
