@@ -3,7 +3,7 @@
 
 // Conditionally import Socket type from phoenix if available
 // Uses a helper type to safely extract Socket when it exists
-type GetPhoenixSocket<T> = T extends { Socket: infer S } ? S : any
+type GetPhoenixSocket<T> = T extends { Socket: infer S } ? InstanceType<S & (new (...args: any[]) => any)> : any
 type PhoenixSocket = GetPhoenixSocket<typeof import("phoenix")>
 
 // Check if DOM types are available and use them, otherwise use any
@@ -31,6 +31,7 @@ export interface LiveSocketInstanceInterface {
   enableLatencySim(upperBoundMs: number): void
   disableLatencySim(): void
   getLatencySim(): number | null
+  socket: PhoenixSocket
   getSocket(): PhoenixSocket
   connect(): void
   disconnect(callback?: () => void): void
