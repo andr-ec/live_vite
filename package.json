@@ -59,6 +59,14 @@
       "import": "./assets/renderer.ts",
       "types": "./assets/renderer.ts"
     },
+    "./hooks": {
+      "import": "./assets/hooks.ts",
+      "types": "./assets/hooks.ts"
+    },
+    "./utils": {
+      "import": "./assets/utils.ts",
+      "types": "./assets/utils.ts"
+    },
     ".": {
       "import": "./assets/index.ts",
       "types": "./assets/index.ts"
